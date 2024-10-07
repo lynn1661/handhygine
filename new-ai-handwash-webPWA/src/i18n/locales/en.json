@@ -1,0 +1,15 @@
+{
+  "languages": {
+    "en": "English",
+    "zh_cn": "繁體中文"
+  },
+  "HandHygiene": {
+    "title": "Hand Hygiene",
+    "logo": "LOGO",
+    "personal": "Personal Information Registration",
+    "studentName": "Student Name",
+    "studentID": "Name",
+    "subject": "Subject",
+    "btn": "GET STARTED"
+  }
+}
