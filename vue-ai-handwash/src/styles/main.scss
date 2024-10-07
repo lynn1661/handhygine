@@ -1,0 +1,33 @@
+@import "@/styles/hands.scss";
+@mixin devices($breakpoint) {
+  @if $breakpoint == computer {
+    @media only screen and (max-width: 1024px) {
+      @content;
+    }
+  } @else if $breakpoint == air {
+    @media only screen and (max-width: 820px) {
+      @content;
+    }
+  } @else if $breakpoint == tablet {
+    @media only screen and (max-width: 768px) {
+      @content;
+    }
+  } @else if $breakpoint == mobile {
+    @media only screen and (max-width: 540px) {
+      @content;
+    }
+  }
+}
+html {
+  width: 100%;
+  // height: 100%;
+  background-color: rgba(33, 84, 118, 0.16);
+}
+
+body,
+#app {
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(33, 84, 118, 0.16);
+  overflow: auto;
+}

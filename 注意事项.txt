@@ -1,0 +1,4 @@
+node版本 16.14.0
+new-ai-handwash-webPWA ：web端网页带pwa功能 视频下载到网页端
+new-ai-handwash-APK ：可通过Android studio打包apk 视频保存到本地图库
+注意：只有apk需要配置权限功能及npx指令
