@@ -1,7 +1,7 @@
 import axios from "axios";
 import router from "./../router";
 const axiosInstance = axios.create({
-  baseURL: "http://ec2-18-163-114-233.ap-east-1.compute.amazonaws.com:8080",
+  baseURL: "https://handhygine.handhyine.com",
   timeout: 1000 * 20,
 });
 

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">handwash</string>
+    <string name="title_activity_main">handwash</string>
+    <string name="package_name">handwash.polyu.app</string>
+    <string name="custom_url_scheme">handwash.polyu.app</string>
+</resources>
