@@ -7,7 +7,7 @@ export function createConnect(message) {
     return;
   } else if (message != null) {
     if (!socket) {
-      socket = io("https://handhygine.handhyine.com", {
+      socket = io("https://hapi.dogoo.co", {
         reconnection: true, // 允许重新连接
         reconnectionAttempts: Infinity, // 尝试无限次重新连接
       });
