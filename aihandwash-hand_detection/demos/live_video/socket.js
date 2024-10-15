@@ -1,33 +1,6 @@
 import io from "socket.io-client";
 let socket;
-const express = require('express');
-const cors = require('cors');
-const http = require('http');
-const socketIO = require('socket.io');
 
-const app = express();
-app.use(cors());
-
-const server = http.createServer(app);
-const io = socketIO(server, {
-  cors: {
-    origin: "*", // 设置允许的前端源地址（允许所有源）
-    methods: ["GET", "POST"]
-  }
-});
-
-io.on('connection', (socket) => {
-  console.log('A user connected');
-
-  socket.on('message', (message) => {
-    console.log('Received message:', message);
-    socket.emit('message', { step: 'success', probabilities: [0.9, 0.1] });
-  });
-
-  socket.on('disconnect', () => {
-    console.log('A user disconnected');
-  });
-});
 const textContainer = document.getElementById("textContainer");
 export function createConnect(message) {
   if (message == null) {
