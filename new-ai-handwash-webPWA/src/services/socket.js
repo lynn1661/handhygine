@@ -3,7 +3,7 @@ let socket = null;
 let res = null;
 export function createConnect(message) {
   if (!socket) {
-    socket = io("https://handhygine.handhyine.com/socket");
+    socket = io("https://handdetect.handhyine.com");
     socket.on("connect", () => {
       console.log("Socket connected");
       socket.on("message", (data) => {
