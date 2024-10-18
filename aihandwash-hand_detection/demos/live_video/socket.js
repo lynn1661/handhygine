@@ -23,6 +23,7 @@ export function createConnect(message) {
         console.log("Socket disconnected");
       });
     }
+    console.log('Sending message to server:', message);
     socket.emit("message", message);
   }
 }
