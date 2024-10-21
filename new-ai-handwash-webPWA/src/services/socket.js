@@ -10,7 +10,10 @@ export function createConnect(message) {
         res = data;
       });
     });
-
+    // 监听错误事件
+    socket.on("connect_error", (error) => {
+      console.error("Connection error:", error);
+    });
     socket.on("disconnect", () => {
       console.log("Socket disconnected");
     });
