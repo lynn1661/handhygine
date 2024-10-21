@@ -1,6 +1,5 @@
 import io from "socket.io-client";
 let socket;
-
 const textContainer = document.getElementById("textContainer");
 export function createConnect(message) {
   if (message == null) {
@@ -18,6 +17,10 @@ export function createConnect(message) {
         socket.on("message", (data) => {
           handleData(data);
         });
+      });
+      // 监听错误事件
+      socket.on("connect_error", (error) => {
+        console.error("Connection error:", error);
       });
       socket.on("disconnect", () => {
         console.log("Socket disconnected");
