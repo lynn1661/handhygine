@@ -22,8 +22,8 @@ export function createConnect(message) {
       socket.on("connect_error", (error) => {
         console.error("Connection error:", error);
       });
-      socket.on("disconnect", () => {
-        console.log("Socket disconnected");
+      socket.on("disconnect", (reason) => {
+        console.log("Socket disconnected:" + reason);
       });
     }
     console.log('Sending message to server:', message);
