@@ -19,11 +19,12 @@ export function createConnect(message) {
     });
   }
   try {
-    JSON.stringify(message);  // 验证是否能被序列化为 JSON
-    socket.emit('message', message);  // 发送消息
+    const jsonMessage = JSON.stringify(message);  // 验证是否能被序列化为 JSON
+    socket.emit('message', jsonMessage);  // 发送消息
   } catch (error) {
     console.error("Invalid JSON data", error);
-}
+    socket.emit('message', message);  // 发送消息
+  }
   return res;
 }
 
