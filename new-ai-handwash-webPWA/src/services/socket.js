@@ -14,7 +14,7 @@ export function createConnect(message) {
     socket.on("connect_error", (error) => {
       console.error("Connection error:", error);
     });
-    socket.on("disconnect", () => {
+    socket.on("disconnect", (reason) => {
       console.log("Socket disconnected:"+ reason);
     });
   }
