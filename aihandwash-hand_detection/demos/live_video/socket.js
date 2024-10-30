@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { deflate } from "pako";
+// import { deflate } from "pako";
 let socket;
 const textContainer = document.getElementById("textContainer");
 export function createConnect(message) {
@@ -30,9 +30,9 @@ export function createConnect(message) {
     console.log('Sending message to server:', message);
     try {
       const jsonMessage = JSON.stringify(message);  // 验证是否能被序列化为 JSON
-      const compressedData = deflate(jsonMessage); //压缩 JSON 字符串
-      socket.emit('message', compressedData);  // 发送消息
-      console.log('Compressed message sent:', compressedData);
+      // const compressedData = deflate(jsonMessage); //压缩 JSON 字符串
+      socket.emit('message', jsonMessage);  // 发送消息
+      // console.log('Compressed message sent:', compressedData);
     } catch (error) {
       console.error("Invalid JSON data", error);
       socket.emit('message', message);  // 发送消息
