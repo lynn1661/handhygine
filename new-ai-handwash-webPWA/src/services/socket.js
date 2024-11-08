@@ -4,7 +4,7 @@ let socket = null;
 let res = null;
 export function createConnect(message) {
   if (!socket) {
-    socket = io("https://realtime.handhyine.com");
+    socket = io("https://ai.handhyine.com");
     socket.on("connect", () => {
       console.log("Socket connected");
       socket.on("message", (data) => {
