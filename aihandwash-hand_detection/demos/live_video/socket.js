@@ -1,14 +1,13 @@
 import { io } from "socket.io-client";
-// import { deflate } from "pako";
 let socket;
 const textContainer = document.getElementById("textContainer");
-export function createConnect(message) {
+export function createConnect(message, currentStep) {
   if (message == null) {
     textContainer.textContent = "unknown";
     return;
   } else if (message != null) {
     if (!socket) {
-      socket = io("https://realtime.handhyine.com", {
+      socket = io("https://ai.handhyine.com", {
         reconnection: true, // 允许重新连接
         reconnectionAttempts: Infinity, // 尝试无限次重新连接
       });
@@ -28,20 +27,15 @@ export function createConnect(message) {
       });
     }
     console.log('Sending message to server:', message);
-    try {
-      const jsonMessage = JSON.stringify(message);  // 验证是否能被序列化为 JSON
-      // const compressedData = deflate(jsonMessage); //压缩 JSON 字符串
-      socket.emit('message', jsonMessage);  // 发送消息
-      // console.log('Compressed message sent:', compressedData);
-    } catch (error) {
-      console.error("Invalid JSON data", error);
-      socket.emit('message', message);  // 发送消息
-    }
+    const payload = { data: message, step: currentStep };
+    socket.emit('message', payload);
   }
 }
 
 function handleData(data) {
-  textContainer.textContent = "step :" + data.step;
+  const { step, current_step } = data;
+  textContainer.textContent = `Detected Step: ${step}, Current Step: ${current_step}`;
+}
   // const probabilitiesList = document.getElementById("probabilitiesList");
   // probabilitiesList.innerHTML = ""; // 清空列表内容，以防重复添加
 
@@ -50,7 +44,7 @@ function handleData(data) {
   //   listItem.textContent = probability;
   //   probabilitiesList.appendChild(listItem);
   // });
-}
+
 
 export function disconnect() {
   if (socket) {
