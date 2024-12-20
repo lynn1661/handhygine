@@ -2,8 +2,8 @@ import { io } from "socket.io-client";
 let socket = null;
 let res = null;
 export function createConnect(message, currentStep) {
-  if (!socket) {
-    socket = io("https://ai.handhyine.com");
+  if (!socket) { // https://ai.handhyine.com or https://realtime.handhyine.com
+    socket = io("https://realtime.handhyine.com");
     socket.on("connect", () => {
       console.log("Socket connected");
       socket.on("message", (data) => {

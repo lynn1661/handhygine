@@ -1,7 +1,7 @@
 import axios from "axios";
 import router from "./../router";
-const axiosInstance = axios.create({
-  baseURL: "https://backend.handhyine.com",
+const axiosInstance = axios.create({ // https://backend.handhyine.com or https://handhygine.handhyine.com
+  baseURL: "https://handhygine.handhyine.com",
   timeout: 1000 * 20,
 });
 
