@@ -116,9 +116,18 @@ const get_rank = async ({ data }) => {
 
   // Calculate how many users the current user has outperformed.
   const totalUsers = allUsers.length;
-  const beatenUsers = allUsers.filter(user => user.total && user.total.length && user.total[user.total.length - 1] < userScore).length;
-  const rankPercentage = (beatenUsers / totalUsers) * 100;  // Percentage of users the current user has beaten.
+  // Check if the current user has full stars or full score
+  const isFullScoreUser = userScore >= 7;  // Adjust this condition according to your full score criteria
 
+  let rankPercentage = 0;
+
+  if (isFullScoreUser) {
+    // If the user has full score, they are at the top
+    rankPercentage = 100;
+  } else {
+    const beatenUsers = allUsers.filter(user => user.total && user.total.length && user.total[user.total.length - 1] <= userScore).length;
+    rankPercentage = (beatenUsers / totalUsers) * 100;  // Percentage of users the current user has beaten.
+  }
   // Maintain the original logic for determining user rank based on score.
   let rankLevel = "Novice";
   if (userScore > 5) {

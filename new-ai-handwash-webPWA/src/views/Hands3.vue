@@ -164,12 +164,10 @@ async function stopCountdown() {
   try {
     clearInterval(timer);
     countdownDisplay.value = 0; // 设置为空字符串
-    const matchCount = resList.filter(
-      (value) => Number(value.step) === 3
-    ).length;
-    if (matchCount >= 10 && matchCount < 15) {
+    const trueCount = resList.filter(ans => ans === true).length;  // 统计 true 的数量
+    if (trueCount >= 10 && trueCount < 15) {
       text.value = "GOOD";
-    } else if (matchCount >= 15) {
+    } else if (trueCount >= 15) {
       text.value = "PERFECT";
     } else {
       text.value = "FAIL";
@@ -328,30 +326,39 @@ onMounted(() => {
   let startNumber = 0;
   let endNumber = 25;
   let firstType = true;
+  let currentStep = 3; // 当前步骤编号
   //存储 25 条数据的函数
   async function storeDataEverySecond(results) {
     storedData.push(results);
     if (firstType) {
       if (storedData.length > 25) {
-        newData = storedData.slice(startNumber, endNumber);
-        const res = await createConnect(newData);
-        if (res != null) {
-          resList.push(res);
-          // 统计匹配值出现的次数
-        }
-        firstType = false;
-        newData = [];
-        storedData.shift();
-      }
-    } else {
-      storedData.shift();
-      newData = storedData.slice(startNumber, endNumber);
-      const res = await createConnect(newData);
-      if (res != null) {
-        resList.push(res);
-        // 统计匹配值出现的次数
-      }
-      newData = [];
+       newData = storedData.slice(startNumber, endNumber);
+       try {
+         const res = await createConnect(newData, currentStep);  // 等待服务器返回数据
+          if (res && res.ans !== undefined) {  // 确保数据格式正确，并包含 ans
+            // 根据返回的 'True' 或 'False' 转换为布尔值
+            resList.push(res.ans === 'True'); 
+          }
+       } catch (error) {
+         console.error('Error during socket communication:', error);
+       }
+       firstType = false;
+       newData = [];
+       storedData.shift();
+     }
+   } else {
+     storedData.shift();
+     newData = storedData.slice(startNumber, endNumber);
+     try {
+       const res = await createConnect(newData, currentStep);
+       if (res && res.ans !== undefined) {
+         // 根据返回的 'True' 或 'False' 转换为布尔值
+         resList.push(res.ans === 'True');
+       }
+     } catch (error) {
+       console.error('Error during socket communication:', error);
+     }
+     newData = [];
     }
   }
   const hands = new mpHands.Hands(config);
