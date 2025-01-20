@@ -208,8 +208,8 @@ const programmeOptions = [
     label: "BSc (Hons) in Vision Science + IE",
   },
   {
-    value: "BSc(Hons)BCT",
-    label: "BSc(Hons)BCT",
+    value: "BSc(Hons)ABCT",
+    label: "BSc(Hons)ABCT",
   },
   {
     value: "BSc(Hons)ASTC",
