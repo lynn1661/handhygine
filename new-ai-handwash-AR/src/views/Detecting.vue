@@ -423,7 +423,7 @@ onUnmounted(() => {
   width: 100%;
   height: 650px;
   object-fit: cover;
-  transform: none;
+  transform: scaleX(-1);
   @include devices(tablet) {
     height: 450px;
   }
