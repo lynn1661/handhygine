@@ -14,8 +14,9 @@
         <div class="home-title">{{ $t("HandHygiene.congrat1") }}</div>
         <div class="home-title-vice">{{ $t("HandHygiene.congrat2") }}</div>
         <div class="home-title-rankbeatmessage">
-          {{ $t("HandHygiene.rank1") }}{{ rankMessage
-          }}{{ $t("HandHygiene.rank2") }}
+          {{ $t("HandHygiene.rank1") }} 
+          <span class="number">{{ rankMessage }}</span>
+          {{ $t("HandHygiene.rank2") }}
         </div>
       </div>
     </div>
@@ -280,6 +281,12 @@ onMounted(async () => {
       color: #0f387c;
       height: 50px;
       line-height: 50px;
+
+      .number{
+        color: #ffcc00; //金色
+        font-size: 34px; 
+        font-weight: 900; 
+      }
     }
   }
   &-svg {
