@@ -47,6 +47,16 @@
     "congrat2": "You have completed the test!",
     "rank1": "You have beaten",
     "rank2": "% of users!",
+    "HandHygiene": {
+    "step1Description": "step1",
+    "step2Description": "step2",
+    "step3Description": "step3",
+    "step4Description": "step4",
+    "step5Description": "step5",
+    "step6Description": "step6",
+    "step7Description": "step7",
+    "step": "step"
+    },
     "regularReminders": "Regular Reminders",
     "regularRemindersContent": ": Set prompts for handwashing before meals, after the restroom, and when arriving home.",
     "thoroughWashing": "Thorough Washing",
