@@ -216,6 +216,10 @@ const programmeOptions = [
     label: "BSc(Hons)ASTC",
   },
   {
+    value: "DOptom",
+    label: "DOptom",
+  },
+  {
     value: "Others",
     label: "Others",
   },
