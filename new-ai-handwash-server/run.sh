@@ -1,0 +1,1 @@
+/home/ubuntu/miniconda3/envs/new-ai-handwash/bin/python /home/ubuntu/handhygine/new-ai-handwash-server/kaggle_get_one_prediction.py -c /home/ubuntu/handhygine/new-ai-handwash-server/config/st_gcn/handwash/inference.yaml
