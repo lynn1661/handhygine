@@ -231,7 +231,7 @@ app.router.add_get('/', index)
 # We kick off our server
 if __name__ == '__main__':
     # change the port as the default port number 8080 has been occupied
-    web.run_app(app,port=9500)
+    web.run_app(app,port=9501)
 
 # # get key point information and video with skeleton
 # keypoint_input = split_and_prep_frame()
