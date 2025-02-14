@@ -189,4 +189,4 @@ dependencies:
       - wsproto==1.2.0
       - yarl==1.9.2
       - zipp==3.17.0
-prefix: /home/hhyg/miniconda3/envs/new-ai-handwash
+prefix: /home/ubuntu/miniconda3/envs/new-ai-handwash
