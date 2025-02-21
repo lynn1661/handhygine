@@ -88,21 +88,29 @@ const downloadLink = ref(null);
 const stream = ref();
 const setupMedia = async () => {
   try {
+    console.log("📹 访问摄像头...");
+    // logToBackend("访问摄像头...");
     const mediaRecorderOptions = { mimeType: "video/webm" };
     mediaRecorder.value = new MediaRecorder(stream.value, mediaRecorderOptions);
     mediaRecorder.value.addEventListener("dataavailable", (event) => {
+      console.log("🎥 录制数据可用", event);
       if (event.data.size > 0) {
         recordedChunks.value.push(event.data);
       }
     });
 
     mediaRecorder.value.addEventListener("stop", async () => {
+      console.log("⏹ 录制停止");
       const blob = new Blob(recordedChunks.value, { type: "video/webm" });
+      console.log("💾 录制 Blob:", blob);
       const videoData = await readBlobAsBase64(blob);
+      console.log("📂 录制转换完成");
       store.commit("user/addBlob", videoData);
     });
   } catch (error) {
-    console.log("Error accessing media devices", error);
+    console.log("访问摄像头失败:", error);
+    // logToBackend("访问摄像头失败:", error);
+    
   }
 };
 async function readBlobAsBase64(blob) {
@@ -170,6 +178,26 @@ async function stopCountdown() {
   try {
     clearInterval(timer);
     countdownDisplay.value = 0; // 设置为空字符串
+    console.log("resList:", resList);
+    //logToBackend("resList:", resList);
+    // 计算 true 和 false 总数
+    const totalCount = resList.length;  // 总接收数据条数
+    const trueCount = resList.filter(ans => ans === true).length;  // 统计 true 的数量
+    const trueRatio = totalCount > 0 ? (trueCount / totalCount) * 100 : 0; // 计算 true 占比 (%)
+    console.log(`统计总数=${totalCount}, True=${trueCount}, True占比=${trueRatio.toFixed(2)}%`);
+    //logToBackend(`统计总数=${totalCount}, True=${trueCount}, True占比=${trueRatio.toFixed(2)}%`);
+    // 根据新的规则判断评分
+    if (trueRatio >= 85) {
+      text.value = "PERFECT";
+    } else if (trueRatio >= 60) {
+      text.value = "GOOD";
+    } else {
+      text.value = "FAIL";
+    }
+    console.log(`评分结果: ${text.value}`);
+    //logToBackend(`评分结果: ${text.value}`);
+
+    /*
     const trueCount = resList.filter(ans => ans === true).length;  // 统计 true 的数量
     if (trueCount >= 8 && trueCount < 20) {
       text.value = "GOOD";
@@ -178,6 +206,7 @@ async function stopCountdown() {
     } else {
       text.value = "FAIL";
     }
+    */
     await store.dispatch("user/rating", {
       id:
         sessionStorage.getItem("studnetID") ||
@@ -333,13 +362,17 @@ onMounted(() => {
       if (storedData.length > 25) {
        newData = storedData.slice(startNumber, endNumber);
        try {
-         const res = await createConnect(newData, currentStep);  // 等待服务器返回数据
-          if (res && res.ans !== undefined) {  // 确保数据格式正确，并包含 ans
-            // 根据返回的 'True' 或 'False' 转换为布尔值
-            resList.push(res.ans === 'True'); 
-          }
+        console.log("发送数据到服务器:", newData);
+        //logToBackend("发送数据到服务器:", newData);
+        const res = await createConnect(newData, currentStep);  // 等待服务器返回数据
+        console.log("服务器返回:", res);
+        //logToBackend("服务器返回:", res);
+        if (res && res.ans !== undefined) {  // 确保数据格式正确，并包含 ans
+          // 根据返回的 'True' 或 'False' 转换为布尔值
+          resList.push(res.ans === 'True'); 
+        }
        } catch (error) {
-         console.error('Error during socket communication:', error);
+         console.error('WebSocket 发送错误:', error);
        }
        firstType = false;
        newData = [];
@@ -349,14 +382,18 @@ onMounted(() => {
      storedData.shift();
      newData = storedData.slice(startNumber, endNumber);
      try {
-       const res = await createConnect(newData, currentStep);
-       if (res && res.ans !== undefined) {
-         // 根据返回的 'True' 或 'False' 转换为布尔值
-         resList.push(res.ans === 'True');
+        console.log("发送数据到服务器:", newData);
+        //logToBackend("发送数据到服务器:", newData);
+        const res = await createConnect(newData, currentStep);  // 等待服务器返回数据
+        console.log("服务器返回:", res);
+        //logToBackend("服务器返回:", res);
+        if (res && res.ans !== undefined) {  // 确保数据格式正确，并包含 ans
+          // 根据返回的 'True' 或 'False' 转换为布尔值
+          resList.push(res.ans === 'True'); 
+        }
+       } catch (error) {
+         console.error('WebSocket 发送错误:', error);
        }
-     } catch (error) {
-       console.error('Error during socket communication:', error);
-     }
      newData = [];
     }
   }

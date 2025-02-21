@@ -107,97 +107,117 @@ const stopCountdown = () => {
   percentage.value = 100;
 };
 onMounted(() => {
-  // testSupport([{ client: "Chrome" }]);
-  // function testSupport(supportedDevices) {
-  //   const deviceDetector = new DeviceDetector();
-  //   const detectedDevice = deviceDetector.parse(navigator.userAgent);
-  //   let isSupported = false;
-  //   for (const device of supportedDevices) {
-  //     if (device.client !== undefined) {
-  //       const re = new RegExp(`^${device.client}$`);
-  //       if (!re.test(detectedDevice.client.name)) {
-  //         continue;
-  //       }
-  //     }
-  //     if (device.os !== undefined) {
-  //       const re = new RegExp(`^${device.os}$`);
-  //       if (!re.test(detectedDevice.os.name)) {
-  //         continue;
-  //       }
-  //     }
-  //     isSupported = true;
-  //     break;
-  //   }
-  //   if (!isSupported) {
-  //     alert(
-  //       `This demo, running on ${detectedDevice.client.name}/${detectedDevice.os.name}, ` +
-  //         `is not well supported at this time, continue at your own risk.`
-  //     );
-  //   }
-  // }
-  // Our input frames will come from here.
+  console.log("📹 初始化视频流...");
+  
+  // 获取视频元素并检查是否存在
   const videoElement = document.getElementsByClassName("input_video")[0];
+  if (videoElement) {
+    console.log("📹 1: 视频元素已成功获取");
+  } else {
+    console.error("📹 1: 未找到视频元素");
+  }
+
+  // 获取 canvas 元素并检查是否存在
   const canvasElement = document.getElementsByClassName("output_canvas")[0];
+  if (canvasElement) {
+    console.log("📹 2: Canvas 元素已成功获取");
+  } else {
+    console.error("📹 2: 未找到 Canvas 元素");
+  }
+
+  // 获取控制面板元素
   const controlsElement = document.getElementsByClassName("control-panel")[0];
-  const canvasCtx = canvasElement.getContext("2d");
+  console.log("📹 3: 控制面板元素:", controlsElement);
+
+  const canvasCtx = canvasElement ? canvasElement.getContext("2d") : null;
+  if (canvasCtx) {
+    console.log("📹 4: Canvas 上下文已成功获取");
+  } else {
+    console.error("📹 4: 获取 Canvas 上下文失败");
+  }
+
+  // 配置 MediaPipe 手部模型
   const config = {
     locateFile: (file) => {
       return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@${mpHands.VERSION}/${file}`;
     },
   };
-  // We'll add this to our control panel later, but we'll save it here so we can
-  // call tick() each time the graph runs.
+  console.log("📹 5: 配置文件路径已设置");
+
+  // 控制帧率
   const fpsControl = new controls.FPS();
-  // Optimization: Turn off animated spinner after its hiding animation is done.
+  console.log("📹 6: FPS 控制已设置");
+
+  // 处理 loading 动画
   const spinner = document.querySelector(".loading");
+  console.log("📹 7: 找到 loading 动画");
   spinner.ontransitionend = () => {
     spinner.style.display = "none";
+    console.log("📹 8: loading 动画已隐藏");
   };
+
+  // 初始化并配置 MediaPipe Hands
+  const hands = new mpHands.Hands(config);
+  console.log("📹 9: MediaPipe Hands 实例已创建");
+
+  // 处理视频帧
   function onResults(results) {
-    // Hide the spinner.
+    console.log("🔍 视频帧处理开始...");
     document.body.classList.add("loaded");
-    // Update the frame rate.
     fpsControl.tick();
-    // Draw the overlays.
-    canvasCtx.save();
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    canvasCtx.drawImage(
-      results.image,
-      0,
-      0,
-      canvasElement.width,
-      canvasElement.height
-    );
-    if (results.multiHandLandmarks && results.multiHandedness) {
-      for (let index = 0; index < results.multiHandLandmarks.length; index++) {
-        const classification = results.multiHandedness[index];
-        const isRightHand = classification.label === "Right";
-        const landmarks = results.multiHandLandmarks[index];
-        drawingUtils.drawConnectors(
-          canvasCtx,
-          landmarks,
-          mpHands.HAND_CONNECTIONS,
-          { color: isRightHand ? "#00FF00" : "#FF0000" }
-        );
-        drawingUtils.drawLandmarks(canvasCtx, landmarks, {
-          color: isRightHand ? "#00FF00" : "#FF0000",
-          fillColor: isRightHand ? "#FF0000" : "#00FF00",
-          radius: (data) => {
-            return drawingUtils.lerp(data.from.z, -0.15, 0.1, 10, 1);
-          },
-        });
+    
+    if (canvasCtx && results.image) {
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+      canvasCtx.drawImage(
+        results.image,
+        0,
+        0,
+        canvasElement.width,
+        canvasElement.height
+      );
+      console.log("🔍 视频帧已绘制");
+
+      if (results.multiHandLandmarks && results.multiHandedness) {
+        console.log("🔍 手部数据已找到");
+        for (let index = 0; index < results.multiHandLandmarks.length; index++) {
+          const classification = results.multiHandedness[index];
+          const isRightHand = classification.label === "Right";
+          const landmarks = results.multiHandLandmarks[index];
+          
+          drawingUtils.drawConnectors(
+            canvasCtx,
+            landmarks,
+            mpHands.HAND_CONNECTIONS,
+            { color: isRightHand ? "#00FF00" : "#FF0000" }
+          );
+          drawingUtils.drawLandmarks(canvasCtx, landmarks, {
+            color: isRightHand ? "#00FF00" : "#FF0000",
+            fillColor: isRightHand ? "#FF0000" : "#00FF00",
+            radius: (data) => {
+              return drawingUtils.lerp(data.from.z, -0.15, 0.1, 10, 1);
+            },
+          });
+        }
       }
+      console.log("🔍 手部绘制完成");
     }
+
+    // 判断是否开始倒计时
     if (results.multiHandLandmarks.length >= 2) {
       countdownStarted.value = true;
+      console.log("🔍 开始倒计时");
     }
+
     if (results.multiHandLandmarks.length <= 1) {
       countdownStarted.value = false;
+      console.log("🔍 停止倒计时");
     }
     canvasCtx.restore();
   }
-  const hands = new mpHands.Hands(config);
+
   hands.onResults(onResults);
+
   new controls.ControlPanel(controlsElement, {
     selfieMode: true,
     maxNumHands: 2,

@@ -174,6 +174,23 @@ async function stopCountdown() {
   try {
     clearInterval(timer);
     countdownDisplay.value = 0; // 设置为空字符串
+    console.log("resList:", resList);
+    // 计算 true 和 false 总数
+    const totalCount = resList.length;  // 总接收数据条数
+    const trueCount = resList.filter(ans => ans === true).length;  // 统计 true 的数量
+    const trueRatio = totalCount > 0 ? (trueCount / totalCount) * 100 : 0; // 计算 true 占比 (%)
+    console.log(`统计总数=${totalCount}, True=${trueCount}, True占比=${trueRatio.toFixed(2)}%`);
+    // 根据新的规则判断评分
+    if (trueRatio >= 85) {
+      text.value = "PERFECT";
+    } else if (trueRatio >= 60) {
+      text.value = "GOOD";
+    } else {
+      text.value = "FAIL";
+    }
+    console.log(`评分结果: ${text.value}`);
+
+    /*
     const trueCount = resList.filter(ans => ans === true).length;  // 统计 true 的数量
     if (trueCount >= 8 && trueCount < 20) {
       text.value = "GOOD";
@@ -182,6 +199,7 @@ async function stopCountdown() {
     } else {
       text.value = "FAIL";
     }
+    */
     await store.dispatch("user/rating", {
       id:
         sessionStorage.getItem("studnetID") ||
