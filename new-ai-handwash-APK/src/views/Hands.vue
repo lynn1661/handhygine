@@ -65,7 +65,7 @@ import * as controls from "@mediapipe/control_utils";
 import * as mpHands from "@mediapipe/hands";
 import * as drawingUtils from "@mediapipe/drawing_utils";
 import DeviceDetector from "device-detector-js";
-import { createConnect, disconnect } from "../services/socket";
+import { createConnect, disconnect, sendLog } from "../services/socket";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { getTime } from "../utils/formatData";
@@ -89,7 +89,6 @@ const stream = ref();
 const setupMedia = async () => {
   try {
     console.log("📹 访问摄像头...");
-    // logToBackend("访问摄像头...");
     const mediaRecorderOptions = { mimeType: "video/webm" };
     mediaRecorder.value = new MediaRecorder(stream.value, mediaRecorderOptions);
     mediaRecorder.value.addEventListener("dataavailable", (event) => {
@@ -109,7 +108,6 @@ const setupMedia = async () => {
     });
   } catch (error) {
     console.log("访问摄像头失败:", error);
-    // logToBackend("访问摄像头失败:", error);
     
   }
 };
@@ -179,23 +177,26 @@ async function stopCountdown() {
     clearInterval(timer);
     countdownDisplay.value = 0; // 设置为空字符串
     console.log("resList:", resList);
-    //logToBackend("resList:", resList);
+    // 记录 resList 数据
+    sendLog("info", `resList: ${JSON.stringify(resList)}`);
     // 计算 true 和 false 总数
     const totalCount = resList.length;  // 总接收数据条数
     const trueCount = resList.filter(ans => ans === true).length;  // 统计 true 的数量
     const trueRatio = totalCount > 0 ? (trueCount / totalCount) * 100 : 0; // 计算 true 占比 (%)
     console.log(`统计总数=${totalCount}, True=${trueCount}, True占比=${trueRatio.toFixed(2)}%`);
-    //logToBackend(`统计总数=${totalCount}, True=${trueCount}, True占比=${trueRatio.toFixed(2)}%`);
+    // 记录统计数据
+    sendLog("info", `统计总数=${totalCount}, True=${trueCount}, True占比=${trueRatio.toFixed(2)}%`);
     // 根据新的规则判断评分
-    if (trueRatio >= 85) {
+    if (trueRatio >= 80) {
       text.value = "PERFECT";
-    } else if (trueRatio >= 60) {
+    } else if (trueRatio >= 55) {
       text.value = "GOOD";
     } else {
       text.value = "FAIL";
     }
     console.log(`评分结果: ${text.value}`);
-    //logToBackend(`评分结果: ${text.value}`);
+    // 记录评分结果
+    sendLog("info", `评分结果: ${text.value}`);
 
     /*
     const trueCount = resList.filter(ans => ans === true).length;  // 统计 true 的数量
@@ -362,11 +363,9 @@ onMounted(() => {
       if (storedData.length > 25) {
        newData = storedData.slice(startNumber, endNumber);
        try {
-        console.log("发送数据到服务器:", newData);
-        //logToBackend("发送数据到服务器:", newData);
+        console.log("发送数据到服务器");
         const res = await createConnect(newData, currentStep);  // 等待服务器返回数据
         console.log("服务器返回:", res);
-        //logToBackend("服务器返回:", res);
         if (res && res.ans !== undefined) {  // 确保数据格式正确，并包含 ans
           // 根据返回的 'True' 或 'False' 转换为布尔值
           resList.push(res.ans === 'True'); 
@@ -383,10 +382,8 @@ onMounted(() => {
      newData = storedData.slice(startNumber, endNumber);
      try {
         console.log("发送数据到服务器:", newData);
-        //logToBackend("发送数据到服务器:", newData);
         const res = await createConnect(newData, currentStep);  // 等待服务器返回数据
         console.log("服务器返回:", res);
-        //logToBackend("服务器返回:", res);
         if (res && res.ans !== undefined) {  // 确保数据格式正确，并包含 ans
           // 根据返回的 'True' 或 'False' 转换为布尔值
           resList.push(res.ans === 'True'); 
