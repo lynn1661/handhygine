@@ -68,7 +68,7 @@ import * as controls from "@mediapipe/control_utils";
 import * as mpHands from "@mediapipe/hands";
 import * as drawingUtils from "@mediapipe/drawing_utils";
 import DeviceDetector from "device-detector-js";
-import { createConnect, disconnect } from "../services/socket";
+import { createConnect, disconnect, sendLog } from "../services/socket";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { getTime } from "../utils/formatData";
@@ -175,20 +175,26 @@ async function stopCountdown() {
     clearInterval(timer);
     countdownDisplay.value = 0; // 设置为空字符串
     console.log("resList:", resList);
+    // 记录 resList 数据
+    sendLog("info", `resList: ${JSON.stringify(resList)}`);
     // 计算 true 和 false 总数
     const totalCount = resList.length;  // 总接收数据条数
     const trueCount = resList.filter(ans => ans === true).length;  // 统计 true 的数量
     const trueRatio = totalCount > 0 ? (trueCount / totalCount) * 100 : 0; // 计算 true 占比 (%)
     console.log(`统计总数=${totalCount}, True=${trueCount}, True占比=${trueRatio.toFixed(2)}%`);
+    // 记录统计数据
+    sendLog("info", `统计总数=${totalCount}, True=${trueCount}, True占比=${trueRatio.toFixed(2)}%`);
     // 根据新的规则判断评分
-    if (trueRatio >= 85) {
+    if (trueRatio >= 80) {
       text.value = "PERFECT";
-    } else if (trueRatio >= 60) {
+    } else if (trueRatio >= 55) {
       text.value = "GOOD";
     } else {
       text.value = "FAIL";
     }
     console.log(`评分结果: ${text.value}`);
+    // 记录评分结果
+    sendLog("info", `评分结果: ${text.value}`);
 
     /*
     const trueCount = resList.filter(ans => ans === true).length;  // 统计 true 的数量

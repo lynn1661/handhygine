@@ -29,6 +29,17 @@ export function handleData(data) {
   return data;
 }
 
+// 发送日志到后端
+export function sendLog(level, message) {
+  if (socket) {
+    console.log("Sending log to backend:", message);
+    socket.emit("log", { level, message });
+  } else {
+    console.warn("Socket not connected. Cannot send log.");
+  }
+}
+
+
 export function disconnect() {
   if (socket) {
     socket.disconnect();

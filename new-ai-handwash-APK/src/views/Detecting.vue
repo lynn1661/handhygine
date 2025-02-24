@@ -176,10 +176,8 @@ onMounted(() => {
         canvasElement.width,
         canvasElement.height
       );
-      console.log("🔍 视频帧已绘制");
 
       if (results.multiHandLandmarks && results.multiHandedness) {
-        console.log("🔍 手部数据已找到");
         for (let index = 0; index < results.multiHandLandmarks.length; index++) {
           const classification = results.multiHandedness[index];
           const isRightHand = classification.label === "Right";
