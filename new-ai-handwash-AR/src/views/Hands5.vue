@@ -65,7 +65,7 @@ import * as controls from "@mediapipe/control_utils";
 import * as mpHands from "@mediapipe/hands";
 import * as drawingUtils from "@mediapipe/drawing_utils";
 import DeviceDetector from "device-detector-js";
-import { createConnect, disconnect } from "../services/socket";
+import { createConnect, disconnect, sendLog } from "../services/socket";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { getTime } from "../utils/formatData";
