@@ -198,16 +198,6 @@ async function stopCountdown() {
     // 记录评分结果
     sendLog("info", `评分结果: ${text.value}`);
 
-    /*
-    const trueCount = resList.filter(ans => ans === true).length;  // 统计 true 的数量
-    if (trueCount >= 8 && trueCount < 20) {
-      text.value = "GOOD";
-    } else if (trueCount >= 20) {
-      text.value = "PERFECT";
-    } else {
-      text.value = "FAIL";
-    }
-    */
     await store.dispatch("user/rating", {
       id:
         sessionStorage.getItem("studnetID") ||
@@ -461,6 +451,8 @@ watch(countdownStarted, (newVal) => {
   }
 });
 const backHome = () => {
+  console.log("用户返回主页，断开 WebSocket 连接");
+  disconnect(); // 断开 WebSocket 连接
   redirectTimeoutId.value = false;
   localStorage.removeItem("studnetID");
   sessionStorage.removeItem("studnetID");
