@@ -97,7 +97,7 @@ const backHome = () => {
   state.redirectTimeoutId = false;
   localStorage.removeItem("studnetID");
   sessionStorage.removeItem("studnetID");
-  router.push({
+  router.push({S
     path: "/",
   });
 };

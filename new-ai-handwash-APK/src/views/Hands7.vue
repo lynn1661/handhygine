@@ -441,8 +441,6 @@ watch(countdownStarted, (newVal) => {
   }
 });
 const backHome = () => {
-  console.log("用户返回主页，断开 WebSocket 连接");
-  disconnect(); // 断开 WebSocket 连接
   redirectTimeoutId.value = false;
   localStorage.removeItem("studnetID");
   sessionStorage.removeItem("studnetID");
