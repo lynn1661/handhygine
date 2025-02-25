@@ -126,6 +126,8 @@ const t = useI18n();
 const shouldChangeStyle = ref(true); // 默认不添加
 const HandwashingType = ref();
 const back = () => {
+  console.log("用户返回主页，断开 WebSocket 连接");
+  disconnect(); // 断开 WebSocket 连接
   localStorage.removeItem("studnetID");
   sessionStorage.removeItem("studnetID");
   localStorage.removeItem("studnetSerialNumber");
@@ -136,6 +138,8 @@ const back = () => {
   });
 };
 const tryAgain = () => {
+  console.log("用户重新测试，断开 WebSocket 连接");
+  disconnect(); // 断开 WebSocket 连接
   router.push({
     path: "/detecting",
   });
