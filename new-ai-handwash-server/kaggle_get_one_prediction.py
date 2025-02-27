@@ -173,6 +173,7 @@ async def index(request):
 # 处理前端日志
 @sio.on("log")
 async def handle_log(sid, data):
+    print(f"Received log from frontend: {data}")
     level = data.get("level", "info").upper()
     message = data.get("message", "")
 
