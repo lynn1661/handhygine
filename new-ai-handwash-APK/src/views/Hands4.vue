@@ -357,11 +357,11 @@ onMounted(() => {
 
         const overlap = await isOverlapping(landmarksList);
         if (!overlap) {
-          console.log("⚠️ 检测到一只手或双手摊开，直接判定 FALSE");
+          console.log("⚠️ 未检测到手或双手摊开，直接判定 FALSE");
           resList.push(false); // 强制记录 false
         } else {
         console.log("✅ 正常洗手，执行后续检测");
-        storeDataEverySecond(results); // 如果手势正常，则存储数据
+        storeDataEverySecond(combinedData); // 如果手势正常，则存储数据
         }
       }
     }
@@ -413,7 +413,8 @@ onMounted(() => {
       if (storedData.length > 25) {
        newData = storedData.slice(startNumber, endNumber);
        try {
-         const res = await createConnect(newData, currentStep);  // 等待服务器返回数据
+          const res = await createConnect(newData, currentStep);  // 等待服务器返回数据
+          console.log("服务器返回:", res);
           if (res && res.ans !== undefined) {  // 确保数据格式正确，并包含 ans
             // 根据返回的 'True' 或 'False' 转换为布尔值
             resList.push(res.ans === 'True'); 
@@ -426,18 +427,19 @@ onMounted(() => {
        storedData.shift();
      }
    } else {
-     storedData.shift();
-     newData = storedData.slice(startNumber, endNumber);
-     try {
-       const res = await createConnect(newData, currentStep);
-       if (res && res.ans !== undefined) {
-         // 根据返回的 'True' 或 'False' 转换为布尔值
-         resList.push(res.ans === 'True');
-       }
-     } catch (error) {
-       console.error('Error during socket communication:', error);
-     }
-     newData = [];
+      storedData.shift();
+      newData = storedData.slice(startNumber, endNumber);
+      try {
+        const res = await createConnect(newData, currentStep);
+        console.log("服务器返回:", res);
+        if (res && res.ans !== undefined) {
+          // 根据返回的 'True' 或 'False' 转换为布尔值
+          resList.push(res.ans === 'True');
+        }
+      } catch (error) {
+        console.error('Error during socket communication:', error);
+      }
+      newData = [];
     }
   }
 

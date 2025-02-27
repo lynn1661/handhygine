@@ -546,11 +546,11 @@ onMounted(() => {
 
         const overlap = await isOverlapping(landmarksList);
         if (!overlap) {
-          console.log("⚠️ 检测到一只手或双手摊开，直接判定 FALSE");
+          console.log("⚠️ 未检测到手或双手摊开，直接判定 FALSE");
           resList.push(false); // 强制记录 false
         } else {
         console.log("✅ 正常洗手，执行后续检测");
-        storeDataEverySecond(results); // 如果手势正常，则存储数据
+        storeDataEverySecond(combinedData); // 如果手势正常，则存储数据
         }
 
         /* 3333
