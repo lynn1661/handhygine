@@ -230,7 +230,7 @@ async function stopCountdown() {
     // 根据新的规则判断评分
     if (trueRatio >= 80) {
       text.value = "PERFECT";
-    } else if (trueRatio >= 10) {
+    } else if (trueRatio >= 55) {
       text.value = "GOOD";
     } else {
       text.value = "FAIL";
