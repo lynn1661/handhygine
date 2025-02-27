@@ -168,6 +168,214 @@ const startCountdown = () => {
     }
   }, 1000);
 };
+
+/*222
+async function isHandOpen(landmarks) {
+  if (!landmarks || landmarks.length < 21) {
+    console.log("⚠️ hand 数据无效或未识别到手", JSON.stringify(landmarks, null, 2));
+    return true;
+  }
+
+  console.log("🎯 开始检测手势，手部关键点数据:", landmarks);
+
+  const wrist = landmarks[0];
+  const middleMCP = landmarks[9]; // 中指 MCP 关节点
+
+  // **🟢 计算手掌法向量 (Palm Normal Vector)**
+  const palmVector = {
+    x: middleMCP.x - wrist.x,
+    y: middleMCP.y - wrist.y,
+    z: middleMCP.z - wrist.z
+  };
+
+  console.log(`📏 计算手掌法向量:`, palmVector);
+
+  // **🟢 计算手掌朝向**
+  const palmFacingCamera = palmVector.z > 0.03;  // 手掌朝向摄像头
+  const backFacingCamera = palmVector.z < -0.03; // 手背朝向摄像头
+  console.log("📏 手掌朝向摄像头:", palmFacingCamera);
+  console.log("📏 手背朝向摄像头:", backFacingCamera);
+
+  // **🟢 计算手指张开角度**
+  function getAngle(fingerTip, fingerMCP) {
+    const dx1 = fingerTip.x - fingerMCP.x;
+    const dy1 = fingerTip.y - fingerMCP.y;
+    const dx2 = wrist.x - fingerMCP.x;
+    const dy2 = wrist.y - fingerMCP.y;
+
+    const dotProduct = dx1 * dx2 + dy1 * dy2;
+    const magnitude1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+    const magnitude2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+    return Math.acos(dotProduct / (magnitude1 * magnitude2)) * (180 / Math.PI);
+  }
+
+  const fingerAngles = [
+    getAngle(landmarks[4], landmarks[2]),   // 拇指
+    getAngle(landmarks[8], landmarks[5]),   // 食指
+    getAngle(landmarks[12], landmarks[9]),  // 中指
+    getAngle(landmarks[16], landmarks[13]), // 无名指
+    getAngle(landmarks[20], landmarks[17])  // 小指
+  ];
+
+  console.log("📊 各手指角度:", fingerAngles.map(a => a.toFixed(2)).join(", "));
+
+  // **🟢 手指张开优化**
+  const fingersExtended = fingerAngles.filter(angle => angle > 50).length >= 3;
+  console.log("🖐 手指完全张开 (优化后):", fingersExtended);
+
+  // **🟢 检测手指间距**
+  function getDistance(p1, p2) {
+    return Math.sqrt(
+      Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2) + Math.pow(p1.z - p2.z, 2)
+    );
+  }
+
+  const fingerDistances = [
+    getDistance(landmarks[8], landmarks[12]),  // 食指 - 中指
+    getDistance(landmarks[12], landmarks[16]), // 中指 - 无名指
+    getDistance(landmarks[16], landmarks[20])  // 无名指 - 小指
+  ];
+
+  const fingersApart = fingerDistances.every(dist => dist > 0.05);
+  console.log("✋ 手指间距是否足够分开:", fingersApart);
+
+  // **🟢 允许“手指并拢但平放”也算张开**
+  const fingersCloseAndFlat = fingerDistances.every(dist => dist < 0.02);
+  console.log("✋ 手指并拢且平放:", fingersCloseAndFlat);
+
+  // **🟢 最终判断是否摊开**
+  let isOpen = fingersExtended || palmFacingCamera || backFacingCamera || fingersApart || fingersCloseAndFlat;
+  console.log(`✅ 手是否摊开 (优化后): ${isOpen ? "是" : "否"}`);
+
+  return isOpen;
+}
+*/
+/*111
+// 检测 **是否有手摊开** 或者 **未检测到手**
+async function isAnyHandOpen(results) {
+  if (!results || !results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+    console.log("🚨 没有检测到手，直接判定为 False");
+    return true; // **直接判定摊开**
+  }
+
+  // console.log("📸 Mediapipe 识别到的手部数据:", JSON.stringify(results.multiHandLandmarks, null, 2));
+  console.log("🎯 开始检测是否有手摊开");
+
+  for (const landmarks of results.multiHandLandmarks) {
+    const handOpen = await isHandOpen(landmarks);
+    if (handOpen) {
+      console.log(`⚠️ 发现手摊开，立即判定为 False`);
+      return true; // 只要有一只手摊开，就返回 true
+    }
+  }
+
+  console.log("✅ 未发现手摊开，正常进行检测");
+  return false;
+}*/
+
+/* 3333
+let isForcedFail = false;  // 存储是否因手持续摊开导致 FAIL
+let handOpenStartTime = null; // 记录手摊开的开始时间
+
+async function trackHandOpen(results) {
+  console.log("📡 开始追踪手势状态...");
+
+  const isOpen = await isHandOpen(results.multiHandLandmarks);
+
+  if (isOpen) {
+    if (!handOpenStartTime) {
+      handOpenStartTime = Date.now(); // 记录开始时间
+    }
+  } else {
+    handOpenStartTime = null; // 手恢复正常，重置时间
+  }
+
+  if (handOpenStartTime && Date.now() - handOpenStartTime >= 2000) { // **时间超过 2 秒**
+    console.log("🚨 持续检测到手摊开 2 秒，判定 FAIL");
+    isForcedFail = true;
+  }
+}*/
+/* 2222
+let openStartTime = null; // 记录摊开手的开始时间
+const OPEN_FAIL_THRESHOLD_1 = 1000; // 1秒阈值（单位：毫秒）
+const OPEN_FAIL_THRESHOLD_2 = 2000; // 2秒阈值（单位：毫秒）
+
+async function trackHandOpen(results) {
+  if (!results || !results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+    console.log("🚨 没有检测到手");
+    
+    if (!openStartTime) {
+      openStartTime = Date.now();
+    } else if (Date.now() - openStartTime > OPEN_FAIL_THRESHOLD_2) {
+      console.log("❌ 持续未检测到手 2 秒，判定 FAIL");
+      isForcedFail = true; // 直接判定 FAIL
+    }
+    return;
+  }
+
+  for (const landmarks of results.multiHandLandmarks) {
+    const handOpen = await isHandOpen(landmarks);
+    if (handOpen) {
+      console.log("⚠️ 发现手持续摊开...");
+      
+      if (!openStartTime) {
+        openStartTime = Date.now();
+      } else if (Date.now() - openStartTime > OPEN_FAIL_THRESHOLD_1) {
+        console.log("❌ 持续检测到手摊开 1 秒，判定 FAIL");
+        isForcedFail = true; // 直接判定 FAIL
+      }
+      return;
+    }
+  }
+
+  // **如果手恢复正常，重置计时器**
+  openStartTime = null;
+  return false;
+}*/
+
+// 检查双手是否有重叠，或者只检测到一只手
+async function isOverlapping(landmarksList) {
+  if (!landmarksList || landmarksList.length === 0) {
+    console.log("🚨 未检测到手，直接判定为 False");
+    return false;  // 未检测到手，直接判定为 False
+  }
+
+  if (landmarksList.length < 2) {
+    console.log("⚠️ 仅检测到一只手，不参与重叠计算");
+    return true;  // 仅检测到一只手，不参与重叠计算
+  }
+
+  console.log("🎯 开始检测双手是否重叠");
+
+  // 计算每只手的边界框
+  function getBoundingBox(landmarks) {
+    const xCoords = landmarks.map(p => p.x);
+    const yCoords = landmarks.map(p => p.y);
+    return {
+      minX: Math.min(...xCoords),
+      maxX: Math.max(...xCoords),
+      minY: Math.min(...yCoords),
+      maxY: Math.max(...yCoords),
+    };
+  }
+
+  const hand1Box = getBoundingBox(landmarksList[0]);
+  const hand2Box = getBoundingBox(landmarksList[1]);
+
+  // console.log("📏 计算出的手部边界框:", hand1Box, hand2Box);
+
+  // **判断两个手的边界框是否有重叠**
+  const overlapX = Math.max(0, Math.min(hand1Box.maxX, hand2Box.maxX) - Math.max(hand1Box.minX, hand2Box.minX));
+  const overlapY = Math.max(0, Math.min(hand1Box.maxY, hand2Box.maxY) - Math.max(hand1Box.minY, hand2Box.minY));
+
+  const Overlapping = overlapX > 0 && overlapY > 0;
+
+  console.log("🖐 双手是否重叠:", Overlapping);
+
+  return Overlapping;
+}
+
 const studnetId = computed(() => {
   return store.state.user.userID;
 });
@@ -186,6 +394,29 @@ async function stopCountdown() {
     console.log(`统计总数=${totalCount}, True=${trueCount}, True占比=${trueRatio.toFixed(2)}%`);
     // 记录统计数据
     sendLog("info", `统计总数=${totalCount}, True=${trueCount}, True占比=${trueRatio.toFixed(2)}%`);
+    /* 2323
+    // ✅ **如果是因为手持续摊开导致的 FAIL，直接判定**
+    if (isForcedFail) {
+      console.log("🚨 由于手持续摊开或未检测到手，直接判定 FAIL");
+      text.value = "FAIL";
+    } else {
+      // 计算 true 和 false 总数
+      const totalCount = resList.length;
+      const trueCount = resList.filter(ans => ans === true).length;
+      const trueRatio = totalCount > 0 ? (trueCount / totalCount) * 100 : 0;
+      console.log(`统计总数=${totalCount}, True=${trueCount}, True占比=${trueRatio.toFixed(2)}%`);
+      sendLog("info", `统计总数=${totalCount}, True=${trueCount}, True占比=${trueRatio.toFixed(2)}%`);
+
+      // ✅ **正常评分逻辑**
+      if (trueRatio >= 80) {
+        text.value = "PERFECT";
+      } else if (trueRatio >= 55) {
+        text.value = "GOOD";
+      } else {
+        text.value = "FAIL";
+      }
+    }*/
+    
     // 根据新的规则判断评分
     if (trueRatio >= 80) {
       text.value = "PERFECT";
@@ -242,8 +473,7 @@ onMounted(() => {
   // call tick() each time the graph runs.
   const fpsControl = new controls.FPS();
   // Optimization: Turn off animated spinner after its hiding animation is done.
-  function onResults(results) {
-    loading.value = false;
+  async function onResults(results) {
     // Update the frame rate.
     fpsControl.tick();
     // Draw the overlays.
@@ -289,7 +519,7 @@ onMounted(() => {
           combinedData[label].push(newData);
         });
         countdownStarted.value = true;
-        storeDataEverySecond(combinedData);
+        
         drawingUtils.drawConnectors(
           canvasCtx,
           landmarks,
@@ -303,6 +533,55 @@ onMounted(() => {
             return drawingUtils.lerp(data.from.z, -0.15, 0.1, 10, 1);
           },
         });
+
+        // console.log("combinedData",combinedData);
+        // 检查是否没有手或双手摊开
+        const leftHand = combinedData["Left"] && combinedData["Left"].length > 0 ? combinedData["Left"][0].keypoints : null;
+        const rightHand = combinedData["Right"] && combinedData["Right"].length > 0 ? combinedData["Right"][0].keypoints : null;
+
+        const landmarksList = [];
+        if (leftHand) landmarksList.push(leftHand);
+        if (rightHand) landmarksList.push(rightHand);
+        console.log("landmarksList",landmarksList);
+
+        const overlap = await isOverlapping(landmarksList);
+        if (!overlap) {
+          console.log("⚠️ 检测到一只手或双手摊开，直接判定 FALSE");
+          resList.push(false); // 强制记录 false
+        } else {
+        console.log("✅ 正常洗手，执行后续检测");
+        storeDataEverySecond(results); // 如果手势正常，则存储数据
+        }
+
+        /* 3333
+        // **调用 trackHandOpen() 检测是否手持续摊开 2 秒**
+        await trackHandOpen(results);
+
+        // ✅ 如果持续 2 秒手摊开，标记为 FAIL
+        if (isForcedFail) {
+          console.log("🚨 持续检测到手摊开 2 秒，立即判定 FAIL");
+          isForcedFail = false; // 复位标记，避免多次触发
+          resList.push(false); // 直接标记为 FAIL，不再发送数据
+          return;
+        }
+        */
+        /*222
+        // ✅ **实时追踪手摊开情况**
+        trackHandOpen(results);
+
+        storeDataEverySecond(combinedData);
+        */
+       
+        /* 1111
+        // 优先检查双手摊开情况
+        if (await isAnyHandOpen(results)) {
+          console.log("⚠️ 检测到手摊开或没检测到手，自动判定为 False");
+          resList.push(false); // 强制记录 False
+        } else {
+          console.log("✅ 正常洗手，执行后续检测");
+          storeDataEverySecond(combinedData);
+        }
+        */
       }
     }
     if (results.multiHandLandmarks.length === 0) {
@@ -346,14 +625,13 @@ onMounted(() => {
   let endNumber = 25;
   let firstType = true;
   let currentStep = 1; // 当前步骤编号  
-  //存储 25 条数据的函数
+
   async function storeDataEverySecond(results) {
     storedData.push(results);
     if (firstType) {
       if (storedData.length > 25) {
        newData = storedData.slice(startNumber, endNumber);
        try {
-        console.log("发送数据到服务器");
         const res = await createConnect(newData, currentStep);  // 等待服务器返回数据
         console.log("服务器返回:", res);
         if (res && res.ans !== undefined) {  // 确保数据格式正确，并包含 ans
@@ -371,7 +649,6 @@ onMounted(() => {
      storedData.shift();
      newData = storedData.slice(startNumber, endNumber);
      try {
-        console.log("发送数据到服务器:", newData);
         const res = await createConnect(newData, currentStep);  // 等待服务器返回数据
         console.log("服务器返回:", res);
         if (res && res.ans !== undefined) {  // 确保数据格式正确，并包含 ans

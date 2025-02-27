@@ -163,6 +163,49 @@ const startCountdown = () => {
     }
   }, 1000);
 };
+
+// 检查双手是否有重叠，或者只检测到一只手
+async function isOverlapping(landmarksList) {
+  if (!landmarksList || landmarksList.length === 0) {
+    console.log("🚨 未检测到手，直接判定为 False");
+    return false;  // 未检测到手，直接判定为 False
+  }
+
+  if (landmarksList.length < 2) {
+    console.log("⚠️ 仅检测到一只手，不参与重叠计算");
+    return true;  // 仅检测到一只手，不参与重叠计算
+  }
+
+  console.log("🎯 开始检测双手是否重叠");
+
+  // 计算每只手的边界框
+  function getBoundingBox(landmarks) {
+    const xCoords = landmarks.map(p => p.x);
+    const yCoords = landmarks.map(p => p.y);
+    return {
+      minX: Math.min(...xCoords),
+      maxX: Math.max(...xCoords),
+      minY: Math.min(...yCoords),
+      maxY: Math.max(...yCoords),
+    };
+  }
+
+  const hand1Box = getBoundingBox(landmarksList[0]);
+  const hand2Box = getBoundingBox(landmarksList[1]);
+
+  // console.log("📏 计算出的手部边界框:", hand1Box, hand2Box);
+
+  // **判断两个手的边界框是否有重叠**
+  const overlapX = Math.max(0, Math.min(hand1Box.maxX, hand2Box.maxX) - Math.max(hand1Box.minX, hand2Box.minX));
+  const overlapY = Math.max(0, Math.min(hand1Box.maxY, hand2Box.maxY) - Math.max(hand1Box.minY, hand2Box.minY));
+
+  const Overlapping = overlapX > 0 && overlapY > 0;
+
+  console.log("🖐 双手是否重叠:", Overlapping);
+
+  return Overlapping;
+}
+
 const studnetId = computed(() => {
   return store.state.user.userID;
 });
@@ -239,7 +282,7 @@ onMounted(() => {
   const fpsControl = new controls.FPS();
   // Optimization: Turn off animated spinner after its hiding animation is done.
 
-  function onResults(results) {
+  async function onResults(results) {
     loading.value = false;
     // Update the frame rate.
     fpsControl.tick();
@@ -301,6 +344,23 @@ onMounted(() => {
             return drawingUtils.lerp(data.from.z, -0.15, 0.1, 10, 1);
           },
         });
+        // 检查是否没有手或双手摊开
+        const leftHand = combinedData["Left"] && combinedData["Left"].length > 0 ? combinedData["Left"][0].keypoints : null;
+        const rightHand = combinedData["Right"] && combinedData["Right"].length > 0 ? combinedData["Right"][0].keypoints : null;
+
+        const landmarksList = [];
+        if (leftHand) landmarksList.push(leftHand);
+        if (rightHand) landmarksList.push(rightHand);
+        console.log("landmarksList",landmarksList);
+
+        const overlap = await isOverlapping(landmarksList);
+        if (!overlap) {
+          console.log("⚠️ 检测到一只手或双手摊开，直接判定 FALSE");
+          resList.push(false); // 强制记录 false
+        } else {
+        console.log("✅ 正常洗手，执行后续检测");
+        storeDataEverySecond(results); // 如果手势正常，则存储数据
+        }
       }
     }
     if (results.multiHandLandmarks.length === 0) {

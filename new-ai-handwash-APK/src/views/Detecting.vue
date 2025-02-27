@@ -198,18 +198,18 @@ onMounted(() => {
           });
         }
       }
-      console.log("🔍 手部绘制完成");
+      // console.log("🔍 手部绘制完成");
     }
 
     // 判断是否开始倒计时
     if (results.multiHandLandmarks.length >= 2) {
       countdownStarted.value = true;
-      console.log("🔍 开始倒计时");
+      // console.log("🔍 开始倒计时");
     }
 
     if (results.multiHandLandmarks.length <= 1) {
       countdownStarted.value = false;
-      console.log("🔍 停止倒计时");
+      // console.log("🔍 停止倒计时");
     }
     canvasCtx.restore();
   }
