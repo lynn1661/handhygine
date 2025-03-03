@@ -18,14 +18,11 @@ log_file_path = os.path.join(r"/home/hhyg/new-ai-handwash-server", "log.txt")
 
 # 添加 FileHandler 只一次
 if not logger.handlers:
-    # 文件日志
     fh = logging.FileHandler(log_file_path)
     fh.setLevel(logging.INFO)
-    # 日志格式
     main_formatter = logging.Formatter(
         fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        datefmt="%d-%m-%Y %H:%M:%S"
-    )
+        datefmt='%d-%m-%Y %H:%M:%S')
     fh.setFormatter(main_formatter)
     logger.addHandler(fh)
 
@@ -141,7 +138,13 @@ def map_result_to_step(action_results, step):
     return action_list
 
 # creates a new Async Socket IO Server
-sio = socketio.AsyncServer(cors_allowed_origins='*',async_mode='aiohttp')
+#sio = socketio.AsyncServer(cors_allowed_origins='*',async_mode='aiohttp')
+sio = socketio.AsyncServer(
+    cors_allowed_origins="*",
+    async_mode="aiohttp",
+    ping_timeout=30,  # 30 秒内未收到心跳则断开
+    ping_interval=10  # 每 10 秒发送一次心跳检测
+)
 # Creates a new Aiohttp Web Application
 app = web.Application()
 # Binds our Socket.IO server to our Web App instance
@@ -166,10 +169,14 @@ async def connect(sid, environ):
     save_log(f"Client {sid} connected")
     client_last_active[sid] = asyncio.get_event_loop().time()  # 记录连接时间
 
+# index.html
 async def index(request):
-    with open('index.html') as f:
-        return web.Response(text=f.read(), content_type='text/html')
-
+    index_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "index.html")
+    if os.path.exists(index_path):
+        with open(index_path, "r", encoding="utf-8") as f:
+            return web.Response(text=f.read(), content_type="text/html")
+    else:
+        return web.Response(text="Index page not found", status=404)
 # 处理前端日志
 @sio.on("log")
 async def handle_log(sid, data):
@@ -183,7 +190,6 @@ async def handle_log(sid, data):
         logger.warning(f"Frontend log [{sid}]: {message}")
     else:
         logger.info(f"Frontend log [{sid}]: {message}")
-
 
 @sio.on('message')
 async def print_message(sid, message):
@@ -212,6 +218,7 @@ async def print_message(sid, message):
     # print("processor.result", processor.result[0].shape)
     action_list = map_result_to_step(processor.result, current_step)
     print(f"action_list {action_list}")
+    save_log(f"action_list {action_list}")
     await sio.emit('message', action_list)
     save_log(f"Send back message: {action_list}")
 
