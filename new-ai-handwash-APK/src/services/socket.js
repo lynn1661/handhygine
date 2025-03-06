@@ -3,7 +3,7 @@ let socket = null;
 let res = null;
 export function createConnect(message, currentStep) {
   if (!socket) { // https://ai.handhyine.com or https://realtime.handhyine.com
-    socket = io("https://ai.handhyine.com");
+    socket = io("https://new-ai.handhyine.com");
     socket.on("connect", () => {
       console.log("Socket connected");
       socket.on("message", (data) => {
