@@ -440,17 +440,6 @@ onMounted(() => {
       new controls.Toggle({ title: "Selfie Mode", field: "selfieMode" }),
       new controls.SourcePicker({
         onFrame: async (input, size) => {
-          const aspect = size.height / size.width;
-          let width, height;
-          if (window.innerWidth > window.innerHeight) {
-            height = window.innerHeight;
-            width = height / aspect;
-          } else {
-            width = window.innerWidth;
-            height = width * aspect;
-          }
-          canvasElement.width = width;
-          canvasElement.height = height;
           await hands.send({ image: input });
         },
       }),
