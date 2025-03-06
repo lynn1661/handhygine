@@ -12,12 +12,6 @@
           <div class="home-img">
             <img id="hands" src="../assets/3.gif" alt="" />
           </div>
-          <div class="handDiv-r">
-            <div v-if="leftHand" class="hand-right">{{ $t("HandHygiene.rightHand") }}</div>
-          </div>
-          <div class="handDiv-l">
-            <div v-if="rightHand" class="hand-left">{{ $t("HandHygiene.leftHand") }}</div>
-          </div>
           <div class="flex-item percentage progress">
             <div class="circle">
               <div>{{ countdownDisplay }}s</div>
@@ -26,7 +20,8 @@
         </div>
       </div>
     </div>
-    <div>
+    <!-- 注释掉下载链接部分 -->
+    <!-- <div>
       <a
         ref="downloadLink"
         :href="videoUrl"
@@ -34,7 +29,7 @@
         style="display: none"
         >下载录制的视频</a
       >
-    </div>
+    </div> -->
     <div style="margin: 26px 67px 0px 67px">
       <div class="home-camera">
         <div class="container">
@@ -47,8 +42,8 @@
             <div v-if="text == 'GOOD'">
               <img src="../assets/GOOD.png" class="goodImg" />
             </div>
-            <div v-if="text == 'FAIL'">
-              <img src="../assets/FAIL.png" class="goodImg" />
+            <div v-if="text == 'Need Improvement'">
+              <img src="../assets/NEED_IMPROVEMENT.png" class="needImprovementImg" />
             </div>
           </div>
           <div class="loading" v-loading="loading">
@@ -77,7 +72,7 @@ const router = useRouter();
 const progressColor = ref("blue");
 // 倒计时逻辑
 const percentage = ref(100);
-const countdown = ref(2);
+const countdown = ref(3);
 const countdownDisplay = ref(countdown.value);
 const countdownStarted = ref(false);
 const text = ref("");
@@ -87,8 +82,8 @@ let timer = null; // 声明计时器变量
 const inputVideo = ref(null);
 const mediaRecorder = ref(null);
 const recordedChunks = ref([]);
-const videoUrl = ref("");
-const downloadLink = ref(null);
+// const videoUrl = ref("");
+// const downloadLink = ref(null);
 const stream = ref();
 const setupMedia = async () => {
   try {
@@ -104,6 +99,9 @@ const setupMedia = async () => {
       const blob = new Blob(recordedChunks.value, { type: "video/webm" });
       const videoData = await readBlobAsBase64(blob);
       store.commit("user/addBlob", videoData);
+      // 注释掉下载相关代码
+      // videoUrl.value = URL.createObjectURL(blob);
+      // downloadLink.value.click();
     });
   } catch (error) {
     console.log("Error accessing media devices", error);
@@ -133,35 +131,19 @@ const stopRecording = () => {
 };
 const startCountdown = () => {
   startRecording();
-  countdown.value = 2; // 重置倒计时
+  countdown.value = 3; // 重置倒计时为3秒
   countdownDisplay.value = countdown.value; // 更新显示的倒计时值
 
   timer = setInterval(() => {
     countdown.value--;
-    let str = Math.ceil((countdown.value / 2) * 100); // 取整数，根据每个阶段的一半计算百分比
+    let str = Math.ceil((countdown.value / 3) * 100); // 根据3秒计算百分比
     percentage.value = str;
     countdownDisplay.value = countdown.value >= 0 ? countdown.value : "";
     if (countdown.value === 0) {
       clearInterval(timer);
       countdownDisplay.value = 0; // 设置为空字符串
       setTimeout(() => {
-        rightHand.value = false;
-        leftHand.value = true;
-        countdown.value = 2; // 重置倒计时为2秒
-        countdownDisplay.value = countdown.value; // 更新显示的倒计时值
-        timer = setInterval(() => {
-          countdown.value--;
-          let str = Math.ceil((countdown.value / 2) * 100); // 取整数，根据每个阶段的一半计算百分比
-          percentage.value = str;
-          countdownDisplay.value = countdown.value >= 0 ? countdown.value : "";
-          if (countdown.value === 0) {
-            clearInterval(timer);
-            countdownDisplay.value = 0; // 设置为空字符串
-            setTimeout(() => {
-              stopCountdown();
-            }, 1000);
-          }
-        }, 1000);
+        stopCountdown();
       }, 1000);
     }
   }, 1000);
@@ -196,7 +178,7 @@ async function isOverlapping(landmarksList) {
   const hand1Box = getBoundingBox(landmarksList[0]);
   const hand2Box = getBoundingBox(landmarksList[1]);
 
-  // console.log("📏 计算出的手部边界框:", hand1Box, hand2Box);
+  // console.log("计算出的手部边界框:", hand1Box, hand2Box);
 
   // **判断两个手的边界框是否有重叠**
   const overlapX = Math.max(0, Math.min(hand1Box.maxX, hand2Box.maxX) - Math.max(hand1Box.minX, hand2Box.minX));
@@ -233,7 +215,7 @@ async function stopCountdown() {
     } else if (trueRatio >= 55) {
       text.value = "GOOD";
     } else {
-      text.value = "FAIL";
+      text.value = "Need Improvement";
     }
     console.log(`评分结果: ${text.value}`);
     // 记录评分结果
@@ -528,11 +510,18 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 @import "@/styles/main.scss";
 .container {
-  width: calc(100% - 130px);
+  width: min(calc(100% - 130px), 1280px);
+  margin: 0 auto;
+  position: relative;
+  background: transparent;
+  aspect-ratio: 16/9;  // 添加标准视频比例
+  @media (max-width: 768px) {
+    aspect-ratio: 4/3;  // 移动设备使用更紧凑的比例
+  }
 }
 .home {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   background-image: url("../assets/bg.png");
   background-size: cover;
   background-position: center;
@@ -553,6 +542,10 @@ onUnmounted(() => {
     font-family: "Helvetica85";
     font-weight: 800;
     font-size: 39px;
+    @media (max-width: 768px) {
+      font-size: 32px;
+      height: 120px;
+    }
     color: #0f387c;
     font-style: normal;
     text-transform: none;
@@ -561,6 +554,11 @@ onUnmounted(() => {
     width: 75px;
     height: 75px;
     margin-right: 83px;
+    @media (max-width: 768px) {
+      width: 60px;
+      height: 60px;
+      margin-right: 60px;
+    }
     img {
       width: 100%;
       height: 100%;
@@ -574,93 +572,25 @@ onUnmounted(() => {
       display: flex;
       justify-content: center;
     }
-    .handDiv-l {
-      position: absolute;
-      top: 0;
-      margin-top: -55px;
-      .hand-left {
-        z-index: 999;
-        position: absolute;
-        top: 450px;
-        left: 10px;
-        width: 160px;
-        height: 85px;
-        border-radius: 13px 13px 13px 13px;
-        border: 1px solid #7791bc;
-        background-image: url("../assets/leftBG.png");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        font-family: "Helvetica85";
-        font-weight: 800;
-        font-size: 22px;
-        color: #3560a7;
-        line-height: 85px;
-        text-align: center;
-        font-style: normal;
-        text-transform: none;
-        @include devices(tablet) {
-          width: 150px;
-          height: 70px;
-          line-height: 70px;
-          font-size: 21px;
-          top: 415px;
-        }
-      }
-    }
-    .handDiv-r {
-      position: absolute;
-      top: 0;
-      right: 0;
-      margin-top: -55px;
-      .hand-right {
-        z-index: 999;
-        position: relative;
-        top: 450px;
-        right: 80px;
-        width: 160px;
-        height: 85px;
-        border-radius: 13px 13px 13px 13px;
-        border: 1px solid #7791bc;
-        background-image: url("../assets/leftBG.png");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        font-family: "Helvetica85";
-        font-weight: 800;
-        font-size: 22px;
-        color: #3560a7;
-        line-height: 85px;
-        text-align: center;
-        font-style: normal;
-        text-transform: none;
-        @include devices(tablet) {
-          width: 150px;
-          height: 70px;
-          line-height: 70px;
-          font-size: 21px;
-          top: 415px;
-        }
-      }
-    }
   }
   #hands {
     border-radius: 50%;
     overflow: hidden;
-    width: 354px;
-    height: 354px;
-    border-radius: 50%;
-    @include devices(tablet) {
-      width: 300px;
-      height: 300px;
+    width: 604px;
+    height: 604px;
+    @media (max-width: 1024px) {
+      width: 550px;
+      height: 550px;
+    }
+    @media (max-width: 768px) {
+      width: 504px;
+      height: 504px;
     }
   }
   &-camera {
     margin-top: 15px;
     height: auto;
-    background-color: rgba(206, 206, 206, 0.72);
+    background-color: transparent;
   }
 }
 .performance {
@@ -674,12 +604,18 @@ onUnmounted(() => {
   backface-visibility: hidden;
   justify-content: center;
   .perfectImg {
-    width: 399px;
-    height: 69px;
+    width: min(399px, 50vw);
+    height: auto;
+    aspect-ratio: 399/69;
   }
   .goodImg {
-    width: 198px;
-    height: 52px;
+    width: min(198px, 30vw);
+    height: auto;
+    aspect-ratio: 198/52;
+  }
+  .needImprovementImg {
+    width: min(800px, 50vw);
+    height: auto;
   }
 }
 .percentage {
@@ -687,14 +623,21 @@ onUnmounted(() => {
   top: 150px;
   right: 20px;
   margin-right: 70px;
-  @include devices(tablet) {
-    top: 150px;
+  @media (max-width: 768px) {
+    top: 120px;
+    margin-right: 50px;
   }
 }
 .progress {
   .circle {
     width: 100px;
     height: 100px;
+    @media (max-width: 768px) {
+      width: 80px;
+      height: 80px;
+      font-size: 45px;
+      line-height: 80px;
+    }
     background: #f5f8fd;
     border: 1px solid #7791bc;
     font-family: "Helvetica85";
@@ -714,11 +657,12 @@ onUnmounted(() => {
 }
 .output_canvas {
   width: 100%;
-  height: 600px;
-  object-fit: cover;
+  height: 100%;  // 改为100%以填充容器
+  object-fit: contain;  // 改为contain以保持原始比例
   transform: scaleY(-1);
-  @include devices(tablet) {
-    height: 440px;
-  }
+  background: transparent;
+}
+.input_video {
+  background: transparent;
 }
 </style>
