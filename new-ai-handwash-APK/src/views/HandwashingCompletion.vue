@@ -144,25 +144,25 @@ const blobs = computed(() => {
   return store.state.user.blobs;
 });
 const downloadVideoName = ref();
-const downloadVideo = async () => {
-  for (let i = 0; i < blobs.value.length; i++) {
-    const blobString = blobs.value[i];
-    const fileName = `${downloadVideoName.value[i]}.mp4`;
-    await saveVideoToGallery(blobString, fileName);
-  }
-};
+// const downloadVideo = async () => {
+//   for (let i = 0; i < blobs.value.length; i++) {
+//     const blobString = blobs.value[i];
+//     const fileName = `${downloadVideoName.value[i]}.mp4`;
+//     await saveVideoToGallery(blobString, fileName);
+//   }
+// };
 async function saveVideoToGallery(videoData, fileName) {
-  try {
-    const result = await Filesystem.writeFile({
-      path: fileName,
-      data: videoData,
-      directory: Directory.Documents,
-      recursive: true,
-    });
-    console.log("视频已保存到相册:", result.uri);
-  } catch (error) {
-    console.error("保存视频到相册时出错:", error);
-  }
+  // try {
+  //   const result = await Filesystem.writeFile({
+  //     path: fileName,
+  //     data: videoData,
+  //     directory: Directory.Documents,
+  //     recursive: true,
+  //   });
+  //   console.log("视频已保存到相册:", result.uri);
+  // } catch (error) {
+  //   console.error("保存视频到相册时出错:", error);
+  // }
 }
 const list = ref();
 const showImg = ref("");
@@ -219,8 +219,8 @@ onMounted(async () => {
     showImg.value = "Master";
   }
 
-  // Trigger the video download process
-  downloadVideo();
+  // 注释掉下载视频的调用
+  // downloadVideo();
   // ElNotification({
   //   title: "视频已保存到相册",
   //   type: "success",
