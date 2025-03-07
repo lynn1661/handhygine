@@ -445,6 +445,17 @@ onMounted(() => {
       new controls.Toggle({ title: "Selfie Mode", field: "selfieMode" }),
       new controls.SourcePicker({
         onFrame: async (input, size) => {
+          const aspect = size.height / size.width;
+          let width, height;
+          if (window.innerWidth > window.innerHeight) {
+            height = window.innerHeight;
+            width = height / aspect;
+          } else {
+            width = window.innerWidth;
+            height = width * aspect;
+          }
+          canvasElement.width = width;
+          canvasElement.height = height;
           await hands.send({ image: input });
         },
       }),
@@ -645,9 +656,12 @@ onUnmounted(() => {
   }
 }
 .output_canvas {
-  width: 100%;
-  height: 100%;  // 改为100%以填充容器
-  object-fit: contain;  // 改为contain以保持原始比例
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  height: 400px;  // 固定高度
+  width: auto;    // 宽度自适应
+  object-fit: cover;
   transform: scaleY(-1);
   background: transparent;
 }
