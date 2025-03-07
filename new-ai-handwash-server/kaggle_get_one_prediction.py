@@ -14,7 +14,7 @@ logger = logging.getLogger('Python data')
 logger.setLevel(logging.INFO)
 
 # 设置日志文件路径
-log_file_path = os.path.join(r"/home/ubuntu/handhygine/new-ai-handwash-server", "log.txt")
+log_file_path = "log.txt"
 
 # 添加 FileHandler 只一次
 if not logger.handlers:
