@@ -1,4 +1,4 @@
-weights: /home/ubuntu/handhygine/new-ai-handwash-server/checkpoints/rot_norm/epoch1000_model.pt
+weights: ./checkpoints/rot_norm/epoch1000_model.pt
 
 # feeder
 feeder: feeder.feeder.Feeder
