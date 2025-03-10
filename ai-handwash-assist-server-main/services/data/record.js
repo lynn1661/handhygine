@@ -118,15 +118,14 @@ const get_rank = async ({ data }) => {
 
   // Calculate how many users the current user has outperformed.
   const totalTests = allScores.length;
-  
-  let rankPercentage = 0;
+  const beatenScores = allScores.filter(score => score <= userScore).length;
 
+  let rankPercentage = 0;
   if (userScore >= 7) {
     rankPercentage = 100;
   } else if (userScore <= 0){
     rankPercentage = 0;
   } else {
-    const beatenScores = allScores.filter(score => score <= userScore).length;
     rankPercentage = (beatenScores / totalTests) * 100;  // Percentage of users the current user has beaten.
   }
   // Maintain the original logic for determining user rank based on score.
