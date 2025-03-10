@@ -136,9 +136,15 @@ const get_rank = async ({ data }) => {
   } else if (userScore > 3) {
     rankLevel = "Pro";
   }
+  console.log("当前用户的 total 数组:", res.total);
+  console.log("当前用户的最终分数 userScore:", userScore);
+  console.log("所有用户的分数 allScores:", allScores);
 
   // Return both the user rank level and percentage of users beaten.
   return {
+    userScore,
+    totalTests,
+    beatenScores,
     rankLevel,  // User's rank (Novice, Pro, or Master)
     rankPercentage,  // Percentage of users the current user has beaten
     step_correctness,  // Steps accuracy
