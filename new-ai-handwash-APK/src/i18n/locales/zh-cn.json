@@ -66,6 +66,21 @@
     "nailHygieneContent": "：清洁常藏细菌的指甲下面。",
     "thankyou": "感谢您使用我们的应用程序来提高您的洗手技巧！您的健康和安全对我们至关重要。",
     "tryagain": "再试一次",
-    "homepage": "首页"
+    "homepage": "首页",
+    "step1Title":"第一步：洗手掌",
+    "step2Title":"第二步：洗背侧指缝",
+    "step3Title":"第三步：洗掌侧指缝",
+    "step4Title":"第四步：洗指背",
+    "step5Title":"第五步：洗拇指",
+    "step6Title":"第六步：洗指尖",
+    "step7Title":"第七步：洗手腕、手臂",
+    "step1Content":"用流水湿润双手，涂抹洗手液（或肥皂），掌心相对，手指并拢相互揉搓。",
+    "step2Content":"手心对手背，沿指缝相互揉搓，双手交换进行。",
+    "step3Content":"掌心相对，双手交叉沿指缝相互揉搓。",
+    "step4Content":"弯曲各手指关节，半握拳将指背放在另一手掌中揉搓，双手交换进行。",
+    "step5Content":"一手握住另一手的大拇指，旋转揉搓，双手交换进行。",
+    "step6Content":"弯曲各手指关节，将指尖合拢在另一手掌心中旋转揉搓，双手交换进行.",
+    "step7Content":"双手交换进行.",
+    "rating":"请为本应用打分"
   }
 }

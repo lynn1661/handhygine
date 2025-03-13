@@ -66,6 +66,21 @@
     "nailHygieneContent": ": Clean under fingernails where germs often hide.",
     "thankyou": "Thank you for using our app to enhance your handwashing technique! Your health and safety are of utmost importance to us.",
     "tryagain": "Try Again ",
-    "homepage": "Home Page "
+    "homepage": "Home Page ",
+    "step1Title":"Step 1: PALMS",
+    "step2Title":"Step 2: BACK OF HANDS",
+    "step3Title":"Step 3: FINGER WEBS",
+    "step4Title":"Step 4: BACK OF FINGERS",
+    "step5Title":"Step 5: THUMBS",
+    "step6Title":"Step 6: FINGER TIPS",
+    "step7Title":"Step 7: WRISTS",
+    "step1Content":"Wet both hands under running water, apply hand sanitizer (or soap), press your palms together, and rub your fingers with each other.",
+    "step2Content":"Place the palm of one hand against the back of the other hand and rub along the gaps between your fingers, then switch hands.",
+    "step3Content":"With your palms facing each other, interlace your fingers and rub along the gaps.",
+    "step4Content":"Bend each finger at the joints to form a half-fist, place the back of your fingers against the opposite palm, and rub; then switch hands and repeat.",
+    "step5Content":"Hold one thumb with the opposite hand and rotate it while rubbing; then switch hands.",
+    "step6Content":"Bend your finger joints, press your fingertips together in the center of the opposite palm, and rub in a circular motion; then switch hands.",
+    "step7Content":"Alternate between hands.",
+    "rating":"Please rate this app"
   }
 }
