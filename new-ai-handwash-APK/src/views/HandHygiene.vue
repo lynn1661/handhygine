@@ -1,6 +1,10 @@
 <template>
   <div class="home">
     <div class="home-top">
+      <div class="logo">
+        <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
+        <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
+      </div>
       <div class="back-home">
         <div v-if="!HandHygiene">
           <img src="../assets/home.png" alt="" @click="backHome" />
@@ -323,6 +327,16 @@ const backHome = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .logo-image {
+      width: auto;
+      height: 50px;  
+    }
     .back-home {
       width: 126px;
       height: 126px;

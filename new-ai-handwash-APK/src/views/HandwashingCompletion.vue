@@ -3,6 +3,10 @@
     <div style="height: 20px"></div>
     <div class="home-div">
       <div class="home-top">
+        <div class="logo">
+          <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
+          <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
+        </div>
         <select-locale :changeStyle="shouldChangeStyle"></select-locale>
       </div>
       <div class="home-svg">
@@ -242,9 +246,19 @@ onMounted(async () => {
   background-attachment: fixed;
   &-top {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     height: 30px;
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .logo-image {
+      width: auto;
+      height: 40px;  
+    }
   }
   &-div {
     background-image: url("../assets/divBG.png");
