@@ -40,14 +40,19 @@
         <div class="control-panel"></div>
       </div>
       <div class="feedback">
-      <!-- 原来的图片反馈替换为只读评分 -->
-        <el-rate
-          v-model="resultValue"
-          disabled
-          show-score
-          text-color="#ff9900"
-          score-template="{value} points"
-        />
+        <div class="feedback-content">
+        {{ $t(`HandHygiene.performance`) }}
+        </div>
+        <!-- 原来的图片反馈替换为只读评分 -->
+        <div class="feedback-area">
+          <el-rate
+            v-model="resultValue"
+            disabled
+            show-score
+            text-color="var(--el-color-primary-dark-2)"
+            score-template="{value} points"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -584,29 +589,22 @@ onUnmounted(() => {
     background-color: transparent;
   }
 }
-.performance {
-  display: flex;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  align-items: center;
-  backface-visibility: hidden;
-  justify-content: center;
-  .perfectImg {
-    width: min(399px, 50vw);
-    height: auto;
-    aspect-ratio: 399/69;
+.feedback {
+  background-color:#fff;
+  margin: 10px 25px 0px 25px;
+  &-content {
+    font-size: 24px;
+    font-weight: 500; 
+    text-align: center; 
+    margin-bottom: 5px;
+    //margin-top: 10px;
+    color: var(--el-color-primary-dark-2); 
+    line-height: 1.4;
   }
-  .goodImg {
-    width: min(198px, 30vw);
-    height: auto;
-    aspect-ratio: 198/52;
-  }
-  .needImprovementImg {
-    width: min(800px, 50vw);
-    height: auto;
+  &-area {
+    text-align: center; 
+    margin: 0 auto; 
+    transform: scale(2);
   }
 }
 .percentage {
