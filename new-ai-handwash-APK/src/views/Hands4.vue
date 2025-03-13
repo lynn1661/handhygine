@@ -210,13 +210,13 @@ async function stopCountdown() {
     // 根据新的规则判断评分
     if (trueRatio >= 80) {
       text.value = "PERFECT";
-      resultValue.value = parseFloat((trueRatio / 20).toFixed(1));
+      resultValue.value = Math.round(trueRatio / 20);
     } else if (trueRatio >= 55) {
       text.value = "GOOD"; 
-      resultValue.value = parseFloat((trueRatio / 20).toFixed(1));
+      resultValue.value = Math.round(trueRatio / 20);
     } else {
       text.value = "Need Improvement";
-      resultValue.value = parseFloat((trueRatio / 20).toFixed(1));
+      resultValue.value = Math.round(trueRatio / 20);
     }
     console.log(`评分结果: ${text.value}, 分数: ${resultValue.value}`);
     // 记录评分结果
