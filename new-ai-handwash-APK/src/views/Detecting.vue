@@ -1,6 +1,10 @@
 <template>
   <div class="home">
     <div class="home-top">
+      <div class="logo">
+        <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
+        <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
+      </div>
       <div class="back-home">
         <img src="../assets/blueHome.png" alt="" @click="backHome" />
       </div>
@@ -314,9 +318,20 @@ onUnmounted(() => {
   text-align: center;
   &-top {
     display: flex;
-    justify-content: flex-end;
     align-items: center;
+    justify-content: space-between;
     height: 70px;
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 54px;
+      //margin-top: -20px;
+    }
+    .logo-image {
+      width: auto;
+      height: 50px;  
+    }
     .back-home {
       width: 75px;
       height: 75px;

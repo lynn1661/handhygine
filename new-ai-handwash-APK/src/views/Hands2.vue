@@ -2,6 +2,10 @@
   <div class="home">
     <div class="home-top">
       <div class="flex-item">
+        <div class="logo">
+          <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
+          <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
+        </div>
         <div class="home-title">
           <div style="margin-left: 76px">{{ $t("HandHygiene.step2") }}</div>
           <div class="back-home">
@@ -544,6 +548,16 @@ onUnmounted(() => {
     color: #0f387c;
     font-style: normal;
     text-transform: none;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: -30px;
+  }
+  .logo-image {
+    width: auto;
+    height: 30px;  
   }
   .back-home {
     width: 75px;
