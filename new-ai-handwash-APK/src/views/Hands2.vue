@@ -590,7 +590,7 @@ onUnmounted(() => {
   }
 }
 .feedback {
-  background-color:#fff;
+  // background-color:#fff;
   margin: 10px 25px 0px 25px;
   &-content {
     font-size: 24px;
