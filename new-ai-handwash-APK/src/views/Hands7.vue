@@ -35,20 +35,19 @@
         <div class="container">
           <video class="input_video"></video>
           <canvas class="output_canvas" width="1280px" height="720px"></canvas>
-          <div class="performance">
-            <div v-if="text == 'PERFECT'">
-              <img src="../assets/PERFECT.png" class="perfectImg" />
-            </div>
-            <div v-if="text == 'GOOD'">
-              <img src="../assets/GOOD.png" class="goodImg" />
-            </div>
-            <div v-if="text == 'Need Improvement'">
-              <img src="../assets/NEED_IMPROVEMENT.png" class="needImprovementImg" />
-            </div>
-          </div>
           <div class="loading" v-loading="loading"></div>
         </div>
         <div class="control-panel"></div>
+      </div>
+      <div class="feedback">
+      <!-- 原来的图片反馈替换为只读评分 -->
+        <el-rate
+          v-model="resultValue"
+          disabled
+          show-score
+          text-color="#ff9900"
+          score-template="{value} points"
+        />
       </div>
     </div>
   </div>
@@ -64,6 +63,9 @@ import { createConnect, disconnect, sendLog } from "../services/socket";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { getTime } from "../utils/formatData";
+// 评分组件
+import { ElRate } from 'element-plus';
+const resultValue = ref(0);
 const store = useStore();
 const router = useRouter();
 const progressColor = ref("blue");
@@ -177,7 +179,6 @@ async function isOverlapping(landmarksList) {
   const hand1Box = getBoundingBox(landmarksList[0]);
   const hand2Box = getBoundingBox(landmarksList[1]);
 
-  // console.log("计算出的手部边界框:", hand1Box, hand2Box);
 
   // **判断两个手的边界框是否有重叠**
   const overlapX = Math.max(0, Math.min(hand1Box.maxX, hand2Box.maxX) - Math.max(hand1Box.minX, hand2Box.minX));
@@ -211,14 +212,17 @@ async function stopCountdown() {
     // 根据新的规则判断评分
     if (trueRatio >= 80) {
       text.value = "PERFECT";
+      resultValue.value = parseFloat((trueRatio / 20).toFixed(1));
     } else if (trueRatio >= 55) {
-      text.value = "GOOD";
+      text.value = "GOOD"; 
+      resultValue.value = parseFloat((trueRatio / 20).toFixed(1));
     } else {
       text.value = "Need Improvement";
+      resultValue.value = parseFloat((trueRatio / 20).toFixed(1));
     }
-    console.log(`评分结果: ${text.value}`);
+    console.log(`评分结果: ${text.value}, 分数: ${resultValue.value}`);
     // 记录评分结果
-    sendLog("info", `评分结果: ${text.value}`);
+    sendLog("info", `评分结果: ${text.value}, 分数: ${resultValue.value}`);
 
     await store.dispatch("user/rating", {
       id:
@@ -264,7 +268,6 @@ onMounted(() => {
   // call tick() each time the graph runs.
   const fpsControl = new controls.FPS();
   // Optimization: Turn off animated spinner after its hiding animation is done.
-
   async function onResults(results) {
     loading.value = false;
     // Update the frame rate.
@@ -386,7 +389,6 @@ onMounted(() => {
   let endNumber = 25;
   let firstType = true;
   let currentStep = 7; // 当前步骤编号  
-  //存储 25 条数据的函数
   async function storeDataEverySecond(results) {
     storedData.push(results);
     if (firstType) {
@@ -502,14 +504,11 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 @import "@/styles/main.scss";
 .container {
-  width: min(calc(100% - 130px), 1280px);
+  width: 500px;
+  height: 300px;
   margin: 0 auto;
   position: relative;
   background: transparent;
-  aspect-ratio: 16/9;  // 添加标准视频比例
-  @media (max-width: 768px) {
-    aspect-ratio: 4/3;  // 移动设备使用更紧凑的比例
-  }
 }
 .home {
   width: 100%;
@@ -559,14 +558,14 @@ onUnmounted(() => {
   .home-flex {
     margin-left: 67px;
     margin-right: 67px;
-    background: #fff;
+    background: transparent;
     .home-img {
       display: flex;
       justify-content: center;
     }
   }
   #hands {
-    border-radius: 50%;
+    border-radius: 0;
     overflow: hidden;
     width: 604px;
     height: 604px;
@@ -585,30 +584,12 @@ onUnmounted(() => {
     background-color: transparent;
   }
 }
-.performance {
-  display: flex;
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  align-items: center;
-  backface-visibility: hidden;
-  justify-content: center;
-  .perfectImg {
-    width: min(399px, 50vw);
-    height: auto;
-    aspect-ratio: 399/69;
-  }
-  .goodImg {
-    width: min(198px, 30vw);
-    height: auto;
-    aspect-ratio: 198/52;
-  }
-  .needImprovementImg {
-    width: min(800px, 50vw);
-    height: auto;
-  }
+.feedback {
+  width: 400px;
+  margin: 0 auto;
+  margin-top: 10px;
+  text-align: center;
+  transform: scale(2);
 }
 .percentage {
   position: absolute;
@@ -648,11 +629,8 @@ onUnmounted(() => {
   }
 }
 .output_canvas {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  height: 400px;  // 固定高度
-  width: auto;    // 宽度自适应
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   transform: scaleY(-1);
   background: transparent;
