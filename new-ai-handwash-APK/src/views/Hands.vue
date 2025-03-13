@@ -514,7 +514,7 @@ onUnmounted(() => {
 }
 .home {
   width: 100%;
-  height: auto;
+  height: 100%;
   //min-height: 100vh;
   background-image: url("../assets/bg.png");
   background-size: cover;

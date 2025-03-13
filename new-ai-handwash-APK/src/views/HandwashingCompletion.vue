@@ -21,7 +21,7 @@
       </div>
     </div>
     <div class="home-content">
-      <el-scrollbar height="400px" always>
+      <el-scrollbar height="600px" always>
         <div class="step-rating-container">
           <!-- 对 list 进行循环，每一项代表一个步骤 -->
           <div class="step-row" v-for="(item, index) in list" :key="index">
@@ -234,7 +234,7 @@ onMounted(async () => {
 @import "@/styles/main.scss";
 .home {
   width: 100%;
-  height: auto;
+  height: 100%;
   background-image: url("../assets/bg.png");
   background-size: cover;
   background-position: center;
