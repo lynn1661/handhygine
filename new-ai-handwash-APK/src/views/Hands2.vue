@@ -504,7 +504,6 @@ onUnmounted(() => {
   margin: 0 auto;
   position: relative;
   background: transparent;
-  }
 }
 .home {
   width: 100%;
