@@ -1,0 +1,14 @@
+[Unit]
+Description=service for handwash, it should be changed the privelige and copy to the directory before it can be used
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+User=ubuntu
+ExecStart=/home/ubuntu/miniconda3/envs/new-ai-handwash/bin/python /home/ubuntu/handhygine/new-ai-handwash-server/kaggle_get_one_prediction.py -c /home/ubuntu/handhygine/new-ai-handwash-server/config/st_gcn/handwash/inference.yaml
+StandardOutput=append:/var/log/handwash.log
+StandardError=append:/var/log/handwash_error.log
+
+[Install]
+WantedBy=multi-user.target
