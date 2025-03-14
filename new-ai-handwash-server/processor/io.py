@@ -26,7 +26,7 @@ class IO():
         self.init_environment()
         self.load_model()
         self.load_weights()
-        self.gpu()
+        # self.gpu()
 
     def load_arg(self, argv=None):
         parser = self.get_parser()
@@ -55,15 +55,15 @@ class IO():
             save_log=self.arg.save_log,
             print_log=self.arg.print_log)
         self.io.save_arg(self.arg)
-
+        self.dev = "cpu"
         # gpu
-        if self.arg.use_gpu:
-            gpus = torchlight.visible_gpu(self.arg.device)
-            torchlight.occupy_gpu(gpus)
-            self.gpus = gpus
-            self.dev = "cuda:0"
-        else:
-            self.dev = "cpu"
+        # if self.arg.use_gpu:
+        #     gpus = torchlight.visible_gpu(self.arg.device)
+        #     torchlight.occupy_gpu(gpus)
+        #     self.gpus = gpus
+        #     self.dev = "cuda:0"
+        # else:
+        #     self.dev = "cpu"
 
     def load_model(self):
         self.model = self.io.load_model(self.arg.model,
@@ -74,17 +74,17 @@ class IO():
             self.model = self.io.load_weights(self.model, self.arg.weights,
                                               self.arg.ignore_weights)
 
-    def gpu(self):
-        # move modules to gpu
-        self.model = self.model.to(self.dev)
-        for name, value in vars(self).items():
-            cls_name = str(value.__class__)
-            if cls_name.find('torch.nn.modules') != -1:
-                setattr(self, name, value.to(self.dev))
+    # def gpu(self):
+    #     # move modules to gpu
+    #     self.model = self.model.to(self.dev)
+    #     for name, value in vars(self).items():
+    #         cls_name = str(value.__class__)
+    #         if cls_name.find('torch.nn.modules') != -1:
+    #             setattr(self, name, value.to(self.dev))
 
-        # model parallel
-        if self.arg.use_gpu and len(self.gpus) > 1:
-            self.model = nn.DataParallel(self.model, device_ids=self.gpus)
+    #     # model parallel
+    #     if self.arg.use_gpu and len(self.gpus) > 1:
+    #         self.model = nn.DataParallel(self.model, device_ids=self.gpus)
 
     def start(self):
         self.io.print_log('Parameters:\n{}\n'.format(str(vars(self.arg))))
