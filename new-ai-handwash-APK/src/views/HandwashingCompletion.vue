@@ -220,10 +220,10 @@ onMounted(async () => {
   }
 
   downloadVideo();
-  // ElNotification({
-  //   title: "视频已保存到相册",
-  //   type: "success",
-  // });
+  ElNotification({
+    title: "视频已保存到相册",
+    type: "success",
+  });
 });
 </script>
 <style lang="scss" scoped>
