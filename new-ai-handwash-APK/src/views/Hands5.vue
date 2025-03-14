@@ -20,8 +20,7 @@
         </div>
       </div>
     </div>
-    <!-- 注释掉下载链接部分 -->
-    <!-- <div>
+    <div>
       <a
         ref="downloadLink"
         :href="videoUrl"
@@ -29,7 +28,7 @@
         style="display: none"
         >下载录制的视频</a
       >
-    </div> -->
+    </div>
     <div style="margin: 26px 67px 0px 67px">
       <div class="home-camera">
         <div class="container">
@@ -500,14 +499,11 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 @import "@/styles/main.scss";
 .container {
-  width: min(calc(100% - 130px), 1280px);
+  width: 500px;
+  height: 300px;
   margin: 0 auto;
   position: relative;
   background: transparent;
-  aspect-ratio: 16/9;
-  @media (max-width: 768px) {
-    aspect-ratio: 4/3;
-  }
 }
 .home {
   width: 100%;
@@ -646,11 +642,8 @@ onUnmounted(() => {
   }
 }
 .output_canvas {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  height: 400px;  // 固定高度
-  width: auto;    // 宽度自适应
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   transform: scaleY(-1);
   background: transparent;
