@@ -71,9 +71,11 @@ const append_rating = async ({ data }) => {
             return (prev += 1);
           case "good":
             return (prev += 0.5);
-          case "you can do better":
+          case "need improvement":
           case "fail":
             return (prev += 0);
+          default:
+            return prev;
         }
       }, 0)
     );
