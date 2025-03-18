@@ -24,8 +24,7 @@
         </div>
       </div>
     </div>
-    <!-- 注释掉下载链接部分 -->
-    <!-- <div>
+    <div>
       <a
         ref="downloadLink"
         :href="videoUrl"
@@ -33,7 +32,7 @@
         style="display: none"
         >下载录制的视频</a
       >
-    </div> -->
+    </div>
     <div style="margin: 10px 67px 0px 67px">
       <div class="home-camera">
         <div class="container">
