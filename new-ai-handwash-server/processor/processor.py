@@ -29,7 +29,7 @@ class Processor(IO):
         self.init_environment()
         self.load_model()
         self.load_weights()
-        self.gpu()
+        # self.gpu()
         self.load_data()
         self.load_optimizer()
 
