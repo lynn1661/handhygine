@@ -24,8 +24,7 @@
         </div>
       </div>
     </div>
-    <!-- 注释掉下载链接部分 -->
-    <!-- <div>
+    <div>
       <a
         ref="downloadLink"
         :href="videoUrl"
@@ -33,7 +32,7 @@
         style="display: none"
         >下载录制的视频</a
       >
-    </div> -->
+    </div>
     <div style="margin: 26px 67px 0px 67px">
       <div class="home-camera">
         <div class="container">
@@ -90,8 +89,8 @@ let timer = null; // 声明计时器变量
 const inputVideo = ref(null);
 const mediaRecorder = ref(null);
 const recordedChunks = ref([]);
-// const videoUrl = ref("");
-// const downloadLink = ref(null);
+const videoUrl = ref("");
+const downloadLink = ref(null);
 const stream = ref();
 const setupMedia = async () => {
   try {
@@ -103,14 +102,12 @@ const setupMedia = async () => {
       }
     });
 
-    // 注释掉 MediaRecorder 事件监听器中的下载相关代码
     mediaRecorder.value.addEventListener("stop", async () => {
       const blob = new Blob(recordedChunks.value, { type: "video/webm" });
       const videoData = await readBlobAsBase64(blob);
       store.commit("user/addBlob", videoData);
-      // 注释掉下载相关代码
-      // videoUrl.value = URL.createObjectURL(blob);
-      // downloadLink.value.click();
+      videoUrl.value = URL.createObjectURL(blob);
+      downloadLink.value.click();
     });
   } catch (error) {
     console.log("Error accessing media devices", error);
