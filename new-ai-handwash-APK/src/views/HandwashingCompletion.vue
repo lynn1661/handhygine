@@ -30,7 +30,7 @@
               alt=""
             />
             <img
-              v-if="item.Step === 'FAIL'"
+              v-if="item.Step === 'Need Improvement'"
               src="/public/nullstar.png"
               alt=""
             />
