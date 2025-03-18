@@ -122,7 +122,7 @@ const get_rank = async ({ data }) => {
   const totalTests = allScores.length;
   const beatenScores = allScores.filter(score => score <= userScore).length;
   // Percentage of users the current user has beaten.
-  const rankPercentage = (beatenScores / totalTests) * 100; 
+  let rankPercentage = (beatenScores / totalTests) * 100; 
   if (userScore >= 7) {rankPercentage = 100;}
   if (userScore <= 0) {rankPercentage = 0;} 
 
