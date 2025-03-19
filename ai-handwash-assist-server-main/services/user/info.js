@@ -4,7 +4,7 @@ const isLogEnabled=require('micro-server').config.log===true;
 
 const fill=async({data})=>{
     if(Object.keys(data).indexOf('ID')<0 || Object.keys(data).indexOf('password')<0){
-        const err = new Error("missing field. required field: ID,subject and department");
+        const err = new Error("missing field. required field: ID and password");
         err.code = 400;
         throw err;
     }
