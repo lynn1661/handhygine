@@ -4,8 +4,6 @@ const isLogEnabled=require('micro-server').config.log===true;
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
-// 异步加密密码
-//const hashedPassword = await bcrypt.hash(data.password, saltRounds);
 
 const fill=async({data})=>{
     if(Object.keys(data).indexOf('ID')<0 || Object.keys(data).indexOf('password')<0){
@@ -18,9 +16,13 @@ const fill=async({data})=>{
         err.code = 400;
         throw err;
     }
+
+    // 异步加密密码
+    const hashedPassword = await bcrypt.hash(data.password, saltRounds);
+
     const obj={
         studentID:data.ID,
-        password:data.password,
+        password:hashedPassword,
         start_time:Date.now(),
     }
     const res=await datap.mongo.create('student_info',obj);
