@@ -1,10 +1,10 @@
 <template>
   <div class="home">
+    <div class="logo">
+      <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
+      <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
+    </div>
     <div class="home-top">
-      <div class="logo">
-        <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
-        <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
-      </div>
       <div class="back-home">
         <div v-if="!HandHygiene">
           <img src="../assets/home.png" alt="" @click="backHome" />
@@ -23,7 +23,8 @@
         </div>
         <div class="home-input-password">
           <el-input
-            v-model="studentID"
+            v-model="password"
+            show-password
             :placeholder="$t('HandHygiene.password')"
           />
         </div>
@@ -104,33 +105,51 @@ const router = useRouter();
 const t = useI18n();
 const shouldChangeStyle = ref(false); // 默认不添加
 const studentID = ref("");
+const password = ref("");
 const HandHygiene = ref(true);
 async function started() {
+  const allowedCredentials = [
+    { id: "user123", password: "pass123" },
+    { id: "user456", password: "pass456" },
+    { id: "user789", password: "pass789" }
+  ];
+
+  const valid = allowedCredentials.some(
+    cred => cred.id === studentID.value && cred.password === password.value
+  );
+
+  if (!valid) {
+    ElNotification({
+      title: "Login Error",
+      type: "error"
+    });
+    studentID.value = "";
+    password.value = "";
+    return;
+  }
+
   try {
     const res = await store.dispatch("user/login", {
       ID: studentID.value,
-      subject: subject.value,
-      department: department.value,
-      program: programme.value,
+      password: password.value
     });
     localStorage.setItem("studnetSerialNumber", studentID.value);
     sessionStorage.setItem("studnetSerialNumber", studentID.value);
     ElNotification({
       title: res.message,
-      type: "success",
+      type: "success"
     });
     setTimeout(() => {
       HandHygiene.value = false;
     }, 1000);
   } catch (e) {
-    console.log();
+    console.log(e);
     ElNotification({
       title: "Network Error",
-      type: "error",
+      type: "error"
     });
     studentID.value = "";
-    subject.value = "";
-    department.value = "";
+    password.value = "";
   }
 }
 const agree = () => {
@@ -141,8 +160,7 @@ const agree = () => {
 const backHome = () => {
   HandHygiene.value = true;
   studentID.value = "";
-  department.value = "";
-  subject.value = "";
+  password.value = "";
   localStorage.removeItem("studnetID");
   sessionStorage.removeItem("studnetID");
 };
@@ -153,6 +171,16 @@ const backHome = () => {
   font-family: "SourceHanSansCN";
   font-size: 26px;
 }
+.logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: -40px;
+    }
+    .logo-image {
+      width: auto;
+      height: 50px;  
+    }
 .home {
   width: 100%;
   height: 100%;
@@ -165,20 +193,11 @@ const backHome = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    .logo-image {
-      width: auto;
-      height: 50px;  
-    }
+    
     .back-home {
       width: 126px;
       height: 126px;
-      margin-left: 41px;
+      margin-right: 10px;
       img {
         margin-top: 30px;
         width: 100%;
