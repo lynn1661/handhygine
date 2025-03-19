@@ -3,40 +3,20 @@ const { datap,utils } = microServer.helper;
 const isLogEnabled=require('micro-server').config.log===true;
 
 const fill=async({data})=>{
-    if(Object.keys(data).indexOf('ID')<0 || Object.keys(data).indexOf('subject')<0 || Object.keys(data).indexOf('department')<0){
+    if(Object.keys(data).indexOf('ID')<0 || Object.keys(data).indexOf('password')<0){
         const err = new Error("missing field. required field: ID,subject and department");
         err.code = 400;
         throw err;
     }
-    if(data.ID==='' || data.subject==='' || data.department===''){
+    if(data.ID==='' || data.password===''){
         const err = new Error("empty field detected ! please check if there is no empty field !");
         err.code = 400;
         throw err;
     }
-    // const idCheck=new RegExp("\\d{8}[A-Z]",'g')
-    // if(!idCheck.test(data.ID)){
-    //     const err = new Error("Wrong input for the student ID ! it should contains 8 numbers and one UPPERCASE character");
-    //     err.code = 400;
-    //     throw err; 
-    // }
-    // const noNumAllows=new RegExp('\\d+','g');
-    // if(noNumAllows.test(data.name) || noNumAllows.test(data.subject)){
-    //     const err = new Error("no number allows in name and subject ! please check about if you have enter any number in both field");
-    //     err.code = 400;
-    //     throw err; 
-    // }
-    // const noSpecialAllows=new RegExp("(\\!|\\@|\\#|\\$|\\%|\\^|\\&|\\*|\\(|\\)|\\-|\\_|\\+|\\=|\\/|\\?|\\.|\\,|\\<|\\>|\\;|\\:|\\'|\\\"|\\[|\\]|\\{|\\})+",'g');
-    // if(noSpecialAllows.test(data.name) || noSpecialAllows.test(data.subject)){
-    //     const err = new Error("no special characters allows in name and subject ! please check about if you have enter any number in both field");
-    //     err.code = 400;
-    //     throw err; 
-    // }
     const obj={
         studentID:data.ID,
+        password:data.password,
         start_time:Date.now(),
-        department:data.department,
-        subject:data.subject,
-        program:data.program
     }
     const res=await datap.mongo.create('student_info',obj);
     if(!res.acknowledged){
@@ -45,7 +25,7 @@ const fill=async({data})=>{
         throw err;
     }
     return {
-        message:'successfully created',
+        message:'Successfully Login',
         ID:res.insertedId
     }
 }
