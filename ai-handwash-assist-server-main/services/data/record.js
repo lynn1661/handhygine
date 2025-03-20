@@ -46,7 +46,7 @@ const append_rating = async ({ data }) => {
     update_res.step_points = [];
   }
   if(update_res?.total===undefined || update_res?.total===null){
-    update_res.total=[];
+    update_res.total= 0;
   }
   if (
     update_res?.record_time === undefined ||
@@ -117,6 +117,7 @@ const get_rank = async ({ data }) => {
   }
   const userScore = res.total || 0;
   const step_correctness = res.step_correctness || [];
+  const step_points = res.step_points || [];
   const step_video_files = res.step_video_file || [];
   /*
   // Default the total and step_correctness fields if not present
@@ -128,12 +129,15 @@ const get_rank = async ({ data }) => {
   // Fetch all users from the database.
   const allUsers = await datap.mongo.read("user_info", {});
    // 把所有用户的 `total` 数组展开成一个大数组
-  const allScores = allUsers.flatMap(user => user.total || []);
-  if (!allScores || allScores.length === 0) {
-    const err = new Error("No user data found");
-    err.code = 500;
-    throw err;
-  }
+   const allScores = allUsers
+   .map(user => user.total)
+   .filter(score => score !== undefined && score !== null);
+ 
+ if (!allScores || allScores.length === 0) {
+   const err = new Error("No user data found");
+   err.code = 500;
+   throw err;
+ }
 
   // Calculate how many users the current user has outperformed.
   const totalTests = allScores.length;
