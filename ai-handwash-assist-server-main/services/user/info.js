@@ -2,27 +2,44 @@ const microServer = require("micro-server");
 const { datap,utils } = microServer.helper;
 const isLogEnabled=require('micro-server').config.log===true;
 const bcrypt = require('bcrypt');
-const saltRounds = 10;
+const storedHashedPassword = "$2b$10$XKxngbnGzW0vasKvS6CY4u15RLChwEBUTuGcBLbV2cucFacvPQNNa";
+const year = date.getFullYear();
+const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要加1并补0
+const day = String(date.getDate()).padStart(2, '0');
+const formattedDate = `${year}-${month}-${day}`; // 格式为 "2025-03-10"
 
+const login = async({ data }) => {
+    if (!data.ID || !data.password) {
+      const err = new Error("missing field. required field: ID and password");
+      err.code = 400;
+      throw err;
+    }
+    // 验证身份
+    if (data.ID === "user" && await bcrypt.compare(data.password, storedHashedPassword)) {
+      return { message: "Valid User", ID: data.ID };
+    } else {
+      const err = new Error("Invalid credentials");
+      err.code = 401;
+      throw err;
+    }
+  };
 
 const fill=async({data})=>{
-    if(Object.keys(data).indexOf('ID')<0 || Object.keys(data).indexOf('password')<0){
-        const err = new Error("missing field. required field: ID and password");
+    if(Object.keys(data).indexOf('ID')<0){
+        const err = new Error("missing field. required field: ID");
         err.code = 400;
         throw err;
     }
-    if(data.ID==='' || data.password===''){
-        const err = new Error("empty field detected ! please check if there is no empty field !");
+    if(data.ID==='' || data.role===''){
+        const err = new Error("empty field detected !");
         err.code = 400;
         throw err;
     }
-
-    // 异步加密密码
-    const hashedPassword = await bcrypt.hash(data.password, saltRounds);
 
     const obj={
         studentID:data.ID,
-        password:hashedPassword,
+        role:data.role,
+        date: formattedDate,
         start_time:Date.now(),
     }
     const res=await datap.mongo.create('student_info',obj);
@@ -37,4 +54,4 @@ const fill=async({data})=>{
     }
 }
 
-module.exports={fill}
+module.exports={login, fill}
