@@ -57,13 +57,15 @@ const append_rating = async ({ data }) => {
       timeZone: "Asia/Hong_Kong",
     }),
   });
-  const obj = { Step: data.rating };
-  utils.logger.debug(obj);
-  update_res.step_correctness.push(obj);
-  update_res.total.push(update_res.step_correctness.reduce((prev, cur) => {
+  const obj1 = { Step: data.rating };
+  utils.logger.debug(obj1);
+  update_res.step_correctness.push(obj1);
+  const obj2 = { Step: data.points };
+  utils.logger.debug(obj2);
+  update_res.step_points.push(obj2);
+  update_res.total = update_res.step_points.reduce((prev, cur) => {
     return prev + Number(cur.Step);
-  }, 0)
-  );
+  }, 0);
   /*
   if (
     !(data?.is_last === undefined || data?.is_last === null) &&
@@ -116,7 +118,7 @@ const get_rank = async ({ data }) => {
   const step_correctness = res.step_correctness && res.step_correctness.length >= 7 ? res.step_correctness.slice(-7) : [];
   const step_video_files = res.step_video_file && res.step_video_file.length >= 7 ? res.step_video_file.slice(-7) : [];
   */
- 
+
   // Fetch all users from the database.
   const allUsers = await datap.mongo.read("user_info", {});
    // 把所有用户的 `total` 数组展开成一个大数组
@@ -151,10 +153,11 @@ const get_rank = async ({ data }) => {
     userScore,
     totalTests,
     beatenScores,
-    rankLevel,  // User's rank (Novice, Pro, or Master)
-    rankPercentage,  // Percentage of users the current user has beaten
-    step_correctness,  // Steps accuracy
-    step_video_files  // Video file paths
+    rankLevel,
+    rankPercentage,
+    step_points,
+    step_correctness,
+    step_video_files
   };
 };
 
