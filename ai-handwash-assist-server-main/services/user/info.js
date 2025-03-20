@@ -4,6 +4,12 @@ const isLogEnabled=require('micro-server').config.log===true;
 const bcrypt = require('bcrypt');
 const storedHashedPassword = "$2b$10$XKxngbnGzW0vasKvS6CY4u15RLChwEBUTuGcBLbV2cucFacvPQNNa";
 
+const date = new Date();
+const year = date.getFullYear();
+const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要加1并补0
+const day = String(date.getDate()).padStart(2, '0');
+const formattedDate = `${year}-${month}-${day}`; // 格式为 "2025-03-10"
+
 const login = async({ data }) => {
     if (!data.ID || !data.password) {
       const err = new Error("missing field. required field: ID and password");
@@ -12,7 +18,7 @@ const login = async({ data }) => {
     }
     // 验证身份
     if (data.ID === "user" && await bcrypt.compare(data.password, storedHashedPassword)) {
-      return { message: "Valid User", ID: data.ID };
+      return { message: "Successfully Login", ID: data.ID };
     } else {
       const err = new Error("Invalid credentials");
       err.code = 401;
@@ -31,11 +37,6 @@ const fill=async({data})=>{
         err.code = 400;
         throw err;
     }
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要加1并补0
-    const day = String(date.getDate()).padStart(2, '0');
-    const formattedDate = `${year}-${month}-${day}`; // 格式为 "2025-03-10"
-
     const obj={
         studentID:data.ID,
         role:data.role,
@@ -49,7 +50,7 @@ const fill=async({data})=>{
         throw err;
     }
     return {
-        message:'Successfully Login',
+        message:'Successfully Choose Role',
         ID:res.insertedId
     }
 }
