@@ -129,15 +129,14 @@ const get_rank = async ({ data }) => {
   // Fetch all users from the database.
   const allUsers = await datap.mongo.read("user_info", {});
    // 把所有用户的 `total` 数组展开成一个大数组
-   const allScores = allUsers
-   .map(user => user.total)
-   .filter(score => score !== undefined && score !== null);
- 
- if (!allScores || allScores.length === 0) {
-   const err = new Error("No user data found");
-   err.code = 500;
-   throw err;
- }
+  const allScores = allUsers.flatMap(user =>
+    Array.isArray(user.total) ? user.total : [user.total]
+  ).filter(score => score !== undefined && score !== null);
+  if (!allScores || allScores.length === 0) {
+    const err = new Error("No user data found");
+    err.code = 500;
+    throw err;
+  }
 
   // Calculate how many users the current user has outperformed.
   const totalTests = allScores.length;
