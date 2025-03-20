@@ -16,7 +16,7 @@ const append_rating = async ({ data }) => {
     err.code = 400;
     throw err;
   }
-  const res = await datap.mongo.readid2("student_info", data.id);
+  const res = await datap.mongo.readid2("user_info", data.id);
   // just assume it is exist
   var update_res = res;
   update_res.id = update_res._id;
@@ -60,6 +60,11 @@ const append_rating = async ({ data }) => {
   const obj = { Step: data.rating };
   utils.logger.debug(obj);
   update_res.step_correctness.push(obj);
+  update_res.total.push(update_res.step_correctness.reduce((prev, cur) => {
+    return prev + Number(cur.Step);
+  }, 0)
+  );
+  /*
   if (
     !(data?.is_last === undefined || data?.is_last === null) &&
     data.is_last === true
@@ -79,8 +84,8 @@ const append_rating = async ({ data }) => {
         }
       }, 0)
     );
-  }
-  await datap.mongo.update("student_info", update_res);
+  }*/
+  await datap.mongo.update("user_info", update_res);
   return {
     message: "successfully updated",
   };
@@ -95,21 +100,25 @@ const get_rank = async ({ data }) => {
   }
 
   // Retrieve the current user's total score from the database using their ID.
-  const res = await datap.mongo.readid2("student_info", data.id);
+  const res = await datap.mongo.readid2("user_info", data.id);
 
   if (!res) {
     const err = new Error("User data not found");
     err.code = 500;
     throw err;
   }
-
+  const userScore = res.total || 0;
+  const step_correctness = res.step_correctness || [];
+  const step_video_files = res.step_video_file || [];
+  /*
   // Default the total and step_correctness fields if not present
   const userScore = res.total && res.total.length > 0 ? res.total[res.total.length - 1] : 0;
   const step_correctness = res.step_correctness && res.step_correctness.length >= 7 ? res.step_correctness.slice(-7) : [];
   const step_video_files = res.step_video_file && res.step_video_file.length >= 7 ? res.step_video_file.slice(-7) : [];
-
+  */
+ 
   // Fetch all users from the database.
-  const allUsers = await datap.mongo.read("student_info", {});
+  const allUsers = await datap.mongo.read("user_info", {});
    // 把所有用户的 `total` 数组展开成一个大数组
   const allScores = allUsers.flatMap(user => user.total || []);
   if (!allScores || allScores.length === 0) {

@@ -43,7 +43,7 @@ const fill=async({data})=>{
         date: formattedDate,
         start_time:Date.now(),
     }
-    const res=await datap.mongo.create('student_info',obj);
+    const res=await datap.mongo.create('user_info',obj);
     if(!res.acknowledged){
         const err=new Error('cannot save');
         err.code=500;
