@@ -3,10 +3,6 @@ const { datap,utils } = microServer.helper;
 const isLogEnabled=require('micro-server').config.log===true;
 const bcrypt = require('bcrypt');
 const storedHashedPassword = "$2b$10$XKxngbnGzW0vasKvS6CY4u15RLChwEBUTuGcBLbV2cucFacvPQNNa";
-const year = date.getFullYear();
-const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要加1并补0
-const day = String(date.getDate()).padStart(2, '0');
-const formattedDate = `${year}-${month}-${day}`; // 格式为 "2025-03-10"
 
 const login = async({ data }) => {
     if (!data.ID || !data.password) {
@@ -35,6 +31,10 @@ const fill=async({data})=>{
         err.code = 400;
         throw err;
     }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要加1并补0
+    const day = String(date.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`; // 格式为 "2025-03-10"
 
     const obj={
         studentID:data.ID,
