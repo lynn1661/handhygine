@@ -39,6 +39,12 @@ const append_rating = async ({ data }) => {
   ) {
     update_res.step_correctness = [];
   }
+  if (
+    update_res?.step_points === undefined ||
+    update_res?.step_points === null
+  ) {
+    update_res.step_points = [];
+  }
   if(update_res?.total===undefined || update_res?.total===null){
     update_res.total=[];
   }
