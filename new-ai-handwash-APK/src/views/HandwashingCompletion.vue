@@ -143,7 +143,7 @@ const back = () => {
 };
 const tryAgain = () => {
   router.push({
-    path: "/detecting",
+    path: "/rolerank",
   });
 };
 

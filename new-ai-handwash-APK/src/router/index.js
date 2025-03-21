@@ -1,6 +1,8 @@
 import { createRouter, createWebHashHistory  } from "vue-router";
 import BaseLayout from "@/layouts/BaseLayout.vue";
 import Role from "@/views/Role.vue";
+import RoleRank from "@/views/RoleRank.vue";
+import RoleRankList from "@/views/RoleRankList.vue";
 import Detecting from "@/views/Detecting.vue";
 import Hands from "@/views/Hands.vue";
 import Hands2 from "@/views/Hands2.vue";
@@ -18,6 +20,14 @@ const routes = [
   {
     path: "/role",
     component: Role,
+  },
+  {
+    path: "/rolerank",
+    component: RoleRank,
+  },
+  {
+    path: "/roleranklist",
+    component: RoleRankList,
   },
   {
     path: "/detecting",
