@@ -16,7 +16,7 @@ const login = async({ data }) => {
       err.code = 400;
       throw err;
     }
-    // 验证身份
+    // 验证身份 用户名称后续可修改
     if (data.ID === "user" && await bcrypt.compare(data.password, storedHashedPassword)) {
       return { message: "Successfully Login", ID: data.ID };
     } else {
@@ -41,7 +41,9 @@ const fill=async({data})=>{
         studentID:data.ID,
         role:data.role,
         date: formattedDate,
-        start_time:Date.now(),
+        start_time:new Date().toLocaleString("zh-HK", {
+            timeZone: "Asia/Hong_Kong",
+          }),
     }
     const res=await datap.mongo.create('user_info',obj);
     if(!res.acknowledged){
