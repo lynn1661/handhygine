@@ -2,7 +2,7 @@ const microServer = require("micro-server");
 const { datap,utils } = microServer.helper;
 const isLogEnabled=require('micro-server').config.log===true;
 const bcrypt = require('bcrypt');
-const storedHashedPassword = "$2b$10$XKxngbnGzW0vasKvS6CY4u15RLChwEBUTuGcBLbV2cucFacvPQNNa";
+const storedHashedPassword = "$2b$10$2w9C6rCedSuCFls1x4BcU.iS2XUAZ8V4.BZ35DASFwYcbyTlMOLwK";
 
 const date = new Date();
 const year = date.getFullYear();
