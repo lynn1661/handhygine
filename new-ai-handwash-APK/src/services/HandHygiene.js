@@ -1,6 +1,10 @@
 import axiosInstance from "@/utils/axiosInstance";
 
 export async function userLogin(params) {
+  return axiosInstance.post("/user/info/login", {
+    ...params,
+  });
+}export async function updateRole(params) {
   return axiosInstance.post("/user/info/fill", {
     ...params,
   });
