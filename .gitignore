@@ -1,2 +1,4 @@
 # 忽略日志文件
 new-ai-handwash-server/log.txt
+# 忽略哈希加密
+ai-handwash-assist-server-main/services/user/hash.js
