@@ -6,7 +6,7 @@ const { ObjectId } = require("mongodb");
 {
     id
     rating
-    is_last
+    points
 }
 */
 const append_rating = async ({ data }) => {
@@ -72,27 +72,6 @@ const append_rating = async ({ data }) => {
   update_res.total = update_res.step_points.reduce((prev, cur) => {
     return prev + Number(cur.Step);
   }, 0);
-  /*
-  if (
-    !(data?.is_last === undefined || data?.is_last === null) &&
-    data.is_last === true
-  ) {
-    update_res.total.push(
-      update_res.step_correctness.slice(update_res.step_correctness.length-7).reduce((prev, cur) => {
-        switch (cur.Step.toLowerCase()) {
-          case "perfect":
-            return (prev += 1);
-          case "good":
-            return (prev += 0.5);
-          case "need improvement":
-          case "fail":
-            return (prev += 0);
-          default:
-            return prev;
-        }
-      }, 0)
-    );
-  }*/
   await datap.mongo.update("user_info", update_res);
   return {
     message: "successfully updated",
@@ -130,7 +109,9 @@ const get_rank = async ({ data }) => {
   const allUsers = await datap.mongo.read("user_info", {});
    // 把所有用户的 `total` 数组展开成一个大数组
   const allScores = allUsers.flatMap(user =>
-    Array.isArray(user.total) ? user.total : [user.total]
+    Array.isArray(user.total) 
+    ? user.total.map(score => score * 5) 
+    : [user.total]
   ).filter(score => score !== undefined && score !== null);
   if (!allScores || allScores.length === 0) {
     const err = new Error("No user data found");
@@ -143,18 +124,17 @@ const get_rank = async ({ data }) => {
   const beatenScores = allScores.filter(score => score <= userScore).length;
   // Percentage of users the current user has beaten.
   let rankPercentage = (beatenScores / totalTests) * 100; 
-  if (userScore >= 7) {rankPercentage = 100;}
+  if (userScore >= 35) {rankPercentage = 100;}
   if (userScore <= 0) {rankPercentage = 0;} 
 
   // Maintain the original logic for determining user rank based on score.
   let rankLevel = "Novice";
-  if (userScore > 5) {
+  if (userScore > 25) {
     rankLevel = "Master";
-  } else if (userScore > 3) {
+  } else if (userScore > 15) {
     rankLevel = "Pro";
   }
-  console.log("当前用户的 total 数组:", res.total);
-  console.log("当前用户的最终分数 userScore:", userScore);
+  console.log("当前用户的分数 userScore:", userScore);
   console.log("所有用户的分数 allScores:", allScores);
 
   // Return both the user rank level and percentage of users beaten.
