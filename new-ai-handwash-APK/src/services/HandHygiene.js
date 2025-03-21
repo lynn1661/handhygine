@@ -21,3 +21,9 @@ export async function get_rank(params) {
     ...params,
   });
 }
+
+export async function getRankList(params) {
+  return axiosInstance.post("/data/rank/getRankList", {
+    ...params,
+  });
+}
