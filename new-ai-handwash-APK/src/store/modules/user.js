@@ -1,14 +1,18 @@
-import { userLogin, append_rating, get_rank } from "@/services/HandHygiene.js";
+import { userLogin, updateRole, append_rating, get_rank } from "@/services/HandHygiene.js";
 
 export default {
   namespaced: true,
   state: {
     userID: "",
+    role: "",
     blobs: [],
   },
   mutations: {
     updateUserID(state, payload) {
       state.userID = payload;
+    },
+    setUserRole(state, role) {
+      state.role = role;
     },
     addBlob(state, payload) {
       state.blobs.push(payload);
@@ -22,8 +26,17 @@ export default {
       try {
         const { data } = await userLogin(payload);
         commit("updateUserID", data.ID);
-        localStorage.setItem("studnetID", data.ID);
-        sessionStorage.setItem("studnetID", data.ID);
+        localStorage.setItem("studentID", data.ID);
+        sessionStorage.setItem("studentID", data.ID);
+        return data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async updateRole({ commit }, payload) {
+      try {
+        const { data } = await updateRole(payload);
+        commit("setUserRole", payload.role);
         return data;
       } catch (error) {
         console.log(error);
