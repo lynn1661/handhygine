@@ -23,7 +23,7 @@ const getRankList = async ({ data }) => {
     const sort = { total: -1 };
   
     // 调用数据库读取接口，假设参数依次为：集合名称、过滤条件、limit、skip、排序条件
-    const records = await datap.mongo.read("student_info", filter, null, null, sort);
+    const records = await datap.mongo.read("user_info", filter, null, 0, sort);
     
     return {
       message: "Successfully retrieved rank list",

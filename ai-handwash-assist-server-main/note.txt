@@ -1,5 +1,0 @@
-endpoints:
-- fill_info -> filling info, return ID
-- append_rating -> {time,rating,is_last} if is_last, calculate the total spent time
-- get_rank -> only fetch its rank from the data
-- rating ???
