@@ -29,61 +29,8 @@
           />
         </div>
       </div>  
-      <div class="category">
-        <el-button plain>Doctor</el-button>
-        <el-button plain>Nurse</el-button>
-        <el-button plain>Assistant</el-button>
-        <el-button plain>Clerk</el-button>
-      </div>
       <div class="home-btn">
         <el-button @click="started">{{ $t("HandHygiene.btn") }}</el-button>
-      </div>
-    </div>
-    <div v-if="!HandHygiene" class="agreeText">
-      <div class="content">
-        <div class="content-title">{{ $t("HandHygiene.disclaimer") }}</div>
-        <div class="content-subTitle">
-          <div style="margin-bottom: 15px">
-            {{ $t("HandHygiene.disclaimerContent1") }}
-          </div>
-          <div style="margin-bottom: 15px">
-            {{ $t("HandHygiene.disclaimerContent2") }}
-          </div>
-          <div style="margin-bottom: 15px">
-            {{ $t("HandHygiene.disclaimerContent3") }}
-          </div>
-          <div style="margin-bottom: 15px">
-            {{ $t("HandHygiene.disclaimerContent4") }}
-          </div>
-          <div style="margin-bottom: 15px">
-            {{ $t("HandHygiene.disclaimerContent5") }}
-          </div>
-          <div style="margin-bottom: 15px">
-            {{ $t("HandHygiene.disclaimerContent6") }}
-          </div>
-          <div style="margin-bottom: 15px">
-            {{ $t("HandHygiene.disclaimerContent7") }}
-          </div>
-
-          <div style="margin-bottom: 15px">
-            {{ $t("HandHygiene.disclaimerContent8") }}
-          </div>
-          <div style="margin-bottom: 15px">
-            {{ $t("HandHygiene.disclaimerContent9") }}
-          </div>
-          <div style="margin-bottom: 15px">
-            {{ $t("HandHygiene.disclaimerContent10") }}
-          </div>
-          <div style="margin-bottom: 15px">
-            {{ $t("HandHygiene.disclaimerContent11") }}
-          </div>
-          <div style="margin-bottom: 15px">
-            {{ $t("HandHygiene.disclaimerContent12") }}
-          </div>
-        </div>
-        <div class="content-btn">
-          <el-button @click="agree"> {{ $t("HandHygiene.agree") }}</el-button>
-        </div>
       </div>
     </div>
   </div>
@@ -108,39 +55,19 @@ const studentID = ref("");
 const password = ref("");
 const HandHygiene = ref(true);
 async function started() {
-  const allowedCredentials = [
-    { id: "user123", password: "pass123" },
-    { id: "user456", password: "pass456" },
-    { id: "user789", password: "pass789" }
-  ];
-
-  const valid = allowedCredentials.some(
-    cred => cred.id === studentID.value && cred.password === password.value
-  );
-
-  if (!valid) {
-    ElNotification({
-      title: "Login Error",
-      type: "error"
-    });
-    studentID.value = "";
-    password.value = "";
-    return;
-  }
-
   try {
     const res = await store.dispatch("user/login", {
       ID: studentID.value,
       password: password.value
     });
-    localStorage.setItem("studnetSerialNumber", studentID.value);
-    sessionStorage.setItem("studnetSerialNumber", studentID.value);
+    localStorage.setItem("studentID", studentID.value);
+    sessionStorage.setItem("studentID", studentID.value);
     ElNotification({
       title: res.message,
       type: "success"
     });
     setTimeout(() => {
-      HandHygiene.value = false;
+      router.push({ path: "/role" });
     }, 1000);
   } catch (e) {
     console.log(e);
@@ -152,17 +79,12 @@ async function started() {
     password.value = "";
   }
 }
-const agree = () => {
-  router.push({
-    path: "/detecting",
-  });
-};
 const backHome = () => {
   HandHygiene.value = true;
   studentID.value = "";
   password.value = "";
-  localStorage.removeItem("studnetID");
-  sessionStorage.removeItem("studnetID");
+  localStorage.removeItem("studentID");
+  sessionStorage.removeItem("studentID");
 };
 </script>
 <style lang="scss" scoped>
@@ -283,111 +205,16 @@ const backHome = () => {
         height: 60px;
       }
     }
-    &-select {
-      :deep(.el-input) {
-        width: 626px;
-        height: 90px;
-      }
-      :deep(.el-select) {
-        width: 626px;
-        height: 90px;
-        margin: 25px;
-        @include devices(tablet) {
-          margin: 15px;
-        }
-      }
-      :deep(.el-input__wrapper) {
-        background: #f5f8fd;
-        border-radius: 26px 26px 26px 26px;
-      }
-      :deep(.el-input__inner) {
-        font-family: "SourceHanSansCN";
-        font-size: 26px;
-        color: #b4c1d5;
-        height: 60px;
-      }
-      :deep(.el-input__suffix) {
-        width: 53px;
-        height: 53px;
-      }
-      :deep(.el-input__suffix-inner) {
-        width: 53px;
-        height: 53px;
-        background-image: url("../assets/dropdown.png");
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: contain;
-      }
-    }
   }
   &-btn {
     text-align: center;
+    margin-top: 20px;
     @include devices(tablet) {
-      margin-top: 0px;
+      margin-top: 20px;
     }
     :deep(.el-button) {
       width: 626px;
       height: 100px;
-      font-family: Helvetica85;
-      font-weight: 800;
-      font-size: 32px;
-      color: #ffffff;
-      line-height: 16px;
-      font-style: normal;
-      text-transform: none;
-      border-radius: 26px 26px 26px 26px;
-      background-image: url(../assets/button.png);
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-  }
-}
-.agreeText {
-  margin-top: 400px;
-  @include devices(tablet) {
-    margin-top: 300px;
-  }
-}
-.content {
-  width: 90%;
-  margin: 0 auto;
-  overflow: auto;
-  background: #ffffff;
-  box-shadow: 18px 0 62px 0px #c8d4eb;
-  border-radius: 19px 19px 19px 19px;
-  &-title {
-    margin-top: 24px;
-    height: 40px;
-    line-height: 25px;
-    text-align: center;
-    font-family: "Helvetica85";
-    font-weight: 800;
-    font-size: 32px;
-    color: #0f387c;
-    @include devices(tablet) {
-      font-size: 20px;
-    }
-  }
-  &-subTitle {
-    height: 400px;
-    overflow: auto;
-    padding: 25px 25px 0px 25px;
-    font-family: SourceHanSansCN, SourceHanSansCN;
-    font-weight: 400;
-    font-size: 20px;
-    color: #a0b0c7;
-    line-height: 29px;
-    font-style: normal;
-    text-transform: none;
-  }
-  &-btn {
-    text-align: center;
-    margin-top: 0px;
-    margin-bottom: 10px;
-    :deep(.el-button) {
-      width: 626px;
-      height: 118px;
       font-family: Helvetica85;
       font-weight: 800;
       font-size: 32px;
@@ -409,12 +236,4 @@ const backHome = () => {
   font-size: 26px;
   height: 56px;
 }
-.avatar {
-  display: flex;
-}
-.avatar > div {
-  flex: 1;
-  text-align: center;
-}
-
 </style>
