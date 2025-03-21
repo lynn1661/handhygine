@@ -49,12 +49,16 @@
         </div>
         <!-- 原来的图片反馈替换为只读评分 -->
         <div class="feedback-area">
-          <el-rate
+          <!--<el-rate
             v-model="resultValue"
             disabled
             show-score
             text-color="var(--el-color-primary-dark-2)"
             score-template="{value} points"
+          />-->
+          <el-rate
+            v-model="resultValue"
+            disabled
           />
         </div>
       </div>
@@ -228,9 +232,10 @@ async function stopCountdown() {
 
     await store.dispatch("user/rating", {
       id:
-        sessionStorage.getItem("studnetID") ||
-        localStorage.getItem("studnetID"),
+        sessionStorage.getItem("studentSerialNumber") ||
+        localStorage.getItem("studentSerialNumber"),
       rating: text.value,
+      points: resultValue.value,
       is_last: false,
       step_video_file: `${downloadName.value}-step3`,
     });
