@@ -25,7 +25,7 @@
       </div>
     </div>
     <div class="home-content">
-      <el-scrollbar height="560px" always>
+      <el-scrollbar height="430px" always>
         <div class="step-rating-container">
           <!-- 对 list 进行循环，每一项代表一个步骤 -->
           <div class="step-row" v-for="(item, index) in list" :key="index">
@@ -132,10 +132,10 @@ const t = useI18n();
 const shouldChangeStyle = ref(true); // 默认不添加
 const HandwashingType = ref();
 const back = () => {
-  localStorage.removeItem("studnetID");
-  sessionStorage.removeItem("studnetID");
-  localStorage.removeItem("studnetSerialNumber");
-  sessionStorage.removeItem("studnetSerialNumber");
+  localStorage.removeItem("studentID");
+  sessionStorage.removeItem("studentID");
+  localStorage.removeItem("studentSerialNumber");
+  sessionStorage.removeItem("studentSerialNumber");
   store.commit("user/clearVideoBlob");
   router.push({
     path: "/",
@@ -178,8 +178,8 @@ const rankMessage = ref("");
 onMounted(async () => {
   // Get the download name for the video based on the student's serial number
   downloadName.value = getTime(
-    sessionStorage.getItem("studnetSerialNumber") ||
-      localStorage.getItem("studnetSerialNumber")
+    sessionStorage.getItem("studentSerialNumber") ||
+      localStorage.getItem("studentSerialNumber")
   );
 
   // Set a 2-second timeout to disable the loading state
@@ -189,7 +189,7 @@ onMounted(async () => {
 
   // Dispatch the 'rank' action to retrieve the user's ranking data from the store
   const id =
-    sessionStorage.getItem("studnetID") || localStorage.getItem("studnetID");
+    sessionStorage.getItem("studentSerialNumber") || localStorage.getItem("studentSerialNumber");
   console.log("ID being sent: ", id); // Debugging step
   const res = await store.dispatch("user/rank", { id });
   console.log("Response from get_rank:", res); // Debugging step
@@ -247,16 +247,15 @@ onMounted(async () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 30px;
+    height: 45px;
     .logo {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-top: 20px;
+      margin-top: 25px;
     }
     .logo-image {
       width: auto;
-      height: 40px;  
+      height: 60px;  
     }
   }
   &-div {
@@ -276,49 +275,32 @@ onMounted(async () => {
     font-style: normal;
     text-transform: none;
     margin-top: 12px;
-    @include devices(tablet) {
-      margin-top: 12px;
-      font-size: 33px;
-    }
-    &-vice {
-      text-align: center;
-      font-family: "Helvetica85";
-      font-weight: 800;
-      font-size: 21px;
-      color: #0f387c;
-      height: 50px;
-      line-height: 50px;
-    }
     &-rankbeatmessage {
       text-align: center;
       font-family: "Helvetica85";
       font-weight: 800;
-      font-size: 28px;
+      font-size: 34px;
       color: #0f387c;
-      height: 50px;
+      height: 60px;
       line-height: 50px;
 
       .number{
         color: #ffcc00; //金色
-        font-size: 34px; 
+        font-size: 42px; 
         font-weight: 900; 
       }
     }
   }
   &-svg {
-    margin: 0 auto;
+    margin: 10px auto;
     &-img {
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
       img {
-        width: 150px;
-        height: 150px;
-        @include devices(tablet) {
-          width: 150px;
-          height: 150px;
-        }
+        width: 170px;
+        height: 170px;
         border-radius: 50%;
       }
     }
@@ -326,49 +308,6 @@ onMounted(async () => {
   &-content {
     background-color: #fff;
     margin: 0px 63px 0px 63px;
-    // border-radius: 19px 19px 19px 19px;
-    /*
-    .star {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      margin: 0px 52px 36px 52px;
-      @include devices(tablet) {
-        margin: 0px 52px 10px 52px;
-      }
-    }
-    .starImg {
-      margin-top: 20px;
-      @include devices(tablet) {
-        margin-top: 20px;
-      }
-      .home-content-star {
-        width: 85px;
-        height: 82px;
-        @include devices(tablet) {
-          width: 65px;
-          height: 65px;
-        }
-        img {
-          width: 85px;
-          height: 82px;
-          @include devices(tablet) {
-            width: 65px;
-            height: 65px;
-          }
-        }
-      }
-      .title {
-        font-family: "SourceHanSansCN";
-        font-weight: 500;
-        font-size: 25px;
-        color: #07214b;
-        line-height: 30px;
-        text-align: center;
-        font-style: normal;
-        text-transform: none;
-        margin-top: 10px;
-      }*/
       .step-rating-container {
         width: 100%;
         margin: 15px auto;
@@ -419,24 +358,6 @@ onMounted(async () => {
         }
     }
   }
-  /*
-  &-subContent {
-    margin-left: 59px;
-    margin-right: 59px;
-    font-family: "SourceHanSansCN";
-    font-weight: 400;
-    font-size: 22px;
-    color: #bbc5d5;
-    line-height: 28px;
-    text-align: left;
-    font-style: normal;
-    text-transform: none;
-    @include devices(tablet) {
-      margin-left: 55px;
-      margin-right: 55px;
-    }
-  }
-  */
   &-btn {
     display: flex;
     justify-content: center;
