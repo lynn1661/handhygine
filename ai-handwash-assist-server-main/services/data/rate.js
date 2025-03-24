@@ -59,7 +59,7 @@ const rating = async ({ data }) => {
   return {
     message: "Rating successfully submitted",
     rating: data.rating,
-    id: record._id
+    id: data.id
   };
 };
 
