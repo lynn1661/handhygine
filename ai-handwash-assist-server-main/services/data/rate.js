@@ -30,6 +30,14 @@ const rating = async ({ data }) => {
   var update_res = res;
   update_res.id = update_res._id;
   delete update_res._id;
+  if (
+    !(
+      update_res?.lastModified === undefined ||
+      update_res?.lastModified === null
+    )
+  ) {
+    delete update_res.lastModified;
+  }
   utils.logger.debug(update_res);
   if(update_res?.rating===undefined || update_res?.rating===null){
     update_res.rating=0;
@@ -41,7 +49,8 @@ const rating = async ({ data }) => {
 
   // 更新数据库记录
   const updateRes = await datap.mongo.update("user_info", update_res);
-  console("update",update.res)
+  console("updateRes ",updateRes );
+  console("update_res ",update_res )
   if (!updateRes.acknowledged) {
     const err = new Error("Failed to update rating");
     err.code = 500;
