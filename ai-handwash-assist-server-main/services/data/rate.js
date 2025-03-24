@@ -42,15 +42,14 @@ const rating = async ({ data }) => {
   if(update_res?.rating===undefined || update_res?.rating===null){
     update_res.rating=0;
   }
-  update_res.rating=data.rating;
+  
   // 更新记录
   // 如果已有评分记录，可以选择覆盖或者进行累加/平均等操作，这里简单将评分覆盖更新
-  //const updateObj = {_id: ObjectId(data.id),  rating: data.rating};
-
+  update_res.rating=data.rating;
   // 更新数据库记录
   const updateRes = await datap.mongo.update("user_info", update_res);
-  console("updateRes ",updateRes );
-  console("update_res ",update_res )
+  //console.log("updateRes ", updateRes );
+  //console.log("update_res ", update_res )
   if (!updateRes.acknowledged) {
     const err = new Error("Failed to update rating");
     err.code = 500;
