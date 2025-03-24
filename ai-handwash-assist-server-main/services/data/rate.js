@@ -30,10 +30,12 @@ const rating = async ({ data }) => {
 
   // 更新记录
   // 如果已有评分记录，可以选择覆盖或者进行累加/平均等操作，这里简单将评分覆盖更新
-  record.rating = data.rating;
+  const updateObj = {
+    rating: data.rating
+  };
 
   // 更新数据库记录
-  const updateRes = await datap.mongo.update("user_info", record);
+  const updateRes = await datap.mongo.update("user_info", { _id: id }, { $set: updateObj });
   if (!updateRes.acknowledged) {
     const err = new Error("Failed to update rating");
     err.code = 500;
