@@ -35,7 +35,11 @@ const rating = async ({ data }) => {
   };
 
   // 更新数据库记录
-  const updateRes = await datap.mongo.update("user_info", { _id: data.id }, { $set: updateObj });
+  const updateRes = await datap.mongo.update(
+    "user_info",
+    { _id: ObjectId(data.id) },
+    { $set: updateObj }
+  );
   if (!updateRes.acknowledged) {
     const err = new Error("Failed to update rating");
     err.code = 500;
