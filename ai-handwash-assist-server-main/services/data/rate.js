@@ -41,7 +41,7 @@ const rating = async ({ data }) => {
 
   // 更新数据库记录
   const updateRes = await datap.mongo.update("user_info", update_res);
-
+  console("update",update.res)
   if (!updateRes.acknowledged) {
     const err = new Error("Failed to update rating");
     err.code = 500;
