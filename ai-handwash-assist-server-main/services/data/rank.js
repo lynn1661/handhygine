@@ -2,6 +2,7 @@ const microServer = require("micro-server");
 const { datap, utils } = microServer.helper;
 
 const getRankList = async ({ data }) => {
+  console.log("Received role:", data.role);
   const role = data.role || "Doctor";
   
   let filter = {
