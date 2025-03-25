@@ -29,7 +29,8 @@ import { useStore } from "vuex";
 //import { validateStudentID } from "../utils/formatData";
 import { ElAvatar } from 'element-plus';
 import { UserFilled } from '@element-plus/icons-vue';
-import { ElButton } from 'element-plus'
+import { ElButton } from 'element-plus';
+import { onMounted, onUnmounted } from 'vue';
 const store = useStore();
 const router = useRouter();
 const t = useI18n();
@@ -59,6 +60,33 @@ const backHome = () => {
     path: "/",
   });
 };
+let inactivityTimer = null;
+
+const resetTimer = () => {
+  if (inactivityTimer) clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(() => {
+    router.push({ path: '/' });
+  }, 120000); // 2 分钟 = 120000 毫秒
+};
+
+onMounted(() => {
+  // 监听常见用户操作，重置计时器
+  window.addEventListener('mousemove', resetTimer);
+  window.addEventListener('mousedown', resetTimer);
+  window.addEventListener('touchstart', resetTimer);
+  window.addEventListener('keydown', resetTimer);
+
+  // 初始化计时器
+  resetTimer();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('mousemove', resetTimer);
+  window.removeEventListener('mousedown', resetTimer);
+  window.removeEventListener('touchstart', resetTimer);
+  window.removeEventListener('keydown', resetTimer);
+  clearTimeout(inactivityTimer);
+});
 </script>
 <style lang="scss" scoped>
 @import "@/styles/main.scss";
