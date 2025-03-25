@@ -39,17 +39,14 @@ async function RoleRank(role) {
   //const res = await store.dispatch("user/ranklist", {role: role});
   router.push({
     path: "/roleranklist",
-    query: { role}
+    query: {role}
   });
 };
 const backHome = () => {
   localStorage.removeItem("studentID");
   sessionStorage.removeItem("studentID");
-  localStorage.removeItem("studentSerialNumber");
-  sessionStorage.removeItem("studentSerialNumber");
-  store.commit("user/clearVideoBlob");
   router.push({
-    path: "/",
+    path: "/admin",
   });
 };
 </script>
