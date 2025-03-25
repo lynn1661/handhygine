@@ -72,7 +72,7 @@ async function started() {
   } catch (e) {
     console.log(e);
     ElNotification({
-      title: "Network Error",
+      title: "Login Error",
       type: "error"
     });
     studentID.value = "";
