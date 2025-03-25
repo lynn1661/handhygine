@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory  } from "vue-router";
 import BaseLayout from "@/layouts/BaseLayout.vue";
+import Admin from "@/views/Admin.vue";
 import Role from "@/views/Role.vue";
 import RoleRank from "@/views/RoleRank.vue";
 import RoleRankList from "@/views/RoleRankList.vue";
@@ -16,6 +17,10 @@ const routes = [
   {
     path: "/",
     component: BaseLayout,
+  },
+  {
+    path: "/admin",
+    component: Admin,
   },
   {
     path: "/role",
