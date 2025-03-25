@@ -3,7 +3,17 @@
     <div style="height: 20px"></div>
     <div class="home-div">
       <div class="home-top">
-        <div class="logo">
+        <div class="goback">
+          <el-button 
+          color="#409EFF" 
+          style="color: #fff"
+          size="large" 
+          round 
+          :icon="ArrowLeft" 
+          @click="goBack"
+        >Previous Page</el-button>
+        </div>
+          <div class="logo">
           <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
           <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
         </div>
@@ -11,12 +21,26 @@
           <img src="../assets/home.png" alt="" @click="backHome" />
         </div>
       </div>
+      <div class="date-picker">
+        <div class="block">
+          <span class="demonstration">Date</span>
+          <el-date-picker
+            v-model="value"
+            type="daterange"
+            unlink-panels
+            range-separator="To"
+            start-placeholder="Start date"
+            end-placeholder="End date"
+            :shortcuts="shortcuts"
+          />
+        </div>
+      </div>
       <div class="home-ranklist">
         <el-table
           :data="rankList.records"
           style="background-color: transparent"
           :header-cell-style="headerStyle"
-          height="900"
+          height="760"
           :row-class-name="tableRowClass"
           >
           <!-- 角色列 -->
@@ -54,32 +78,70 @@
 
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import SelectLocale from "@/components/SelectLocale.vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute} from "vue-router";
 import { useStore } from "vuex";
 import { getTime } from "../utils/formatData";
 import { Filesystem, Directory } from "@capacitor/filesystem";
 import { ElNotification } from "element-plus";
-import { ElScrollbar, ElRate, ElDialog, ElTable } from 'element-plus'
+import { ElScrollbar, ElRate, ElDialog} from 'element-plus'
+import { ElDatePicker, ElTable } from 'element-plus';
+import {ArrowLeft} from '@element-plus/icons-vue'
 const store = useStore();
 const router = useRouter();
-const role = router.query?.role || "Doctor";// 从 query 中读取 role 参数
+const route = useRoute();
+const role = route.query?.role;// 从 query 中读取 role 参数
 const rankList = ref([]);// 定义排名列表数据
 const loading = ref(true);
 const t = useI18n();
 const shouldChangeStyle = ref(true); // 默认不添加
-const HandwashingType = ref();const backHome = () => {
+const HandwashingType = ref();
+const backHome = () => {
   localStorage.removeItem("studentID");
   sessionStorage.removeItem("studentID");
-  localStorage.removeItem("studentSerialNumber");
-  sessionStorage.removeItem("studentSerialNumber");
-  store.commit("user/clearVideoBlob");
   router.push({
-    path: "/",
+    path: "/admin",
   });
 };
+const goBack = () => {
+  router.push({
+    path: "/rolerank",
+  });
+};
+const value = ref([new Date(), new Date()]);
+const shortcuts = [
+  {
+    text: 'Last week',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+      return [start, end]
+    },
+  },
+  {
+    text: 'Last month',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+      return [start, end]
+    },
+  },
+  {
+    text: 'Last 3 months',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+      return [start, end]
+    },
+  },
+]
+
+
 const thresholdLight = 35 * 0.6; // 21 
 const thresholdDeep = 35 * 0.8;  // 28 
 const headerStyle = () => {
@@ -98,12 +160,37 @@ const tableRowClass = ({ row, rowIndex }) => {
     return '';
   }
 };
+const fetchRankList = async () => {
+  let dateRange = null;
+  if (value.value && value.value.length === 2) {
+    const formatDate = (date) => {
+      const d = new Date(date);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+    dateRange = {
+      start: formatDate(value.value[0]),
+      end: formatDate(value.value[1])
+    };
+  }
+  rankList.value = await store.dispatch("user/ranklist", {
+    role: role,
+    dateRange
+  });
+};
 onMounted(async () => {
-  rankList.value = await store.dispatch("user/ranklist", {role:role});
+  console.log("Role from query:", router.currentRoute.value.query.role);
+  await fetchRankList();
   console.log("rankList", rankList.value)
   setTimeout(() => {
     loading.value = false;
-  }, 1000);
+  }, );
+});
+// 当日期选择器的值变化时，重新获取排名数据
+watch(value, async (newVal, oldVal) => {
+  await fetchRankList();
 });
 
 </script>
@@ -122,6 +209,11 @@ onMounted(async () => {
     justify-content: space-between;
     align-items: center;
     height: 55px;
+    .goback {
+      display: flex;
+      align-items: center;
+      margin-top: 25px;
+    }
     .logo {
       display: flex;
       align-items: center;
@@ -129,7 +221,7 @@ onMounted(async () => {
     }
     .logo-image {
       width: auto;
-      height: 50px;  
+      height: 55px;  
     }
     .back-home {
       width: 100px;
@@ -151,7 +243,7 @@ onMounted(async () => {
     margin: 0px 63px 23px 63px;
   }
   &-ranklist {
-    margin-top: 30px;
+    //margin-top: 10px;
     //background-color: rgba(255, 255, 255, 0.5);
     padding: 20px;
   }
@@ -161,5 +253,31 @@ onMounted(async () => {
 }
 :global(.el-table .light-blue) {
   --el-table-tr-bg-color: rgb(216.8, 235.6, 255);
+}
+.date-picker {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  flex-wrap: wrap;
+}
+
+.date-picker .block {
+  padding: 20px 0;
+  //margin-top: 10px;
+  text-align: center;
+  border-right: solid 1px var(--el-border-color);
+  flex: 1;
+}
+
+.date-picker .block:last-child {
+  border-right: none;
+}
+
+.date-picker .demonstration {
+  display: block;
+  color: var(--el-color-primary-dark-2);
+  font-size: 22px;
+  font-weight: 1000;
+  margin-bottom: 5px;
 }
 </style>
