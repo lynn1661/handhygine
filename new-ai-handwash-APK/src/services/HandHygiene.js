@@ -27,3 +27,9 @@ export async function getRankList(params) {
     ...params,
   });
 }
+
+export async function submitRating(params) {
+  return axiosInstance.post("/data/rate/rating", {
+    ...params,
+  });
+}
