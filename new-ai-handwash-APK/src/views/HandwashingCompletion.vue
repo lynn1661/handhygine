@@ -25,7 +25,7 @@
       </div>
     </div>
     <div class="home-content">
-      <el-scrollbar height="430px" always>
+      <el-scrollbar height="450px" always>
         <div class="step-rating-container">
           <!-- 对 list 进行循环，每一项代表一个步骤 -->
           <div class="step-row" v-for="(item, index) in list" :key="index">
@@ -71,17 +71,52 @@
     <div class="rating">
       <div class="rating-content">
         {{ $t(`HandHygiene.rating`) }}
+        <el-button 
+        type="primary" 
+        size="large" 
+        @click="openDialog" 
+        round
+        >
+        {{ $t(`HandHygiene.ratingbtn`) }}
+        </el-button>
       </div>
-      <!-- 直接显示评分区域 -->
+      
+      <!-- 直接显示评分区域 
       <div class="rating-area">
         <el-rate
           v-model="value"
           size="large"
           :texts="['oops', 'disappointed', 'normal', 'good', 'great']"
           show-text
-          text-color="#ff9900"
+          text-color="#409EFF"
+          active-color="#409EFF"
+          void-color="#ccc"
         />
-      </div>
+      </div>-->
+      
+      <!-- 评分对话框 -->
+      <el-dialog
+        :title="$t('HandHygiene.ratingtitle')"
+        v-model="dialogVisible"
+        width="400px"
+        :before-close="handleClose"
+      >
+        <!-- 评分组件 -->
+        <el-rate
+          class="custom-rate"
+          v-model="value"
+          size="large"
+          :texts="['oops', 'disappointed', 'normal', 'good', 'great']"
+          show-text
+          @change="handleRatingChange"
+        />
+        <!-- 对话框底部操作按钮 -->
+        <template #footer>
+          <el-button @click="dialogVisible = false">{{ $t(`HandHygiene.ratingcancel`) }}</el-button>
+          <el-button type="primary" @click="submitRating" :disabled="disabledRating">{{ $t(`HandHygiene.ratingsubmit`) }}</el-button>
+        </template>
+      </el-dialog>
+
     </div>
     <div>
       <el-row class="home-btn">
@@ -124,7 +159,6 @@ import { getTime } from "../utils/formatData";
 import { Filesystem, Directory } from "@capacitor/filesystem";
 import { ElNotification } from "element-plus";
 import { ElScrollbar, ElRate, ElDialog } from 'element-plus'
-const value = ref();
 const store = useStore();
 const router = useRouter();
 const loading = ref(true);
@@ -143,10 +177,54 @@ const back = () => {
 };
 const tryAgain = () => {
   router.push({
-    path: "/rolerank",
+    path: "/role",
   });
 };
 
+const value = ref(0); // 评分值，初始为 0
+let dialogVisible = ref(false);
+let disabledRating = ref(false); // 提交评分后禁用评分组件
+
+// 打开评分对话框
+const openDialog = () => {
+  console.log("打开评分对话框");
+  dialogVisible.value = true;
+};
+
+// 评分发生变化时触发（也可在提交按钮中统一处理）
+const handleRatingChange = async (newValue) => {
+  console.log("评分变化:", newValue);
+  // 可选：在这里直接调用接口提交评分
+};
+
+// 提交评分并保存到后端
+const submitRating = async () => {
+  try {
+    console.log("提交评分:", value.value);
+    const rank_id = sessionStorage.getItem("studentSerialNumber") || localStorage.getItem("studentSerialNumber");
+    //console.log("提交评分rankid:", rank_id);
+    //const rank_id = '67dd09578fc9261ce50ab805';
+    // 调用 Vuex action 或直接调用后端 API 存储评分结果
+    await store.dispatch("user/submitRating", { id: rank_id, rating: value.value });
+    ElNotification({
+      title: "Thanks for Rating",
+      type: "success",
+    });
+    dialogVisible.value = false;
+  } catch (error) {
+    console.error("评分提交失败:", error);
+    ElNotification({
+      title: "Rating Failed",
+      type: "error",
+    });
+  }
+};
+
+// 对话框关闭前的处理（如需要确认或动画处理）
+const handleClose = (done) => {
+  // 如果需要处理确认逻辑可以在这里加，最终调用 done() 关闭对话框
+  done();
+};
 const blobs = computed(() => {
   return store.state.user.blobs;
 });
@@ -386,44 +464,29 @@ onMounted(async () => {
 .rating{
   background-color:#fff;
   margin: 0px 63px 0px 63px;
+  padding: 10px;
   &-content {
     font-size: 24px;
     font-weight: 500; 
     text-align: center; 
-    margin-bottom: 5px;
+    //margin-bottom: 5px;
     //margin-top: 10px;
     color: var(--el-color-primary-dark-2); 
-    line-height: 1.4;
+    //line-height: 1.4;
   }
+  &-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  /*
   &-area {
     text-align: center; 
     margin: 0 auto; 
     transform: scale(1.6);
-  }
+  }*/
 }
-/*
-.commment {
-  background: #f7f7f7;
-  border-radius: 19px 19px 19px 19px;
-  font-family: "SourceHanSansCN";
-  font-weight: 500;
-  font-size: 25px;
-  color: #07214b;
-  line-height: 28px;
-  text-align: left;
-  font-style: normal;
-  text-transform: none;
-  margin-bottom: 23px;
-  @include devices(tablet) {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
+::v-deep .custom-rate .el-rate__icon {
+  transform: scale(1.5) !important;
 }
-.setpTitle {
-  font-size: 21px;
-  @include devices(tablet) {
-    font-size: 18px;
-  }
-}*/
-
 </style>
