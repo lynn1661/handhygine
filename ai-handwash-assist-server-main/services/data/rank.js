@@ -8,6 +8,7 @@ const getRankList = async ({ data }) => {
   let filter = {
     studentID: "user", // 固定用户名
     role: role,
+    total: { $exists: true }
   };
 
   // 如果传入了日期范围，则构造过滤条件
