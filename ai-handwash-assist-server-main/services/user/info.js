@@ -10,21 +10,36 @@ const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始�
 const day = String(date.getDate()).padStart(2, '0');
 const formattedDate = `${year}-${month}-${day}`; // 格式为 "2025-03-10"
 
-const login = async({ data }) => {
-    if (!data.ID || !data.password) {
-      const err = new Error("missing field. required field: ID and password");
-      err.code = 400;
-      throw err;
-    }
-    // 验证身份 用户名称后续可修改
-    if (data.ID === "user" && await bcrypt.compare(data.password, storedHashedPassword)) {
-      return { message: "Successfully Login", ID: data.ID };
-    } else {
-      const err = new Error("Invalid credentials");
-      err.code = 401;
-      throw err;
-    }
-  };
+const login = async ({ data }) => {
+  // 验证必须字段： accountID 和 password
+  if (!data.accountID || !data.password) {
+    const err = new Error("Missing field. Required fields: accountID and password");
+    err.code = 400;
+    throw err;
+  }
+
+  // 根据传入的 accountID 查询用户记录
+  const records = await datap.mongo.read("account", { accountID: data.accountID });
+  if (!records || records.length === 0) {
+    const err = new Error("Invalid credentials");
+    err.code = 401;
+    throw err;
+  }
+  
+  // 假设 accountID 唯一，取第一个匹配的记录
+  const user = records[0];
+  
+  // 使用 bcrypt.compare 对比前端密码和数据库中存储的加密密码
+  const isValid = await bcrypt.compare(data.password, user.password);
+  if (isValid) {
+    return { message: "Successfully Login", ID: user.accountID };
+  } else {
+    const err = new Error("Invalid credentials");
+    err.code = 401;
+    throw err;
+  }
+};
+
 
 const fill=async({data})=>{
     if(Object.keys(data).indexOf('accountID')<0){
@@ -38,7 +53,7 @@ const fill=async({data})=>{
         throw err;
     }
     const obj={
-        studentID:data.accountID,
+        accountID:data.accountID,
         userID:data.userID,
         role:data.role,
         date: formattedDate,
