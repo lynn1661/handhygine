@@ -26,7 +26,7 @@ import SelectLocale from "@/components/SelectLocale.vue";
 import { ElNotification } from "element-plus";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-//import { validateStudentID } from "../utils/formatData";
+//import { validateaccountID } from "../utils/formatData";
 //import { ElAvatar } from 'element-plus';
 //import { UserFilled } from '@element-plus/icons-vue';
 import { ElButton } from 'element-plus'
@@ -43,8 +43,8 @@ async function RoleRank(role) {
   });
 };
 const backHome = () => {
-  localStorage.removeItem("studentID");
-  sessionStorage.removeItem("studentID");
+  localStorage.removeItem("accountID");
+  sessionStorage.removeItem("accountID");
   router.push({
     path: "/admin",
   });

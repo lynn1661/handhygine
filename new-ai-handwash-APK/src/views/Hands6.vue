@@ -235,8 +235,8 @@ async function stopCountdown() {
 
     await store.dispatch("user/rating", {
       id:
-        sessionStorage.getItem("studentSerialNumber") ||
-        localStorage.getItem("studentSerialNumber"),
+        sessionStorage.getItem("accountSerialNumber") ||
+        localStorage.getItem("accountSerialNumber"),
       rating: text.value,
       points: resultValue.value,
       is_last: false,
