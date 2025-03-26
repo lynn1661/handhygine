@@ -32,7 +32,7 @@ import SelectLocale from "@/components/SelectLocale.vue";
 import { ElNotification } from "element-plus";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-//import { validateStudentID } from "../utils/formatData";
+//import { validateaccountID } from "../utils/formatData";
 import { ElAvatar } from 'element-plus';
 import { UserFilled } from '@element-plus/icons-vue';
 import { ElButton } from 'element-plus';
@@ -43,14 +43,14 @@ const t = useI18n();
 const shouldChangeStyle = ref(false); // 默认不添加
 const userID = ref("");
 async function selectRole(role) {
-  const studentID = localStorage.getItem("studentID");
+  const accountID = localStorage.getItem("accountID");
   const res = await store.dispatch("user/updateRole", { 
-    ID: studentID,
-    userID: ID,
+    accountID: accountID,
+    userID: userID.value,
     role: role, 
   });
-  localStorage.setItem("studentSerialNumber", res.ID);
-  sessionStorage.setItem("studentSerialNumber", res.ID);
+  localStorage.setItem("accountSerialNumber", res.accountID);
+  sessionStorage.setItem("accountSerialNumber", res.accountID);
   //localStorage.setItem("userRole", role);
   //sessionStorage.setItem("userRole", role);
   router.push({
@@ -58,10 +58,10 @@ async function selectRole(role) {
   });
 };
 const backHome = () => {
-  localStorage.removeItem("studentID");
-  sessionStorage.removeItem("studentID");
-  localStorage.removeItem("studentSerialNumber");
-  sessionStorage.removeItem("studentSerialNumber");
+  localStorage.removeItem("accountID");
+  sessionStorage.removeItem("accountID");
+  localStorage.removeItem("accountSerialNumber");
+  sessionStorage.removeItem("accountSerialNumber");
   store.commit("user/clearVideoBlob");
   router.push({
     path: "/",

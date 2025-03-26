@@ -15,10 +15,10 @@
     <div v-if="HandHygiene">
       <div class="home-personal">{{ $t("HandHygiene.personal") }}</div>
       <div class="home-input">
-        <div class="home-input-studentID">
+        <div class="home-input-accountID">
           <el-input
-            v-model="studentID"
-            :placeholder="$t('HandHygiene.studentID')"
+            v-model="accountID"
+            :placeholder="$t('HandHygiene.accountID')"
           />
         </div>
         <div class="home-input-password">
@@ -43,7 +43,7 @@ import SelectLocale from "@/components/SelectLocale.vue";
 import { ElNotification } from "element-plus";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-//import { validateStudentID } from "../utils/formatData";
+//import { validateaccountID } from "../utils/formatData";
 import { ElAvatar } from 'element-plus';
 import { UserFilled } from '@element-plus/icons-vue';
 import { ElButton } from 'element-plus'
@@ -51,17 +51,17 @@ const store = useStore();
 const router = useRouter();
 const t = useI18n();
 const shouldChangeStyle = ref(false); // 默认不添加
-const studentID = ref("");
+const accountID = ref("");
 const password = ref("");
 const HandHygiene = ref(true);
 async function started() {
   try {
     const res = await store.dispatch("user/login", {
-      ID: studentID.value,
+      ID: accountID.value,
       password: password.value
     });
-    localStorage.setItem("studentID", studentID.value);
-    sessionStorage.setItem("studentID", studentID.value);
+    localStorage.setItem("accountID", accountID.value);
+    sessionStorage.setItem("accountID", accountID.value);
     ElNotification({
       title: res.message,
       type: "success"
@@ -75,7 +75,7 @@ async function started() {
       title: "Login Error",
       type: "error"
     });
-    studentID.value = "";
+    accountID.value = "";
     password.value = "";
   }
 }
@@ -164,7 +164,7 @@ async function started() {
   }
   &-input {
     text-align: center;
-    &-studentID {
+    &-accountID {
       :deep(.el-input) {
         width: 626px;
         height: 90px;

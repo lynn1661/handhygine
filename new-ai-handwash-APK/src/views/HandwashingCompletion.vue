@@ -166,10 +166,10 @@ const t = useI18n();
 const shouldChangeStyle = ref(true); // 默认不添加
 const HandwashingType = ref();
 const back = () => {
-  localStorage.removeItem("studentID");
-  sessionStorage.removeItem("studentID");
-  localStorage.removeItem("studentSerialNumber");
-  sessionStorage.removeItem("studentSerialNumber");
+  localStorage.removeItem("accountID");
+  sessionStorage.removeItem("accountID");
+  localStorage.removeItem("accountSerialNumber");
+  sessionStorage.removeItem("accountSerialNumber");
   store.commit("user/clearVideoBlob");
   router.push({
     path: "/",
@@ -201,7 +201,7 @@ const handleRatingChange = async (newValue) => {
 const submitRating = async () => {
   try {
     console.log("提交评分:", value.value);
-    const rank_id = sessionStorage.getItem("studentSerialNumber") || localStorage.getItem("studentSerialNumber");
+    const rank_id = sessionStorage.getItem("accountSerialNumber") || localStorage.getItem("accountSerialNumber");
     //console.log("提交评分rankid:", rank_id);
     //const rank_id = '67dd09578fc9261ce50ab805';
     // 调用 Vuex action 或直接调用后端 API 存储评分结果
@@ -254,10 +254,10 @@ const showImg = ref("");
 const downloadName = ref();
 const rankMessage = ref("");
 onMounted(async () => {
-  // Get the download name for the video based on the student's serial number
+  // Get the download name for the video based on the account's serial number
   downloadName.value = getTime(
-    sessionStorage.getItem("studentSerialNumber") ||
-      localStorage.getItem("studentSerialNumber")
+    sessionStorage.getItem("accountSerialNumber") ||
+      localStorage.getItem("accountSerialNumber")
   );
 
   // Set a 2-second timeout to disable the loading state
@@ -267,7 +267,7 @@ onMounted(async () => {
 
   // Dispatch the 'rank' action to retrieve the user's ranking data from the store
   const id =
-    sessionStorage.getItem("studentSerialNumber") || localStorage.getItem("studentSerialNumber");
+    sessionStorage.getItem("accountSerialNumber") || localStorage.getItem("accountSerialNumber");
   console.log("ID being sent: ", id); // Debugging step
   const res = await store.dispatch("user/rank", { id });
   console.log("Response from get_rank:", res); // Debugging step

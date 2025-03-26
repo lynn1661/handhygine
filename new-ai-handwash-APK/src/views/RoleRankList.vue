@@ -99,8 +99,8 @@ const t = useI18n();
 const shouldChangeStyle = ref(true); // 默认不添加
 const HandwashingType = ref();
 const backHome = () => {
-  localStorage.removeItem("studentID");
-  sessionStorage.removeItem("studentID");
+  localStorage.removeItem("accountID");
+  sessionStorage.removeItem("accountID");
   router.push({
     path: "/admin",
   });

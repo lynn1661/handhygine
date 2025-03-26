@@ -7,11 +7,11 @@ export function getTime(value) {
   const formattedDate = `${year}${month}${day}-${randomSixDigitNumber}-${value}`;
   return formattedDate;
 }
-export function validateStudentID(studentID) {
+export function validateaccountID(accountID) {
   // 定义验证格式的正则表达式
   var regex = /^[0-9]{8}[a-zA-Z]$/;
   // 使用正则表达式进行验证
-  if (regex.test(studentID)) {
+  if (regex.test(accountID)) {
     return true;
   } else {
     return false;

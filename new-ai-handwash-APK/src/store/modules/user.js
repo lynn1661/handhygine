@@ -25,9 +25,9 @@ export default {
     async login({ commit }, payload) {
       try {
         const { data } = await userLogin(payload);
-        commit("updateUserID", data.ID);
-        localStorage.setItem("studentID", data.ID);
-        sessionStorage.setItem("studentID", data.ID);
+        commit("updateUserID", data.accountID);
+        localStorage.setItem("accountID", data.accountID);
+        sessionStorage.setItem("accountID", data.accountID);
         return data;
       } catch (error) {
         console.log(error);
