@@ -27,18 +27,19 @@ const login = async({ data }) => {
   };
 
 const fill=async({data})=>{
-    if(Object.keys(data).indexOf('ID')<0){
-        const err = new Error("missing field. required field: ID");
+    if(Object.keys(data).indexOf('accountID')<0){
+        const err = new Error("missing field. required field: accountID");
         err.code = 400;
         throw err;
     }
-    if(data.ID==='' || data.role===''){
+    if(data.accountID==='' || data.role===''){
         const err = new Error("empty field detected !");
         err.code = 400;
         throw err;
     }
     const obj={
-        studentID:data.ID,
+        studentID:data.accountID,
+        userID:data.userID,
         role:data.role,
         date: formattedDate,
         start_time:new Date().toLocaleString("zh-HK", {
