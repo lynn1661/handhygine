@@ -10,6 +10,12 @@
       </div>
       <select-locale :changeStyle="shouldChangeStyle"></select-locale>
     </div>
+    <div class="home-input">
+      <el-input
+        v-model="userID"
+        :placeholder="$t('HandHygiene.userID')"
+      />
+    </div>
     <div class="role">
       <el-button @click="selectRole('Doctor')"> {{ $t("HandHygiene.role1") }}</el-button>
       <el-button @click="selectRole('Nurse')"> {{ $t("HandHygiene.role2") }}</el-button>
@@ -35,11 +41,12 @@ const store = useStore();
 const router = useRouter();
 const t = useI18n();
 const shouldChangeStyle = ref(false); // 默认不添加
-
+const userID = ref("");
 async function selectRole(role) {
   const studentID = localStorage.getItem("studentID");
   const res = await store.dispatch("user/updateRole", { 
     ID: studentID,
+    userID: ID,
     role: role, 
   });
   localStorage.setItem("studentSerialNumber", res.ID);
@@ -129,10 +136,33 @@ onUnmounted(() => {
     }
   }
 }
-.role {
-  width: 90%;
-  margin: 330px auto 0;
+.home-input{
+  text-align: center;
   
+  
+  //width: 90%;
+  margin: 260px auto 0;
+
+  :deep(.el-input) {
+    width: 626px;
+    height: 90px;
+    margin: 25px;
+  }
+  :deep(.el-input__wrapper) {
+    background: #f5f8fd;
+    border-radius: 26px 26px 26px 26px;
+  }
+  :deep(.el-input__inner) {
+    font-family: "SourceHanSansCN";
+    font-size: 26px;
+    color: #b4c1d5;
+    height: 60px;
+  }
+}
+.role {
+  //width: 90%;
+  //margin: 330px auto 0;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -140,7 +170,7 @@ onUnmounted(() => {
 
   :deep(.el-button) {
     width: 626px;
-    height: 118px;
+    height: 100px;
     font-family: Helvetica85;
     font-weight: 800;
     font-size: 32px;
