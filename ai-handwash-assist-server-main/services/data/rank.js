@@ -6,7 +6,7 @@ const getRankList = async ({ data }) => {
   const role = data.role || "Doctor";
   
   let filter = {
-    studentID: "user", // 固定用户名
+    accountID: "user", // 固定用户名
     role: role,
     total: { $exists: true }
   };
