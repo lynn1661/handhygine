@@ -21,21 +21,19 @@ const login = async ({ data }) => {
   // 根据传入的 accountID 查询用户记录
   const records = await datap.mongo.read("account", { accountID: data.accountID });
   if (!records || records.length === 0) {
-    const err = new Error("1 Invalid credentials");
+    const err = new Error("Invalid ID");
     err.code = 401;
     throw err;
   }
   
   // 假设 accountID 唯一，取第一个匹配的记录
   const user = records[0];
-  console.log("明文密码:", data.password);
-  console.log("数据库哈希:", user.password);
   // 使用 bcrypt.compare 对比前端密码和数据库中存储的加密密码
   const isValid = await bcrypt.compare(data.password, user.password);
   if (isValid) {
     return { message: "Successfully Login", ID: user.accountID };
   } else {
-    const err = new Error("2 Invalid credentials");
+    const err = new Error("Paasword wrong");
     err.code = 401;
     throw err;
   }
