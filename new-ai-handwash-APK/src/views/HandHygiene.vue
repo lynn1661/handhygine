@@ -5,33 +5,26 @@
       <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
     </div>
     <div class="home-top">
-      <div class="back-home">
-        <div v-if="!HandHygiene">
-          <img src="../assets/home.png" alt="" @click="backHome" />
-        </div>
-      </div>
       <select-locale :changeStyle="shouldChangeStyle"></select-locale>
     </div>
-    <div v-if="HandHygiene">
-      <div class="home-personal">{{ $t("HandHygiene.personal") }}</div>
-      <div class="home-input">
-        <div class="home-input-accountID">
-          <el-input
-            v-model="accountID"
-            :placeholder="$t('HandHygiene.accountID')"
-          />
-        </div>
-        <div class="home-input-password">
-          <el-input
-            v-model="password"
-            show-password
-            :placeholder="$t('HandHygiene.password')"
-          />
-        </div>
-      </div>  
-      <div class="home-btn">
-        <el-button @click="started">{{ $t("HandHygiene.btn") }}</el-button>
+    <div class="home-personal">{{ $t("HandHygiene.personal") }}</div>
+    <div class="home-input">
+      <div class="home-input-accountID">
+        <el-input
+          v-model="accountID"
+          :placeholder="$t('HandHygiene.accountID')"
+        />
       </div>
+      <div class="home-input-password">
+        <el-input
+          v-model="password"
+          show-password
+          :placeholder="$t('HandHygiene.password')"
+        />
+      </div>
+    </div>  
+    <div class="home-btn">
+      <el-button @click="started">{{ $t("HandHygiene.btn") }}</el-button>
     </div>
   </div>
 </template>
@@ -43,8 +36,6 @@ import SelectLocale from "@/components/SelectLocale.vue";
 import { ElNotification } from "element-plus";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-//import { validateaccountID } from "../utils/formatData";
-import { ElAvatar } from 'element-plus';
 import { UserFilled } from '@element-plus/icons-vue';
 import { ElButton } from 'element-plus'
 const store = useStore();
@@ -53,7 +44,6 @@ const t = useI18n();
 const shouldChangeStyle = ref(false); // 默认不添加
 const accountID = ref("");
 const password = ref("");
-const HandHygiene = ref(true);
 async function started() {
   try {
     const res = await store.dispatch("user/login", {
@@ -79,13 +69,6 @@ async function started() {
     password.value = "";
   }
 }
-const backHome = () => {
-  HandHygiene.value = true;
-  accountID.value = "";
-  password.value = "";
-  localStorage.removeItem("accountID");
-  sessionStorage.removeItem("accountID");
-};
 </script>
 <style lang="scss" scoped>
 @import "@/styles/main.scss";
@@ -94,15 +77,15 @@ const backHome = () => {
   font-size: 26px;
 }
 .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: -40px;
-    }
-    .logo-image {
-      width: auto;
-      height: 50px;  
-    }
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: -40px;
+}
+.logo-image {
+  width: auto;
+  height: 60px;  
+}
 .home {
   width: 100%;
   height: 100%;
@@ -113,46 +96,7 @@ const backHome = () => {
   background-attachment: fixed;
   &-top {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-    .back-home {
-      width: 126px;
-      height: 126px;
-      margin-right: 10px;
-      img {
-        margin-top: 30px;
-        width: 100%;
-        height: 100%;
-      }
-    }
-  }
-  &-title {
-    width: 692px;
-    height: 203px;
-    line-height: 70px;
-    background-color: rgba(108, 108, 108, 0.27);
-    color: rgba(16, 16, 16, 1);
-    font-size: 48px;
-    text-align: center;
-    box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.4);
-    font-family: Roboto;
-    border: 1px solid rgba(187, 187, 187, 1);
-    margin: 0 auto;
-    &-font {
-      color: rgba(33, 84, 118, 1);
-      font-size: 72px;
-      text-align: center;
-      font-family: Roboto-regular;
-      line-height: 101px;
-    }
-    &-logo {
-      margin-top: -51px;
-      img {
-        width: 200px;
-        height: 200px;
-      }
-    }
+    justify-content: flex-end;
   }
   &-personal {
     text-align: center;
@@ -229,11 +173,5 @@ const backHome = () => {
       background-repeat: no-repeat;
     }
   }
-}
-.custom-option {
-  color: rgba(108, 108, 108, 1);
-  font-family: "SourceHanSansCN";
-  font-size: 26px;
-  height: 56px;
 }
 </style>
