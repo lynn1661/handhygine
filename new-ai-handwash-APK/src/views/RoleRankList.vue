@@ -175,7 +175,9 @@ const fetchRankList = async () => {
       end: formatDate(value.value[1])
     };
   }
+  const accountID = localStorage.getItem("accountID");
   rankList.value = await store.dispatch("user/ranklist", {
+    accountID: accountID,
     role: role,
     dateRange
   });
