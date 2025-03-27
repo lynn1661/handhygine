@@ -57,7 +57,7 @@ const HandHygiene = ref(true);
 async function started() {
   try {
     const res = await store.dispatch("user/login", {
-      ID: accountID.value,
+      accountID: accountID.value,
       password: password.value
     });
     localStorage.setItem("accountID", accountID.value);
