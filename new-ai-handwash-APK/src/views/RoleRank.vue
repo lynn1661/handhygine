@@ -11,6 +11,7 @@
       <select-locale :changeStyle="shouldChangeStyle"></select-locale>
     </div>
     <div class="role">
+      <el-button @click="allRole"> {{ $t("HandHygiene.allrole") }}</el-button>
       <el-button @click="RoleRank('Doctor')"> {{ $t("HandHygiene.role1") }}</el-button>
       <el-button @click="RoleRank('Nurse')"> {{ $t("HandHygiene.role2") }}</el-button>
       <el-button @click="RoleRank('Allied Health')"> {{ $t("HandHygiene.role3") }}</el-button>
@@ -34,7 +35,11 @@ const store = useStore();
 const router = useRouter();
 const t = useI18n();
 const shouldChangeStyle = ref(false); // 默认不添加
-
+const allRole = () => {
+  router.push({
+    path: "/allrole",
+  });
+};
 async function RoleRank(role) {
   //const res = await store.dispatch("user/ranklist", {role: role});
   router.push({

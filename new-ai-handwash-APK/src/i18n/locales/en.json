@@ -11,6 +11,7 @@
     "accountID": "Account",
     "userID": "ID",
     "password": "Password",
+    "allrole": "ALL",
     "role1": "DOCTOR",
     "role2": "NURSE",
     "role3": "ALLIED HEALTH",

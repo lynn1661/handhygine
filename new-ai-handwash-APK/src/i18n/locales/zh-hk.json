@@ -11,6 +11,7 @@
     "accountID": "帳號",
     "userID": "用户",
     "password": "密碼",
+    "allrole": "所有",
     "role1": "醫生",
     "role2": "護士",
     "role3": "輔助醫療",
