@@ -48,13 +48,13 @@
             prop="role" 
             label="Role" 
             fixed="left" 
-            width="100">
+            width="90">
           </el-table-column>
           <!-- ID列 -->
           <el-table-column 
             prop="userID" 
             label="UserID" 
-            width="100">
+            width="90">
           </el-table-column>
           <!-- 成绩 -->
           <el-table-column 
