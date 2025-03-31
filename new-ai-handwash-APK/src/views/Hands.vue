@@ -68,8 +68,8 @@ import { createConnect, disconnect, sendLog } from "../services/socket";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { getTime } from "../utils/formatData";
-// 评分组件
 import { ElRate } from 'element-plus';
+import { nextTick } from 'vue';
 const resultValue = ref(0);
 const store = useStore();
 const router = useRouter();
@@ -108,7 +108,14 @@ const setupMedia = async () => {
       console.log("📂 录制转换完成");
       store.commit("user/addBlob", videoData);
       videoUrl.value = URL.createObjectURL(blob);
-      downloadLink.value.click();
+      // 等待 DOM 更新
+      nextTick(() => {
+        if (downloadLink.value) {
+          downloadLink.value.click();
+        } else {
+          console.error("downloadLink is still null");
+        }
+      });
     });
   } catch (error) {
     console.log("Error accessing media devices", error);
@@ -519,12 +526,13 @@ onUnmounted(() => {
 .home {
   width: 100%;
   height: 100%;
-  //min-height: 100vh;
+  min-height: 100vh;
   background-image: url("../assets/bg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+  //background-attachment: scroll;
   &-top {
     display: flex;
     .flex-item {

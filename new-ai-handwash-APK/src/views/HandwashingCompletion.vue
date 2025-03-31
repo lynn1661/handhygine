@@ -25,7 +25,7 @@
       </div>
     </div>
     <div class="home-content">
-      <el-scrollbar height="450px" always>
+      <el-scrollbar height="440px" always>
         <div class="step-rating-container">
           <!-- 对 list 进行循环，每一项代表一个步骤 -->
           <div class="step-row" v-for="(item, index) in list" :key="index">
