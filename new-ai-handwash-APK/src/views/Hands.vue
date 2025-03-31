@@ -583,6 +583,7 @@ onUnmounted(() => {
   .home-flex {
     margin-left: 67px;
     margin-right: 67px;
+    margin-top: -23px;
     background: transparent;
     .home-img {
       display: flex;
@@ -611,12 +612,12 @@ onUnmounted(() => {
 }
 .feedback {
   //background-color:#fff;
-  margin: 10px 25px 0px 25px;
+  margin: 2px 25px 0px 25px;
   &-content {
     font-size: 24px;
     font-weight: 500; 
     text-align: center; 
-    margin-bottom: 5px;
+    //margin-bottom: 5px;
     //margin-top: 10px;
     color: var(--el-color-primary-dark-2); 
     line-height: 1.4;
