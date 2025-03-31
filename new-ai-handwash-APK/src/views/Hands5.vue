@@ -80,7 +80,6 @@ import { ElRate } from 'element-plus';
 const resultValue = ref(0);
 const store = useStore();
 const router = useRouter();
-const progressColor = ref("blue");
 // 倒计时逻辑
 const percentage = ref(100);
 const countdown = ref(3);
@@ -93,6 +92,8 @@ let timer = null; // 声明计时器变量
 const inputVideo = ref(null);
 const mediaRecorder = ref(null);
 const recordedChunks = ref([]);
+const videoUrl = ref("");
+const downloadLink = ref(null);
 const stream = ref();
 const setupMedia = async () => {
   try {
@@ -113,9 +114,11 @@ const setupMedia = async () => {
       const videoData = await readBlobAsBase64(blob);
       console.log("📂 录制转换完成");
       store.commit("user/addBlob", videoData);
+      videoUrl.value = URL.createObjectURL(blob);
+      downloadLink.value.click();
     });
   } catch (error) {
-    console.log("访问摄像头失败:", error);
+    console.log("Error accessing media devices", error);
   }
 };
 async function readBlobAsBase64(blob) {
@@ -144,7 +147,6 @@ const startCountdown = () => {
   startRecording();
   countdown.value = 3; // 重置倒计时为3秒
   countdownDisplay.value = countdown.value; // 更新显示的倒计时值
-
   timer = setInterval(() => {
     countdown.value--;
     let str = Math.ceil((countdown.value / 3) * 100); // 根据3秒计算百分比
@@ -201,8 +203,8 @@ async function isOverlapping(landmarksList) {
   return Overlapping;
 }
 
-const studnetId = computed(() => {
-  return store.state.user.userID;
+const accountID = computed(() => {
+  return store.state.user.accountID;
 });
 const redirectTimeoutId = ref(true);
 async function stopCountdown() {
@@ -240,10 +242,8 @@ async function stopCountdown() {
         localStorage.getItem("accountSerialNumber"),
       rating: text.value,
       points: resultValue.value,
-      is_last: false,
       step_video_file: `${downloadName.value}-step5`,
     });
-
     if (redirectTimeoutId.value) {
       setTimeout(() => {
         stopRecording();
@@ -261,8 +261,8 @@ const loading = ref(true);
 const downloadName = ref();
 onMounted(() => {
   downloadName.value = getTime(
-    sessionStorage.getItem("studnetSerialNumber") ||
-      localStorage.getItem("studnetSerialNumber")
+    sessionStorage.getItem("accountSerialNumber") ||
+      localStorage.getItem("accountSerialNumber")
   );
   // Our input frames will come from here.
   const videoElement = document.getElementsByClassName("input_video")[0];
@@ -328,7 +328,6 @@ onMounted(() => {
           combinedData[label].push(newData);
         });
         countdownStarted.value = true;
-        storeDataEverySecond(combinedData);
         drawingUtils.drawConnectors(
           canvasCtx,
           landmarks,
@@ -436,7 +435,6 @@ onMounted(() => {
       newData = [];
     }
   }
-
   const hands = new mpHands.Hands(config);
   hands.onResults(onResults);
   new controls.ControlPanel(controlsElement, {
@@ -503,8 +501,10 @@ watch(countdownStarted, (newVal) => {
 });
 const backHome = () => {
   redirectTimeoutId.value = false;
-  localStorage.removeItem("studnetID");
-  sessionStorage.removeItem("studnetID");
+  localStorage.removeItem("accountID");
+  sessionStorage.removeItem("accountID");
+  localStorage.removeItem("accountSerialNumber");
+  sessionStorage.removeItem("accountSerialNumber");
   store.commit("user/clearVideoBlob");
   router.push({
     path: "/",
@@ -525,7 +525,8 @@ onUnmounted(() => {
 }
 .home {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
+  //min-height: 100vh;
   background-image: url("../assets/bg.png");
   background-size: cover;
   background-position: center;

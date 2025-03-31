@@ -38,8 +38,7 @@
         <div class="container">
           <video class="input_video"></video>
           <canvas class="output_canvas" width="1280px" height="720px"></canvas>
-          <div class="loading" v-loading="loading">
-          </div>
+          <div class="loading" v-loading="loading"></div>
         </div>
         <div class="control-panel"></div>
       </div>
@@ -81,7 +80,6 @@ import { ElRate } from 'element-plus';
 const resultValue = ref(0);
 const store = useStore();
 const router = useRouter();
-const progressColor = ref("blue");
 // 倒计时逻辑
 const percentage = ref(100);
 const countdown = ref(3);
@@ -94,21 +92,30 @@ let timer = null; // 声明计时器变量
 const inputVideo = ref(null);
 const mediaRecorder = ref(null);
 const recordedChunks = ref([]);
+const videoUrl = ref("");
+const downloadLink = ref(null);
 const stream = ref();
 const setupMedia = async () => {
   try {
+    console.log("📹 访问摄像头...");
     const mediaRecorderOptions = { mimeType: "video/webm" };
     mediaRecorder.value = new MediaRecorder(stream.value, mediaRecorderOptions);
     mediaRecorder.value.addEventListener("dataavailable", (event) => {
+      console.log("🎥 录制数据可用", event);
       if (event.data.size > 0) {
         recordedChunks.value.push(event.data);
       }
     });
 
     mediaRecorder.value.addEventListener("stop", async () => {
+      console.log("⏹ 录制停止");
       const blob = new Blob(recordedChunks.value, { type: "video/webm" });
+      console.log("💾 录制 Blob:", blob);
       const videoData = await readBlobAsBase64(blob);
+      console.log("📂 录制转换完成");
       store.commit("user/addBlob", videoData);
+      videoUrl.value = URL.createObjectURL(blob);
+      downloadLink.value.click();
     });
   } catch (error) {
     console.log("Error accessing media devices", error);
@@ -136,7 +143,6 @@ const stopRecording = () => {
     mediaRecorder.value.stop();
   }
 };
-
 const startCountdown = () => {
   startRecording();
   countdown.value = 3; // 重置倒计时为3秒
@@ -185,7 +191,6 @@ async function isOverlapping(landmarksList) {
   const hand1Box = getBoundingBox(landmarksList[0]);
   const hand2Box = getBoundingBox(landmarksList[1]);
 
-  // console.log("计算出的手部边界框:", hand1Box, hand2Box);
 
   // **判断两个手的边界框是否有重叠**
   const overlapX = Math.max(0, Math.min(hand1Box.maxX, hand2Box.maxX) - Math.max(hand1Box.minX, hand2Box.minX));
@@ -198,8 +203,8 @@ async function isOverlapping(landmarksList) {
   return Overlapping;
 }
 
-const studnetId = computed(() => {
-  return store.state.user.userID;
+const accountID = computed(() => {
+  return store.state.user.accountID;
 });
 const redirectTimeoutId = ref(true);
 async function stopCountdown() {
@@ -237,10 +242,8 @@ async function stopCountdown() {
         localStorage.getItem("accountSerialNumber"),
       rating: text.value,
       points: resultValue.value,
-      is_last: false,
       step_video_file: `${downloadName.value}-step2`,
     });
-
     if (redirectTimeoutId.value) {
       setTimeout(() => {
         stopRecording();
@@ -258,8 +261,8 @@ const loading = ref(true);
 const downloadName = ref();
 onMounted(() => {
   downloadName.value = getTime(
-    sessionStorage.getItem("studnetSerialNumber") ||
-      localStorage.getItem("studnetSerialNumber")
+    sessionStorage.getItem("accountSerialNumber") ||
+      localStorage.getItem("accountSerialNumber")
   );
   // Our input frames will come from here.
   const videoElement = document.getElementsByClassName("input_video")[0];
@@ -325,7 +328,6 @@ onMounted(() => {
           combinedData[label].push(newData);
         });
         countdownStarted.value = true;
-        storeDataEverySecond(combinedData);
         drawingUtils.drawConnectors(
           canvasCtx,
           landmarks,
@@ -392,14 +394,12 @@ onMounted(() => {
       }
     }
   }
-
   let storedData = [];
   let newData = [];
   let startNumber = 0;
   let endNumber = 25;
   let firstType = true;
   let currentStep = 2; // 当前步骤编号  
-  //存储 25 条数据的函数
   async function storeDataEverySecond(results) {
     storedData.push(results);
     if (firstType) {
@@ -435,7 +435,6 @@ onMounted(() => {
       newData = [];
     }
   }
-
   const hands = new mpHands.Hands(config);
   hands.onResults(onResults);
   new controls.ControlPanel(controlsElement, {
@@ -502,8 +501,10 @@ watch(countdownStarted, (newVal) => {
 });
 const backHome = () => {
   redirectTimeoutId.value = false;
-  localStorage.removeItem("studnetID");
-  sessionStorage.removeItem("studnetID");
+  localStorage.removeItem("accountID");
+  sessionStorage.removeItem("accountID");
+  localStorage.removeItem("accountSerialNumber");
+  sessionStorage.removeItem("accountSerialNumber");
   store.commit("user/clearVideoBlob");
   router.push({
     path: "/",
@@ -524,7 +525,8 @@ onUnmounted(() => {
 }
 .home {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
+  //min-height: 100vh;
   background-image: url("../assets/bg.png");
   background-size: cover;
   background-position: center;
@@ -580,7 +582,6 @@ onUnmounted(() => {
   .home-flex {
     margin-left: 67px;
     margin-right: 67px;
-    //background: #fff;
     background: transparent;
     .home-img {
       display: flex;
