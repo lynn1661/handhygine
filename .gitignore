@@ -1,6 +1,2 @@
-# 忽略日志文件
-new-ai-handwash-server/log.txt
-# 忽略哈希加密
-ai-handwash-assist-server-main/services/user/hash.js
 # 忽略AR版本
 new-ai-handwash-AR
