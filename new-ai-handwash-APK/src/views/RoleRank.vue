@@ -98,16 +98,16 @@ const backHome = () => {
 }
 .role {
   width: 90%;
-  margin: 330px auto 0;
+  margin: 270px auto 0;
   
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px; 
+  gap: 12px; 
 
   :deep(.el-button) {
-    width: 626px;
-    height: 118px;
+    width: 580px;
+    height: 100px;
     font-family: Helvetica85;
     font-weight: 800;
     font-size: 32px;

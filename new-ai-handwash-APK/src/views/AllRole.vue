@@ -195,7 +195,10 @@ const initCharts = async () => {
           ], 
         title: {
           text: role,
-          left: 'center'
+          left: 'center',
+          textStyle: {
+            color: '#606266'
+          }
         },
         tooltip: {
           trigger: 'item'
@@ -326,13 +329,14 @@ watch(value, async () => {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
+  margin-top: 20px;
 }
 .chart {
   width: 45%;
-  height: 400px;
+  height: 370px;
   margin-bottom: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  //border: 1px solid #ccc;
+  //border-radius: 8px;
   padding: 10px;
 }
 .chart-title {
