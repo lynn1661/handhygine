@@ -32,9 +32,6 @@ import SelectLocale from "@/components/SelectLocale.vue";
 import { ElNotification } from "element-plus";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-//import { validateaccountID } from "../utils/formatData";
-import { ElAvatar } from 'element-plus';
-import { UserFilled } from '@element-plus/icons-vue';
 import { ElButton } from 'element-plus';
 import { onMounted, onUnmounted } from 'vue';
 const store = useStore();
@@ -49,10 +46,8 @@ async function selectRole(role) {
     userID: userID.value,
     role: role, 
   });
-  localStorage.setItem("accountSerialNumber", res.accountID);
-  sessionStorage.setItem("accountSerialNumber", res.accountID);
-  //localStorage.setItem("userRole", role);
-  //sessionStorage.setItem("userRole", role);
+  localStorage.setItem("accountSerialNumber", res.ID);
+  sessionStorage.setItem("accountSerialNumber", res.ID);
   router.push({
     path: "/detecting",
   });

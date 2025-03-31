@@ -33,10 +33,10 @@
         >下载录制的视频</a
       >
     </div>
-    <div style="margin: 10px 67px 0px 67px">
+    <div style="margin: 26px 67px 0px 67px">
       <div class="home-camera">
         <div class="container">
-          <video ref="inputVideo" class="input_video"></video>
+          <video class="input_video"></video>
           <canvas class="output_canvas" width="1280px" height="720px"></canvas>
           <div class="loading" v-loading="loading"></div>
         </div>
@@ -85,6 +85,8 @@ let timer = null; // 声明计时器变量
 const inputVideo = ref(null);
 const mediaRecorder = ref(null);
 const recordedChunks = ref([]);
+const videoUrl = ref("");
+const downloadLink = ref(null);
 const stream = ref();
 const setupMedia = async () => {
   try {
@@ -105,9 +107,11 @@ const setupMedia = async () => {
       const videoData = await readBlobAsBase64(blob);
       console.log("📂 录制转换完成");
       store.commit("user/addBlob", videoData);
+      videoUrl.value = URL.createObjectURL(blob);
+      downloadLink.value.click();
     });
   } catch (error) {
-    console.log("访问摄像头失败:", error);
+    console.log("Error accessing media devices", error);
   }
 };
 async function readBlobAsBase64(blob) {
@@ -136,7 +140,6 @@ const startCountdown = () => {
   startRecording();
   countdown.value = 3; // 重置倒计时为3秒
   countdownDisplay.value = countdown.value; // 更新显示的倒计时值
-
   timer = setInterval(() => {
     countdown.value--;
     let str = Math.ceil((countdown.value / 3) * 100); // 根据3秒计算百分比
@@ -193,8 +196,8 @@ async function isOverlapping(landmarksList) {
   return Overlapping;
 }
 
-const studnetId = computed(() => {
-  return store.state.user.userID;
+const accountID = computed(() => {
+  return store.state.user.accountID;
 });
 const redirectTimeoutId = ref(true);
 async function stopCountdown() {
@@ -232,7 +235,6 @@ async function stopCountdown() {
         localStorage.getItem("accountSerialNumber"),
       rating: text.value,
       points: resultValue.value,
-      is_last: false,
       step_video_file: `${downloadName.value}-step1`,
     });
     if (redirectTimeoutId.value) {
@@ -252,8 +254,8 @@ const loading = ref(true);
 const downloadName = ref();
 onMounted(() => {
   downloadName.value = getTime(
-    sessionStorage.getItem("studnetSerialNumber") ||
-      localStorage.getItem("studnetSerialNumber")
+    sessionStorage.getItem("accountSerialNumber") ||
+      localStorage.getItem("accountSerialNumber")
   );
   // Our input frames will come from here.
   const videoElement = document.getElementsByClassName("input_video")[0];
@@ -319,7 +321,6 @@ onMounted(() => {
           combinedData[label].push(newData);
         });
         countdownStarted.value = true;
-        storeDataEverySecond(combinedData);
         drawingUtils.drawConnectors(
           canvasCtx,
           landmarks,
@@ -405,7 +406,7 @@ onMounted(() => {
           resList.push(res.ans === 'True'); 
         }
        } catch (error) {
-         console.error('WebSocket 发送错误:', error);
+         console.error('Error during socket communication:', error);
        }
        firstType = false;
        newData = [];
@@ -415,14 +416,14 @@ onMounted(() => {
      storedData.shift();
      newData = storedData.slice(startNumber, endNumber);
      try {
-        const res = await createConnect(newData, currentStep);  // 等待服务器返回数据
+        const res = await createConnect(newData, currentStep);
         console.log("服务器返回:", res);
-        if (res && res.ans !== undefined) {  // 确保数据格式正确，并包含 ans
+        if (res && res.ans !== undefined) {
           // 根据返回的 'True' 或 'False' 转换为布尔值
           resList.push(res.ans === 'True'); 
         }
        } catch (error) {
-         console.error('WebSocket 发送错误:', error);
+         console.error('Error during socket communication:', error);
        }
      newData = [];
     }
@@ -493,8 +494,10 @@ watch(countdownStarted, (newVal) => {
 });
 const backHome = () => {
   redirectTimeoutId.value = false;
-  localStorage.removeItem("studnetID");
-  sessionStorage.removeItem("studnetID");
+  localStorage.removeItem("accountID");
+  sessionStorage.removeItem("accountID");
+  localStorage.removeItem("accountSerialNumber");
+  sessionStorage.removeItem("accountSerialNumber");
   store.commit("user/clearVideoBlob");
   router.push({
     path: "/",

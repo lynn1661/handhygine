@@ -50,20 +50,26 @@
             fixed="left" 
             width="100">
           </el-table-column>
+          <!-- ID列 -->
+          <el-table-column 
+            prop="userID" 
+            label="UserID" 
+            width="100">
+          </el-table-column>
           <!-- 成绩 -->
           <el-table-column 
             prop="total" 
             label="Score" 
-            width="100">
+            width="80">
           </el-table-column>
           <!-- 开始时间 -->
           <el-table-column 
             prop="start_time" 
             label="Start Time" 
-            width="200">
+            width="190">
           </el-table-column>
           <!-- 步骤得分列 -->
-          <el-table-column label="Step Points" width="200">
+          <el-table-column label="Step Points" width="130">
             <template #default="scope">
               <div v-for="(step, index) in scope.row.step_points" :key="index">
                 Step {{ index + 1 }}: {{ step.Step }}
