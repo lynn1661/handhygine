@@ -39,4 +39,52 @@ const getRankList = async ({ data }) => {
   };
 };
 
-module.exports = { getRankList };
+const getAllRank = async ({ data }) => {
+  console.log("Received accountID:", data.accountID);
+
+  // 构造过滤条件：只筛选 accountID 指定的记录，并且必须存在 total 字段
+  let filter = {
+    accountID: data.accountID,
+    total: { $exists: true }
+  };
+
+  // 如果传入了日期范围，则构造过滤条件
+  if (data.dateRange && data.dateRange.start && data.dateRange.end) {
+    filter.date = {
+      $gte: data.dateRange.start,
+      $lte: data.dateRange.end
+    };
+  } else {
+    // 如果没有指定日期范围，默认筛选当天的记录
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+    filter.date = formattedDate;
+  }
+  
+  // 构造排序条件：按照 total 字段降序排列
+  const sort = { total: -1 };
+
+  // 查询满足条件的所有记录
+  const records = await datap.mongo.read("user_info", filter, 0, 0, sort);
+
+  // 将结果按 role 分组：每个 role 对应一个数组
+  const grouped = records.reduce((acc, record) => {
+    // 如果记录中没有 role，默认使用 "Unknown"
+    const role = record.role || "Unknown";
+    if (!acc[role]) {
+      acc[role] = [];
+    }
+    acc[role].push(record);
+    return acc;
+  }, {});
+
+  return {
+    message: "Successfully retrieved all rank lists",
+    records: grouped
+  };
+};
+
+module.exports = { getRankList, getAllRank };
