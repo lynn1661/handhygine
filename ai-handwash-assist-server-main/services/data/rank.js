@@ -72,12 +72,13 @@ const getAllRank = async ({ data }) => {
   console.log(records);
   // 将结果按 role 分组：每个 role 对应一个数组
   const grouped = records.reduce((acc, record) => {
-    // 如果记录中没有 role，默认使用 "Unknown"
+    // 如果记录中没有 role，则默认使用 "Unknown"
     const role = record.role || "Unknown";
     if (!acc[role]) {
       acc[role] = [];
     }
-    acc[role].push(record);
+    // 只存储 total 字段的值
+    acc[role].push(record.total);
     return acc;
   }, {});
 
