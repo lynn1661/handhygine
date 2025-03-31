@@ -8,8 +8,8 @@ export default {
     blobs: [],
   },
   mutations: {
-    updateUserID(state, payload) {
-      state.userID = payload;
+    updateAccountID(state, payload) {
+      state.accountID = payload;
     },
     setUserRole(state, role) {
       state.role = role;
@@ -25,9 +25,7 @@ export default {
     async login({ commit }, payload) {
       try {
         const { data } = await userLogin(payload);
-        commit("updateUserID", data.accountID);
-        localStorage.setItem("accountID", data.accountID);
-        sessionStorage.setItem("accountID", data.accountID);
+        commit("updateAccountID", data.accountID);
         return data;
       } catch (error) {
         console.log(error);
