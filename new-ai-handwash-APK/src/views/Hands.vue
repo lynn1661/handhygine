@@ -532,7 +532,6 @@ onUnmounted(() => {
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  //background-attachment: scroll;
   &-top {
     display: flex;
     .flex-item {
