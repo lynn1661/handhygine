@@ -69,7 +69,7 @@ const getAllRank = async ({ data }) => {
 
   // 查询满足条件的所有记录
   const records = await datap.mongo.read("user_info", filter, 0, 0, sort);
-
+  console.log(records);
   // 将结果按 role 分组：每个 role 对应一个数组
   const grouped = records.reduce((acc, record) => {
     // 如果记录中没有 role，默认使用 "Unknown"
