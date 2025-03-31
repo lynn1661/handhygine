@@ -28,6 +28,12 @@ export async function getRankList(params) {
   });
 }
 
+export async function getAllRank(params) {
+  return axiosInstance.post("/data/rank/getAllRank", {
+    ...params,
+  });
+}
+
 export async function submitRating(params) {
   return axiosInstance.post("/data/rate/rating", {
     ...params,

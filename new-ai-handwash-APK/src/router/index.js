@@ -3,6 +3,7 @@ import BaseLayout from "@/layouts/BaseLayout.vue";
 import Admin from "@/views/Admin.vue";
 import Role from "@/views/Role.vue";
 import RoleRank from "@/views/RoleRank.vue";
+import AllRole from "@/views/AllRole.vue";
 import RoleRankList from "@/views/RoleRankList.vue";
 import Detecting from "@/views/Detecting.vue";
 import Hands from "@/views/Hands.vue";
@@ -29,6 +30,10 @@ const routes = [
   {
     path: "/rolerank",
     component: RoleRank,
+  },
+  {
+    path: "/allrole",
+    component: AllRole,
   },
   {
     path: "/roleranklist",
