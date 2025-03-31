@@ -333,7 +333,7 @@ watch(value, async () => {
 }
 .chart {
   width: 45%;
-  height: 370px;
+  height: 350px;
   margin-bottom: 20px;
   //border: 1px solid #ccc;
   //border-radius: 8px;
