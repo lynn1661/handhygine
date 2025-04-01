@@ -101,15 +101,36 @@
         width="400px"
         :before-close="handleClose"
       >
-        <!-- 评分组件 -->
-        <el-rate
-          class="custom-rate"
-          v-model="value"
-          size="large"
-          :texts="['oops', 'disappointed', 'normal', 'good', 'great']"
-          show-text
-          @change="handleRatingChange"
-        />
+        <!-- 评分行1：App UI -->
+        <div class="rating-row">
+          <div class="rating-description">{{ $t('HandHygiene.ratingui') }}</div>
+          <el-rate
+            class="custom-rate"
+            v-model="uiRating"
+            size="large"
+            @change="handleRatingChange('ui', $event)"
+          />
+        </div>
+        <!-- 评分行2：洗手培训功能 -->
+        <div class="rating-row">
+          <div class="rating-description">{{ $t('HandHygiene.ratingtraining') }}</div>
+          <el-rate
+            class="custom-rate"
+            v-model="trainingRating"
+            size="large"
+            @change="handleRatingChange('training', $event)"
+          />
+        </div>
+        <!-- 评分行3：推荐给他人使用 -->
+        <div class="rating-row">
+          <div class="rating-description">{{ $t('HandHygiene.ratingrecommend') }}</div>
+          <el-rate
+            class="custom-rate"
+            v-model="recommendRating"
+            size="large"
+            @change="handleRatingChange('recommend', $event)"
+          />
+        </div>
         <!-- 对话框底部操作按钮 -->
         <template #footer>
           <el-button @click="dialogVisible = false">{{ $t(`HandHygiene.ratingcancel`) }}</el-button>
@@ -190,11 +211,21 @@ const openDialog = () => {
   console.log("打开评分对话框");
   dialogVisible.value = true;
 };
-
+const uiRating = ref(0);
+const trainingRating = ref(0);
+const recommendRating = ref(0);
 // 评分发生变化时触发（也可在提交按钮中统一处理）
-const handleRatingChange = async (newValue) => {
-  console.log("评分变化:", newValue);
-  // 可选：在这里直接调用接口提交评分
+const handleRatingChange = async (ratingType, newValue) => {
+  console.log(`${ratingType} rating changed:`, newValue);
+  // 根据 ratingType 更新对应的响应式变量（假设你已经定义了 uiRating, trainingRating, recommendRating）
+  if (ratingType === 'ui') {
+    uiRating.value = newValue;
+  } else if (ratingType === 'training') {
+    trainingRating.value = newValue;
+  } else if (ratingType === 'recommend') {
+    recommendRating.value = newValue;
+  }
+  // 可选：这里可以直接调用接口提交该评分
 };
 
 // 提交评分并保存到后端
@@ -205,8 +236,15 @@ const submitRating = async () => {
     //console.log("提交评分rankid:", rank_id);
     //const rank_id = '67dd09578fc9261ce50ab805';
     // 调用 Vuex action 或直接调用后端 API 存储评分结果
-    await store.dispatch("user/submitRating", { id: rank_id, rating: value.value });
-    ElNotification({
+    await store.dispatch("user/submitRating", {
+      id: rank_id,
+      rating: {
+        ui: uiRating.value,
+        training: trainingRating.value,
+        recommend: recommendRating.value
+      }
+    });
+ElNotification({
       title: "Thanks for Rating",
       type: "success",
     });
@@ -486,7 +524,23 @@ onMounted(async () => {
     transform: scale(1.6);
   }*/
 }
-::v-deep .custom-rate .el-rate__icon {
-  transform: scale(1.5) !important;
+.rating-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.rating-description {
+  font-size: 16px;
+  //font-weight: bold;
+  color: #333;
+  //margin-bottom: 2px;
+  text-align: center;
+}
+
+.custom-rate {
+  display: flex;
+  justify-content: center;
 }
 </style>
