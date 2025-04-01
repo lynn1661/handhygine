@@ -39,8 +39,12 @@ const rating = async ({ data }) => {
     delete update_res.lastModified;
   }
   utils.logger.debug(update_res);
-  if(update_res?.rating===undefined || update_res?.rating===null){
-    update_res.rating=0;
+  if (update_res?.rating === undefined || update_res?.rating === null) {
+    update_res.rating = {
+      ui: 0,
+      training: 0,
+      recommend: 0
+    };
   }
   
   // 更新记录
