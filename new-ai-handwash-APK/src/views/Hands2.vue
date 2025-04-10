@@ -225,7 +225,7 @@ async function stopCountdown() {
     if (trueRatio >= 80) {
       text.value = "PERFECT";
       resultValue.value = Math.round(trueRatio / 20);
-    } else if (trueRatio >= 55) {
+    } else if (trueRatio >= 40) {
       text.value = "GOOD"; 
       resultValue.value = Math.round(trueRatio / 20);
     } else {
@@ -241,7 +241,7 @@ async function stopCountdown() {
         sessionStorage.getItem("accountSerialNumber") ||
         localStorage.getItem("accountSerialNumber"),
       rating: text.value,
-      points: resultValue.value,
+      points: parseFloat((trueRatio / 20).toFixed(3)),
       step_video_file: `${downloadName.value}-step2`,
     });
     if (redirectTimeoutId.value) {
