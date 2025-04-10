@@ -110,7 +110,7 @@ const get_rank = async ({ data }) => {
    // 把所有用户的 `total` 数组展开成一个大数组
   const allScores = allUsers.flatMap(user =>
     Array.isArray(user.total) 
-    ? user.total.map(score => score * 5) 
+    ? user.total.map(score => score * (100 / 7)) 
     : [user.total]
   ).filter(score => score !== undefined && score !== null);
   if (!allScores || allScores.length === 0) {
