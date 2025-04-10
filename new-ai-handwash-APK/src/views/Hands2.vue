@@ -241,7 +241,7 @@ async function stopCountdown() {
         sessionStorage.getItem("accountSerialNumber") ||
         localStorage.getItem("accountSerialNumber"),
       rating: text.value,
-      points: parseFloat((trueRatio / 20).toFixed(3)),
+      points: parseFloat((trueRatio / 7).toFixed(3)),
       step_video_file: `${downloadName.value}-step2`,
     });
     if (redirectTimeoutId.value) {
