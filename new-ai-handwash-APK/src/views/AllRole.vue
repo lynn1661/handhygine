@@ -162,11 +162,11 @@ const fetchRankData = async () => {
 // 将每个角色的记录数据转换为饼状图数据：统计每个分数区间的人数（总分 35，每 7 分一个区间）
 const processDataForPie = (records) => {
   const ranges = [
-    { name: '0-7', min: 0, max: 7 },
-    { name: '7-14', min: 7, max: 14 },
-    { name: '14-21', min: 14, max: 21 },
-    { name: '21-28', min: 21, max: 28 },
-    { name: '28-35', min: 28, max: 35 }
+    { name: '0-20', min: 0, max: 20 },
+    { name: '20-40', min: 20, max: 40 },
+    { name: '40-60', min: 40, max: 60 },
+    { name: '60-80', min: 60, max: 80 },
+    { name: '80-100', min: 80, max: 100 }
   ];
   return ranges.map(range => ({
     name: range.name,

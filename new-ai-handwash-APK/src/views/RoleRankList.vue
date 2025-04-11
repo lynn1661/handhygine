@@ -148,8 +148,8 @@ const shortcuts = [
 ]
 
 
-const thresholdLight = 35 * 0.6; // 21 
-const thresholdDeep = 35 * 0.8;  // 28 
+const thresholdLight = 60; 
+const thresholdDeep = 80;  
 const headerStyle = () => {
   return {
     background: "var(--el-color-primary-light-5)", // 表头背景色
