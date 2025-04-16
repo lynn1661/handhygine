@@ -1,6 +1,5 @@
 const microServer = require("micro-server");
 const { datap, utils } = microServer.helper;
-const logger = microServer.logger;
 
 // 辅助函数：将 YYYY-MM-DD 格式转换为日期对象
 const parseDate = (dateStr) => {
@@ -18,8 +17,8 @@ const formatDateForQuery = (date) => {
 };
 
 const getRankList = async ({ data }) => {
-  logger.info("接收到的完整请求数据:", JSON.stringify(data, null, 2));
-  logger.info("Received role:", data.role);
+  console.log("接收到的完整请求数据:", JSON.stringify(data, null, 2));
+  console.log("Received role:", data.role);
   const role = data.role || "Doctor";
   
   let filter = {
@@ -30,7 +29,7 @@ const getRankList = async ({ data }) => {
 
   // 改进日期过滤逻辑，处理 start_time 字段
   if (data.dateRange && data.dateRange.start && data.dateRange.end) {
-    logger.info(`查询日期范围: ${data.dateRange.start} 到 ${data.dateRange.end}`);
+    console.log(`查询日期范围: ${data.dateRange.start} 到 ${data.dateRange.end}`);
     
     // 解析日期范围
     const startDate = parseDate(data.dateRange.start);
@@ -46,15 +45,15 @@ const getRankList = async ({ data }) => {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    // 构建正则表达式模式
+    // 构建正则表达式模式，匹配 "DD/M/YYYY 上午" 或 "DD/M/YYYY 下午" 格式
     const regexPattern = datePatterns.map(date => `^${date}`).join('|');
-    logger.info("正则表达式模式:", regexPattern);
+    console.log("正则表达式模式:", regexPattern);
     
     filter.start_time = {
       $regex: regexPattern
     };
     
-    logger.info("日期匹配模式:", datePatterns);
+    console.log("日期匹配模式:", datePatterns);
   } else {
     // 如果没有指定日期范围，默认筛选当天的记录
     const today = new Date();
@@ -65,7 +64,7 @@ const getRankList = async ({ data }) => {
     };
   }
   
-  logger.info("最终的查询条件:", JSON.stringify(filter, null, 2));
+  console.log("最终的查询条件:", JSON.stringify(filter, null, 2));
   
   // 构造排序条件：total 从高到低
   const sort = { total: -1 };
@@ -76,16 +75,16 @@ const getRankList = async ({ data }) => {
     role: role,
     total: { $exists: true }
   }, 0, 0, sort);
-  logger.info(`总共找到 ${allRecords.length} 条记录`);
+  console.log(`总共找到 ${allRecords.length} 条记录`);
   if (allRecords.length > 0) {
-    logger.info("所有记录的前5条 start_time:", allRecords.slice(0, 5).map(r => r.start_time));
+    console.log("所有记录的前5条 start_time:", allRecords.slice(0, 5).map(r => r.start_time));
   }
 
   // 查询满足条件的记录
   const records = await datap.mongo.read("user_info", filter, 0, 0, sort);
-  logger.info(`筛选后找到 ${records.length} 条记录`);
+  console.log(`筛选后找到 ${records.length} 条记录`);
   if (records.length > 0) {
-    logger.info("筛选后记录的前5条 start_time:", records.slice(0, 5).map(r => r.start_time));
+    console.log("筛选后记录的前5条 start_time:", records.slice(0, 5).map(r => r.start_time));
   }
 
   return {
@@ -95,8 +94,8 @@ const getRankList = async ({ data }) => {
 };
 
 const getAllRank = async ({ data }) => {
-  logger.info("Received accountID:", data.accountID);
-  logger.info("接收到的完整请求数据:", JSON.stringify(data, null, 2));
+  console.log("Received accountID:", data.accountID);
+  console.log("接收到的完整请求数据:", JSON.stringify(data, null, 2));
 
   let filter = {
     accountID: data.accountID,
@@ -105,7 +104,7 @@ const getAllRank = async ({ data }) => {
 
   // 改进日期过滤逻辑，处理 start_time 字段
   if (data.dateRange && data.dateRange.start && data.dateRange.end) {
-    logger.info(`查询日期范围: ${data.dateRange.start} 到 ${data.dateRange.end}`);
+    console.log(`查询日期范围: ${data.dateRange.start} 到 ${data.dateRange.end}`);
     
     // 解析日期范围
     const startDate = parseDate(data.dateRange.start);
@@ -121,15 +120,15 @@ const getAllRank = async ({ data }) => {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    // 构建正则表达式模式
+    // 构建正则表达式模式，匹配日期部分
     const regexPattern = datePatterns.map(date => `^${date}`).join('|');
-    logger.info("正则表达式模式:", regexPattern);
+    console.log("正则表达式模式:", regexPattern);
     
     filter.start_time = {
       $regex: regexPattern
     };
     
-    logger.info("日期匹配模式:", datePatterns);
+    console.log("日期匹配模式:", datePatterns);
   } else {
     // 如果没有指定日期范围，默认筛选当天的记录
     const today = new Date();
@@ -140,7 +139,7 @@ const getAllRank = async ({ data }) => {
     };
   }
   
-  logger.info("最终的查询条件:", JSON.stringify(filter, null, 2));
+  console.log("最终的查询条件:", JSON.stringify(filter, null, 2));
   
   // 构造排序条件：按照 total 字段降序排列
   const sort = { total: -1 };
@@ -150,16 +149,16 @@ const getAllRank = async ({ data }) => {
     accountID: data.accountID,
     total: { $exists: true }
   }, 0, 0, sort);
-  logger.info(`总共找到 ${allRecords.length} 条记录`);
+  console.log(`总共找到 ${allRecords.length} 条记录`);
   if (allRecords.length > 0) {
-    logger.info("所有记录的前5条 start_time:", allRecords.slice(0, 5).map(r => r.start_time));
+    console.log("所有记录的前5条 start_time:", allRecords.slice(0, 5).map(r => r.start_time));
   }
 
   // 查询满足条件的记录
   const records = await datap.mongo.read("user_info", filter, 0, 0, sort);
-  logger.info(`筛选后找到 ${records.length} 条记录`);
+  console.log(`筛选后找到 ${records.length} 条记录`);
   if (records.length > 0) {
-    logger.info("筛选后记录的前5条 start_time:", records.slice(0, 5).map(r => r.start_time));
+    console.log("筛选后记录的前5条 start_time:", records.slice(0, 5).map(r => r.start_time));
   }
   
   // 将结果按 role 分组并添加统计信息
