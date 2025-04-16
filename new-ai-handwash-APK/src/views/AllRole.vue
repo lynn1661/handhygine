@@ -94,6 +94,14 @@ const goBack = () => {
 const value = ref([new Date(), new Date()]);
 const shortcuts = [
   {
+    text: 'All Dates',
+    value: () => {
+      const start = new Date(2020, 0, 1) // 从2020年开始
+      const end = new Date(2030, 11, 31) // 到2030年结束
+      return [start, end]
+    },
+  },
+  {
     text: 'Last week',
     value: () => {
       const end = new Date()
@@ -138,25 +146,66 @@ const fetchRankData = async () => {
   let dateRange = null;
   if (value.value && value.value.length === 2) {
     const formatDate = (date) => {
-      const d = new Date(date);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
+      if (!date) return null;
+      try {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) {
+          console.error('无效的日期:', date);
+          return null;
+        }
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      } catch (error) {
+        console.error('日期格式化错误:', error);
+        return null;
+      }
     };
-    dateRange = {
-      start: formatDate(value.value[0]),
-      end: formatDate(value.value[1])
-    };
+    
+    const startDate = formatDate(value.value[0]);
+    const endDate = formatDate(value.value[1]);
+    
+    if (startDate && endDate) {
+      dateRange = {
+        start: startDate,
+        end: endDate
+      };
+      console.log('查询日期范围:', dateRange);
+    } else {
+      console.error('日期范围无效，使用默认值');
+    }
   }
-  // 调用 Vuex action，传递 accountID 和日期范围
-  const res = await store.dispatch("user/allrank", {
-    accountID,
-    dateRange
-  });
-  console.log("res from allrank:", res);
-  // 假设返回的 res.records 格式为：{ Doctor: [...], Nurse: [...], Allied Health: [...], Other: [...] }
-  rankData.value = res.records;
+  
+  loading.value = true;
+  try {
+    // 调用 Vuex action，传递 accountID 和日期范围
+    const res = await store.dispatch("user/allrank", {
+      accountID,
+      dateRange
+    });
+    console.log("返回的数据:", res);
+    if (res && res.records) {
+      // 假设返回的 res.records 格式为：{ Doctor: [...], Nurse: [...], Allied Health: [...], Other: [...] }
+      rankData.value = res.records;
+    } else {
+      console.error("返回的数据格式不正确:", res);
+      ElNotification({
+        title: '警告',
+        message: '数据格式不正确，图表可能无法正确显示',
+        type: 'warning',
+      });
+    }
+  } catch (error) {
+    console.error("获取排名数据失败:", error);
+    ElNotification({
+      title: '错误',
+      message: '获取排名数据失败，请重试',
+      type: 'error',
+    });
+  } finally {
+    loading.value = false;
+  }
 };
 
 // 将每个角色的记录数据转换为饼状图数据：统计每个分数区间的人数（总分 35，每 7 分一个区间）

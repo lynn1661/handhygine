@@ -119,6 +119,14 @@ const goBack = () => {
 const value = ref([new Date(), new Date()]);
 const shortcuts = [
   {
+    text: 'All Dates',
+    value: () => {
+      const start = new Date(2020, 0, 1) // 从2020年开始
+      const end = new Date(2030, 11, 31) // 到2030年结束
+      return [start, end]
+    },
+  },
+  {
     text: 'Last week',
     value: () => {
       const end = new Date()
@@ -170,23 +178,56 @@ const fetchRankList = async () => {
   let dateRange = null;
   if (value.value && value.value.length === 2) {
     const formatDate = (date) => {
-      const d = new Date(date);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${year}-${month}-${day}`;
+      if (!date) return null;
+      try {
+        const d = new Date(date);
+        if (isNaN(d.getTime())) {
+          console.error('无效的日期:', date);
+          return null;
+        }
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      } catch (error) {
+        console.error('日期格式化错误:', error);
+        return null;
+      }
     };
-    dateRange = {
-      start: formatDate(value.value[0]),
-      end: formatDate(value.value[1])
-    };
+    
+    const startDate = formatDate(value.value[0]);
+    const endDate = formatDate(value.value[1]);
+    
+    if (startDate && endDate) {
+      dateRange = {
+        start: startDate,
+        end: endDate
+      };
+      console.log('查询日期范围:', dateRange);
+    } else {
+      console.error('日期范围无效，使用默认值');
+    }
   }
+  
   const accountID = localStorage.getItem("accountID");
-  rankList.value = await store.dispatch("user/ranklist", {
-    accountID: accountID,
-    role: role,
-    dateRange
-  });
+  loading.value = true;
+  try {
+    rankList.value = await store.dispatch("user/ranklist", {
+      accountID: accountID,
+      role: role,
+      dateRange
+    });
+    console.log("获取到的数据:", rankList.value);
+  } catch (error) {
+    console.error("获取排名列表失败:", error);
+    ElNotification({
+      title: '错误',
+      message: '获取排名数据失败，请重试',
+      type: 'error',
+    });
+  } finally {
+    loading.value = false;
+  }
 };
 onMounted(async () => {
   console.log("Role from query:", router.currentRoute.value.query.role);
