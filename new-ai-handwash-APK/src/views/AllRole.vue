@@ -388,12 +388,14 @@ watch(value, async () => {
 @import "@/styles/main.scss";
 .home {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   background-image: url("../assets/bg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+  position: relative;
+  overflow-y: auto;
   &-top {
     display: flex;
     justify-content: space-between;
@@ -416,7 +418,6 @@ watch(value, async () => {
     .back-home {
       width: 100px;
       height: 100px;
-      //margin-right: 10px;
       img {
         margin-top: 10px;
         width: 100%;
@@ -425,12 +426,12 @@ watch(value, async () => {
     }
   }
   &-div {
-    //background-image: url("../assets/divBG.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
     margin: 0px 63px 23px 63px;
+    min-height: calc(100vh - 23px);
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    padding: 20px;
   }
 }
 
@@ -443,7 +444,6 @@ watch(value, async () => {
 
 .date-picker .block {
   padding: 20px 0;
-  //margin-top: 10px;
   text-align: center;
   border-right: solid 1px var(--el-border-color);
   flex: 1;
