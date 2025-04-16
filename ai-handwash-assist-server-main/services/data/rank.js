@@ -1,19 +1,16 @@
 const microServer = require("micro-server");
 const { datap, utils } = microServer.helper;
 
-// 辅助函数：将 YYYY-MM-DD 格式转换为日期对象
-const parseDate = (dateStr) => {
+// 辅助函数：将 YYYY-MM-DD 格式转换为 ISO 日期字符串
+const getISODateRange = (dateStr, isEnd = false) => {
   const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day);
-};
-
-// 辅助函数：格式化日期为查询模式
-const formatDateForQuery = (date) => {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  // 返回日期部分，不包含时间
-  return `${day}/${month}/${year}`;
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (isEnd) {
+    date.setUTCHours(23, 59, 59, 999);
+  } else {
+    date.setUTCHours(0, 0, 0, 0);
+  }
+  return date.toISOString();
 };
 
 const getRankList = async ({ data }) => {
@@ -27,40 +24,29 @@ const getRankList = async ({ data }) => {
     total: { $exists: true }
   };
 
-  // 改进日期过滤逻辑，处理 start_time 字段
+  // 使用 lastModified 字段进行日期过滤
   if (data.dateRange && data.dateRange.start && data.dateRange.end) {
     console.log(`查询日期范围: ${data.dateRange.start} 到 ${data.dateRange.end}`);
     
-    // 解析日期范围
-    const startDate = parseDate(data.dateRange.start);
-    const endDate = parseDate(data.dateRange.end);
-    endDate.setHours(23, 59, 59); // 设置结束日期为当天的最后一刻
+    // 转换为 ISO 日期格式
+    const startDate = getISODateRange(data.dateRange.start);
+    const endDate = getISODateRange(data.dateRange.end, true);
     
-    // 生成日期范围内的所有日期
-    const datePatterns = [];
-    const currentDate = new Date(startDate);
+    console.log("查询时间范围:", startDate, "到", endDate);
     
-    while (currentDate <= endDate) {
-      datePatterns.push(formatDateForQuery(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    // 构建正则表达式模式，匹配 "DD/M/YYYY 上午" 或 "DD/M/YYYY 下午" 格式
-    const regexPattern = datePatterns.map(date => `^${date} (上午|下午)`).join('|');
-    console.log("正则表达式模式:", regexPattern);
-    
-    filter.start_time = {
-      $regex: regexPattern
+    filter.lastModified = {
+      $gte: startDate,
+      $lte: endDate
     };
-    
-    console.log("日期匹配模式:", datePatterns);
   } else {
     // 如果没有指定日期范围，默认筛选当天的记录
     const today = new Date();
-    const todayPattern = formatDateForQuery(today);
+    const startOfDay = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0));
+    const endOfDay = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999));
     
-    filter.start_time = {
-      $regex: `^${todayPattern} (上午|下午)`
+    filter.lastModified = {
+      $gte: startOfDay.toISOString(),
+      $lte: endOfDay.toISOString()
     };
   }
   
@@ -73,7 +59,10 @@ const getRankList = async ({ data }) => {
   const records = await datap.mongo.read("user_info", filter, 0, 0, sort);
   console.log(`找到 ${records.length} 条记录`);
   if (records.length > 0) {
-    console.log("示例记录的 start_time:", records[0].start_time);
+    console.log("示例记录:", {
+      lastModified: records[0].lastModified,
+      start_time: records[0].start_time
+    });
   }
 
   return {
@@ -91,40 +80,29 @@ const getAllRank = async ({ data }) => {
     total: { $exists: true }
   };
 
-  // 改进日期过滤逻辑，处理 start_time 字段
+  // 使用 lastModified 字段进行日期过滤
   if (data.dateRange && data.dateRange.start && data.dateRange.end) {
     console.log(`查询日期范围: ${data.dateRange.start} 到 ${data.dateRange.end}`);
     
-    // 解析日期范围
-    const startDate = parseDate(data.dateRange.start);
-    const endDate = parseDate(data.dateRange.end);
-    endDate.setHours(23, 59, 59); // 设置结束日期为当天的最后一刻
+    // 转换为 ISO 日期格式
+    const startDate = getISODateRange(data.dateRange.start);
+    const endDate = getISODateRange(data.dateRange.end, true);
     
-    // 生成日期范围内的所有日期
-    const datePatterns = [];
-    const currentDate = new Date(startDate);
+    console.log("查询时间范围:", startDate, "到", endDate);
     
-    while (currentDate <= endDate) {
-      datePatterns.push(formatDateForQuery(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    // 构建正则表达式模式，匹配 "DD/M/YYYY 上午" 或 "DD/M/YYYY 下午" 格式
-    const regexPattern = datePatterns.map(date => `^${date} (上午|下午)`).join('|');
-    console.log("正则表达式模式:", regexPattern);
-    
-    filter.start_time = {
-      $regex: regexPattern
+    filter.lastModified = {
+      $gte: startDate,
+      $lte: endDate
     };
-    
-    console.log("日期匹配模式:", datePatterns);
   } else {
     // 如果没有指定日期范围，默认筛选当天的记录
     const today = new Date();
-    const todayPattern = formatDateForQuery(today);
+    const startOfDay = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0));
+    const endOfDay = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999));
     
-    filter.start_time = {
-      $regex: `^${todayPattern} (上午|下午)`
+    filter.lastModified = {
+      $gte: startOfDay.toISOString(),
+      $lte: endOfDay.toISOString()
     };
   }
   
@@ -137,7 +115,10 @@ const getAllRank = async ({ data }) => {
   const records = await datap.mongo.read("user_info", filter, 0, 0, sort);
   console.log(`找到 ${records.length} 条记录`);
   if (records.length > 0) {
-    console.log("示例记录的 start_time:", records[0].start_time);
+    console.log("示例记录:", {
+      lastModified: records[0].lastModified,
+      start_time: records[0].start_time
+    });
   }
   
   // 将结果按 role 分组并添加统计信息
