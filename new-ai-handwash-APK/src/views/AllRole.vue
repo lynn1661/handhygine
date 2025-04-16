@@ -23,7 +23,7 @@
       </div>
       <div class="date-picker">
         <div class="block">
-          <span class="demonstration">Date</span>
+          <span class="demonstration">Date Range</span>
           <el-date-picker
             v-model="value"
             type="daterange"
@@ -32,7 +32,19 @@
             start-placeholder="Start date"
             end-placeholder="End date"
             :shortcuts="shortcuts"
+            value-format="YYYY-MM-DD"
           />
+        </div>
+      </div>
+      <div class="summary-stats" v-if="Object.keys(rankData).length > 0">
+        <h2>Overall Statistics</h2>
+        <div class="stats-grid">
+          <div v-for="(data, role) in rankData" :key="role" class="stat-card">
+            <h3>{{ role }}</h3>
+            <p>Total Records: {{ data.stats.count }}</p>
+            <p>Average Score: {{ data.stats.average }}</p>
+            <p>Score Range: {{ data.stats.min }} - {{ data.stats.max }}</p>
+          </div>
         </div>
       </div>
       <div class="charts-container">
@@ -207,19 +219,25 @@ const fetchRankData = async () => {
 
 // 将每个角色的记录数据转换为饼状图数据：统计每个分数区间的人数（总分 35，每 7 分一个区间）
 const processDataForPie = (roleData) => {
-  if (!roleData || !roleData.scores) return [];
+  if (!roleData || !roleData.scores || !Array.isArray(roleData.scores)) {
+    console.error('Invalid role data:', roleData);
+    return [];
+  }
   
   const ranges = [
-    { name: '0-20 (Poor)', min: 0, max: 20 },
-    { name: '20-40 (Below Average)', min: 20, max: 40 },
-    { name: '40-60 (Average)', min: 40, max: 60 },
-    { name: '60-80 (Good)', min: 60, max: 80 },
-    { name: '80-100 (Excellent)', min: 80, max: 100 }
+    { name: '0-20 (Poor)', min: 0, max: 20, color: '#ff4d4f' },
+    { name: '20-40 (Below Average)', min: 20, max: 40, color: '#ffa940' },
+    { name: '40-60 (Average)', min: 40, max: 60, color: '#fadb14' },
+    { name: '60-80 (Good)', min: 60, max: 80, color: '#73d13d' },
+    { name: '80-100 (Excellent)', min: 80, max: 100, color: '#40a9ff' }
   ];
   
   return ranges.map(range => ({
     name: range.name,
-    value: roleData.scores.filter(score => score >= range.min && score < range.max).length
+    value: roleData.scores.filter(score => score >= range.min && score < range.max).length,
+    itemStyle: {
+      color: range.color
+    }
   }));
 };
 
@@ -251,7 +269,10 @@ const initCharts = async () => {
         },
         tooltip: {
           trigger: 'item',
-          formatter: '{b}: {c} ({d}%)'
+          formatter: (params) => {
+            const percentage = ((params.value / roleData.stats.count) * 100).toFixed(1);
+            return `${params.name}\nCount: ${params.value}\nPercentage: ${percentage}%`;
+          }
         },
         legend: {
           orient: 'vertical',
@@ -277,8 +298,18 @@ const initCharts = async () => {
             },
             label: {
               show: true,
-              formatter: '{b}: {c}\n({d}%)',
-              fontSize: 12
+              position: 'outside',
+              formatter: (params) => {
+                const percentage = ((params.value / roleData.stats.count) * 100).toFixed(1);
+                return `${params.name}\n${params.value} (${percentage}%)`;
+              },
+              fontSize: 12,
+              color: '#606266'
+            },
+            labelLine: {
+              show: true,
+              length: 10,
+              length2: 10
             },
             emphasis: {
               label: {
@@ -297,6 +328,11 @@ const initCharts = async () => {
         ]
       };
       chart.setOption(option);
+      
+      // 添加窗口大小变化时的自适应
+      window.addEventListener('resize', () => {
+        chart.resize();
+      });
     }
   }
 };
@@ -392,26 +428,59 @@ watch(value, async () => {
   font-weight: 1000;
   margin-bottom: 5px;
 }
+.summary-stats {
+  margin: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+
+  h2 {
+    text-align: center;
+    color: #606266;
+    margin-bottom: 20px;
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  padding: 15px;
+  background: #f5f7fa;
+  border-radius: 8px;
+  text-align: center;
+
+  h3 {
+    color: #409EFF;
+    margin-bottom: 10px;
+  }
+
+  p {
+    margin: 5px 0;
+    color: #606266;
+  }
+}
+
 .charts-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   gap: 20px;
   padding: 20px;
   margin-top: 20px;
 }
+
 .chart {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 12px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   padding: 20px;
-  height: 400px;
+  height: 450px;
 }
-.chart-title {
-  text-align: center;
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
+
 .chart-content {
   width: 100%;
   height: 100%;

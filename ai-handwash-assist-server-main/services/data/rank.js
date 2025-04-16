@@ -1,6 +1,12 @@
 const microServer = require("micro-server");
 const { datap, utils } = microServer.helper;
 
+// 辅助函数：将 YYYY-MM-DD 格式转换为日期对象
+const parseDate = (dateStr) => {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  return new Date(year, month - 1, day);
+};
+
 const getRankList = async ({ data }) => {
   console.log("接收到的完整请求数据:", JSON.stringify(data, null, 2));
   console.log("Received role:", data.role);
@@ -12,30 +18,46 @@ const getRankList = async ({ data }) => {
     total: { $exists: true }
   };
 
-  // 改进日期过滤逻辑
+  // 改进日期过滤逻辑，处理 start_time 字段
   if (data.dateRange && data.dateRange.start && data.dateRange.end) {
     console.log(`查询日期范围: ${data.dateRange.start} 到 ${data.dateRange.end}`);
     
-    // 将日期字符串转换为 Date 对象进行比较
-    const startDate = new Date(data.dateRange.start);
-    const endDate = new Date(data.dateRange.end);
-    endDate.setHours(23, 59, 59, 999); // 设置结束日期为当天的最后一刻
+    // 解析日期范围
+    const startDate = parseDate(data.dateRange.start);
+    const endDate = parseDate(data.dateRange.end);
     
-    filter.date = {
-      $gte: data.dateRange.start,
-      $lte: data.dateRange.end
+    // 构建日期匹配模式
+    const datePatterns = [];
+    const currentDate = new Date(startDate);
+    
+    // 生成日期范围内的所有日期匹配模式
+    while (currentDate <= endDate) {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth() + 1;
+      const day = currentDate.getDate();
+      
+      // 匹配 "YYYY/M/D" 格式，考虑上午/下午的情况
+      datePatterns.push(`${year}/${month}/${day}`);
+      
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // 使用 $regex 匹配任意一个日期模式
+    filter.start_time = {
+      $regex: new RegExp(datePatterns.join('|')),
     };
+    
+    console.log("日期匹配模式:", datePatterns);
   } else {
     // 如果没有指定日期范围，默认筛选当天的记录
     const today = new Date();
     const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    const formattedDate = `${year}-${month}-${day}`;
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
     
-    filter.date = {
-      $gte: formattedDate,
-      $lte: `${formattedDate} 23:59:59`
+    // 匹配今天的日期格式
+    filter.start_time = {
+      $regex: new RegExp(`${year}/${month}/${day}`),
     };
   }
   
@@ -63,30 +85,46 @@ const getAllRank = async ({ data }) => {
     total: { $exists: true }
   };
 
-  // 改进日期过滤逻辑
+  // 改进日期过滤逻辑，处理 start_time 字段
   if (data.dateRange && data.dateRange.start && data.dateRange.end) {
     console.log(`查询日期范围: ${data.dateRange.start} 到 ${data.dateRange.end}`);
     
-    // 将日期字符串转换为 Date 对象进行比较
-    const startDate = new Date(data.dateRange.start);
-    const endDate = new Date(data.dateRange.end);
-    endDate.setHours(23, 59, 59, 999); // 设置结束日期为当天的最后一刻
+    // 解析日期范围
+    const startDate = parseDate(data.dateRange.start);
+    const endDate = parseDate(data.dateRange.end);
     
-    filter.date = {
-      $gte: data.dateRange.start,
-      $lte: data.dateRange.end
+    // 构建日期匹配模式
+    const datePatterns = [];
+    const currentDate = new Date(startDate);
+    
+    // 生成日期范围内的所有日期匹配模式
+    while (currentDate <= endDate) {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth() + 1;
+      const day = currentDate.getDate();
+      
+      // 匹配 "YYYY/M/D" 格式，考虑上午/下午的情况
+      datePatterns.push(`${year}/${month}/${day}`);
+      
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    // 使用 $regex 匹配任意一个日期模式
+    filter.start_time = {
+      $regex: new RegExp(datePatterns.join('|')),
     };
+    
+    console.log("日期匹配模式:", datePatterns);
   } else {
     // 如果没有指定日期范围，默认筛选当天的记录
     const today = new Date();
     const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    const formattedDate = `${year}-${month}-${day}`;
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
     
-    filter.date = {
-      $gte: formattedDate,
-      $lte: `${formattedDate} 23:59:59`
+    // 匹配今天的日期格式
+    filter.start_time = {
+      $regex: new RegExp(`${year}/${month}/${day}`),
     };
   }
   
@@ -103,20 +141,26 @@ const getAllRank = async ({ data }) => {
   const grouped = records.reduce((acc, record) => {
     const role = record.role || "Unknown";
     if (!acc[role]) {
-      acc[role] = [];
+      acc[role] = {
+        records: [],
+        scores: []
+      };
     }
-    acc[role].push(record.total);
+    acc[role].records.push(record);
+    acc[role].scores.push(record.total);
     return acc;
   }, {});
 
   // 计算每个角色的统计信息
   const stats = {};
-  for (const [role, scores] of Object.entries(grouped)) {
+  for (const [role, data] of Object.entries(grouped)) {
+    const scores = data.scores;
     const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
     const max = Math.max(...scores);
     const min = Math.min(...scores);
     stats[role] = {
-      scores,
+      records: data.records,
+      scores: scores,
       stats: {
         count: scores.length,
         average: Math.round(avg * 100) / 100,
