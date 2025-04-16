@@ -36,10 +36,7 @@
         </div>
       </div>
       <div class="charts-container">
-        <!-- 遍历每个角色数据，生成对应的饼状图容器 -->
-        <div v-for="(records, role) in rankData" :key="role" class="chart">
-          
-          <!-- 每个图表容器，需要一个独立的 ref 标识 -->
+        <div v-for="(roleData, role) in rankData" :key="role" class="chart">
           <div :class="role.replace(/\s+/g, '-').toLowerCase() + '-chart'" class="chart-content"></div>
         </div>
       </div>
@@ -209,72 +206,93 @@ const fetchRankData = async () => {
 };
 
 // 将每个角色的记录数据转换为饼状图数据：统计每个分数区间的人数（总分 35，每 7 分一个区间）
-const processDataForPie = (records) => {
+const processDataForPie = (roleData) => {
+  if (!roleData || !roleData.scores) return [];
+  
   const ranges = [
-    { name: '0-20', min: 0, max: 20 },
-    { name: '20-40', min: 20, max: 40 },
-    { name: '40-60', min: 40, max: 60 },
-    { name: '60-80', min: 60, max: 80 },
-    { name: '80-100', min: 80, max: 100 }
+    { name: '0-20 (Poor)', min: 0, max: 20 },
+    { name: '20-40 (Below Average)', min: 20, max: 40 },
+    { name: '40-60 (Average)', min: 40, max: 60 },
+    { name: '60-80 (Good)', min: 60, max: 80 },
+    { name: '80-100 (Excellent)', min: 80, max: 100 }
   ];
+  
   return ranges.map(range => ({
     name: range.name,
-    value: records.filter(total => total >= range.min && total < range.max).length
+    value: roleData.scores.filter(score => score >= range.min && score < range.max).length
   }));
 };
 
 // 初始化并渲染饼状图
 const initCharts = async () => {
   await nextTick();
-  for (const role in rankData.value) {
-    const records = rankData.value[role];
-    const pieData = processDataForPie(records);
-    // 查找对应角色的图表容器，假设容器 class 为 "Doctor-chart" 等
+  for (const [role, roleData] of Object.entries(rankData.value)) {
+    const pieData = processDataForPie(roleData);
     const className = role.replace(/\s+/g, '-').toLowerCase();
     const chartElement = document.querySelector(`.${className}-chart`);
     if (chartElement) {
       const chart = echarts.init(chartElement);
       const option = {
-        color: [
-          'rgb(197.7, 225.9, 255)',
-          'rgb(159.5, 206.5, 255)', 
-          'rgb(121.3, 187.1, 255)', 
-          '#409EFF',
-          'rgb(51.2, 126.4, 204)'
-          ], 
         title: {
-          text: role,
+          text: `${role} Performance Distribution`,
+          subtext: `Total Records: ${roleData.stats.count}\nAverage Score: ${roleData.stats.average}\nHighest: ${roleData.stats.max}\nLowest: ${roleData.stats.min}`,
           left: 'center',
+          top: 0,
           textStyle: {
-            color: '#606266'
+            color: '#606266',
+            fontSize: 16,
+            fontWeight: 'bold'
+          },
+          subtextStyle: {
+            color: '#909399',
+            fontSize: 12,
+            align: 'center'
           }
         },
         tooltip: {
-          trigger: 'item'
+          trigger: 'item',
+          formatter: '{b}: {c} ({d}%)'
         },
         legend: {
           orient: 'vertical',
-          left: 'left'
+          left: 10,
+          top: 'center',
+          itemWidth: 10,
+          itemHeight: 10,
+          textStyle: {
+            fontSize: 12
+          }
         },
         series: [
           {
             name: 'Score Distribution',
             type: 'pie',
-            radius: '50%',
-            data: pieData,
-            label: {
-              show: false,
+            radius: ['40%', '70%'],
+            center: ['60%', '60%'],
+            avoidLabelOverlap: true,
+            itemStyle: {
+              borderRadius: 10,
+              borderColor: '#fff',
+              borderWidth: 2
             },
-            labelLine: {
-              show: false
+            label: {
+              show: true,
+              formatter: '{b}: {c}\n({d}%)',
+              fontSize: 12
             },
             emphasis: {
+              label: {
+                show: true,
+                fontSize: 14,
+                fontWeight: 'bold'
+              },
               itemStyle: {
                 shadowBlur: 10,
                 shadowOffsetX: 0,
                 shadowColor: 'rgba(0, 0, 0, 0.5)'
               }
-            }
+            },
+            data: pieData
           }
         ]
       };
@@ -375,18 +393,18 @@ watch(value, async () => {
   margin-bottom: 5px;
 }
 .charts-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 20px;
+  padding: 20px;
   margin-top: 20px;
 }
 .chart {
-  width: 45%;
-  height: 350px;
-  margin-bottom: 20px;
-  //border: 1px solid #ccc;
-  //border-radius: 8px;
-  padding: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  height: 400px;
 }
 .chart-title {
   text-align: center;
@@ -396,6 +414,6 @@ watch(value, async () => {
 }
 .chart-content {
   width: 100%;
-  height: calc(100% - 40px);
+  height: 100%;
 }
 </style>
