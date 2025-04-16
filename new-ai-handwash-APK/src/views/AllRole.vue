@@ -41,14 +41,21 @@
         <div class="stats-grid">
           <div v-for="(data, role) in rankData" :key="role" class="stat-card">
             <h3>{{ role }}</h3>
-            <p>Total Records: {{ data.stats.count }}</p>
-            <p>Average Score: {{ data.stats.average }}</p>
-            <p>Score Range: {{ data.stats.min }} - {{ data.stats.max }}</p>
+            <template v-if="Array.isArray(data)">
+              <p>Total Records: {{ data.length }}</p>
+              <p>Average Score: {{ calculateStats(data).average }}</p>
+              <p>Score Range: {{ calculateStats(data).min }} - {{ calculateStats(data).max }}</p>
+            </template>
+            <template v-else>
+              <p>Total Records: {{ data.stats?.count || 0 }}</p>
+              <p>Average Score: {{ data.stats?.average || 0 }}</p>
+              <p>Score Range: {{ data.stats?.min || 0 }} - {{ data.stats?.max || 0 }}</p>
+            </template>
           </div>
         </div>
       </div>
       <div class="charts-container">
-        <div v-for="(roleData, role) in rankData" :key="role" class="chart">
+        <div v-for="(data, role) in rankData" :key="role" class="chart">
           <div :class="role.replace(/\s+/g, '-').toLowerCase() + '-chart'" class="chart-content"></div>
         </div>
       </div>
@@ -217,10 +224,29 @@ const fetchRankData = async () => {
   }
 };
 
-// 将每个角色的记录数据转换为饼状图数据：统计每个分数区间的人数（总分 35，每 7 分一个区间）
-const processDataForPie = (roleData) => {
-  if (!roleData || !roleData.scores || !Array.isArray(roleData.scores)) {
-    console.error('Invalid role data:', roleData);
+// 计算统计信息
+const calculateStats = (scores) => {
+  if (!Array.isArray(scores) || scores.length === 0) {
+    return {
+      count: 0,
+      average: 0,
+      max: 0,
+      min: 0
+    };
+  }
+  
+  return {
+    count: scores.length,
+    average: Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 100) / 100,
+    max: Math.max(...scores),
+    min: Math.min(...scores)
+  };
+};
+
+// 处理饼图数据
+const processDataForPie = (scores) => {
+  if (!Array.isArray(scores)) {
+    console.error('Invalid scores data:', scores);
     return [];
   }
   
@@ -234,7 +260,7 @@ const processDataForPie = (roleData) => {
   
   return ranges.map(range => ({
     name: range.name,
-    value: roleData.scores.filter(score => score >= range.min && score < range.max).length,
+    value: scores.filter(score => score >= range.min && score < range.max).length,
     itemStyle: {
       color: range.color
     }
@@ -244,16 +270,22 @@ const processDataForPie = (roleData) => {
 // 初始化并渲染饼状图
 const initCharts = async () => {
   await nextTick();
-  for (const [role, roleData] of Object.entries(rankData.value)) {
-    const pieData = processDataForPie(roleData);
+  
+  for (const [role, data] of Object.entries(rankData.value)) {
+    // 获取分数数组和统计信息
+    const scores = Array.isArray(data) ? data : (data.scores || []);
+    const stats = Array.isArray(data) ? calculateStats(data) : (data.stats || calculateStats(scores));
+    
+    const pieData = processDataForPie(scores);
     const className = role.replace(/\s+/g, '-').toLowerCase();
     const chartElement = document.querySelector(`.${className}-chart`);
+    
     if (chartElement) {
       const chart = echarts.init(chartElement);
       const option = {
         title: {
           text: `${role} Performance Distribution`,
-          subtext: `Total Records: ${roleData.stats.count}\nAverage Score: ${roleData.stats.average}\nHighest: ${roleData.stats.max}\nLowest: ${roleData.stats.min}`,
+          subtext: `Total Records: ${stats.count}\nAverage Score: ${stats.average}\nHighest: ${stats.max}\nLowest: ${stats.min}`,
           left: 'center',
           top: 0,
           textStyle: {
@@ -270,7 +302,7 @@ const initCharts = async () => {
         tooltip: {
           trigger: 'item',
           formatter: (params) => {
-            const percentage = ((params.value / roleData.stats.count) * 100).toFixed(1);
+            const percentage = ((params.value / stats.count) * 100).toFixed(1);
             return `${params.name}\nCount: ${params.value}\nPercentage: ${percentage}%`;
           }
         },
@@ -300,7 +332,7 @@ const initCharts = async () => {
               show: true,
               position: 'outside',
               formatter: (params) => {
-                const percentage = ((params.value / roleData.stats.count) * 100).toFixed(1);
+                const percentage = ((params.value / stats.count) * 100).toFixed(1);
                 return `${params.name}\n${params.value} (${percentage}%)`;
               },
               fontSize: 12,
