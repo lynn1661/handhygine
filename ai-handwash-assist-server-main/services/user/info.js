@@ -2,13 +2,6 @@ const microServer = require("micro-server");
 const { datap,utils } = microServer.helper;
 const isLogEnabled=require('micro-server').config.log===true;
 const bcrypt = require('bcrypt');
-const storedHashedPassword = "$2b$10$2w9C6rCedSuCFls1x4BcU.iS2XUAZ8V4.BZ35DASFwYcbyTlMOLwK";
-
-const date = new Date();
-const year = date.getFullYear();
-const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要加1并补0
-const day = String(date.getDate()).padStart(2, '0');
-const formattedDate = `${year}-${month}-${day}`; // 格式为 "2025-03-10"
 
 const login = async ({ data }) => {
   // 验证必须字段： accountID 和 password
@@ -37,9 +30,7 @@ const login = async ({ data }) => {
     err.code = 401;
     throw err;
   }
-  
 };
-
 
 const fill=async({data})=>{
     if(Object.keys(data).indexOf('accountID')<0){
@@ -56,10 +47,9 @@ const fill=async({data})=>{
         accountID:data.accountID,
         userID:data.userID,
         role:data.role,
-        date: formattedDate,
         start_time:new Date().toLocaleString("zh-HK", {
             timeZone: "Asia/Hong_Kong",
-          }),
+        }),
     }
     const res=await datap.mongo.create('user_info',obj);
     if(!res.acknowledged){
