@@ -36,15 +36,18 @@ const getRankList = async ({ data }) => {
       const month = currentDate.getMonth() + 1;
       const day = currentDate.getDate();
       
-      // 匹配 "YYYY/M/D" 格式，考虑上午/下午的情况
-      datePatterns.push(`${year}/${month}/${day}`);
+      // 匹配 "DD/MM/YYYY" 格式，考虑上午/下午的情况
+      datePatterns.push(`${day}/${month}/${year}`);
       
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
     // 使用 $regex 匹配任意一个日期模式
+    const regexPattern = datePatterns.map(date => `^${date}`).join('|');
+    console.log("正则表达式模式:", regexPattern);
+    
     filter.start_time = {
-      $regex: new RegExp(datePatterns.join('|')),
+      $regex: regexPattern
     };
     
     console.log("日期匹配模式:", datePatterns);
@@ -55,9 +58,10 @@ const getRankList = async ({ data }) => {
     const month = today.getMonth() + 1;
     const day = today.getDate();
     
-    // 匹配今天的日期格式
+    // 匹配今天的日期格式 "DD/MM/YYYY"
+    const todayPattern = `^${day}/${month}/${year}`;
     filter.start_time = {
-      $regex: new RegExp(`${year}/${month}/${day}`),
+      $regex: todayPattern
     };
   }
   
@@ -103,15 +107,18 @@ const getAllRank = async ({ data }) => {
       const month = currentDate.getMonth() + 1;
       const day = currentDate.getDate();
       
-      // 匹配 "YYYY/M/D" 格式，考虑上午/下午的情况
-      datePatterns.push(`${year}/${month}/${day}`);
+      // 匹配 "DD/MM/YYYY" 格式，考虑上午/下午的情况
+      datePatterns.push(`${day}/${month}/${year}`);
       
       currentDate.setDate(currentDate.getDate() + 1);
     }
     
     // 使用 $regex 匹配任意一个日期模式
+    const regexPattern = datePatterns.map(date => `^${date}`).join('|');
+    console.log("正则表达式模式:", regexPattern);
+    
     filter.start_time = {
-      $regex: new RegExp(datePatterns.join('|')),
+      $regex: regexPattern
     };
     
     console.log("日期匹配模式:", datePatterns);
@@ -122,9 +129,10 @@ const getAllRank = async ({ data }) => {
     const month = today.getMonth() + 1;
     const day = today.getDate();
     
-    // 匹配今天的日期格式
+    // 匹配今天的日期格式 "DD/MM/YYYY"
+    const todayPattern = `^${day}/${month}/${year}`;
     filter.start_time = {
-      $regex: new RegExp(`${year}/${month}/${day}`),
+      $regex: todayPattern
     };
   }
   
