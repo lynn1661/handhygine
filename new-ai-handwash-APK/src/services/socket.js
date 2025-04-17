@@ -3,7 +3,7 @@ let socket = null;
 let res = null;
 export function createConnect(message, currentStep) {
   if (!socket) { 
-    socket = io("https://ai.polyuhandhygiene.com");
+    socket = io("https://ai1.polyuhandhygiene.com");
     socket.on("connect", () => {
       console.log("Socket connected");
       socket.on("message", (data) => {
