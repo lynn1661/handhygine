@@ -493,6 +493,12 @@ onMounted(() => {
       videoElement.classList.toggle("selfie", options.selfieMode);
       hands.setOptions(options);
     });
+  
+  // 保存hands实例到window对象，以便在组件卸载时释放
+  window.handsInstance = hands;
+  
+  // 保存视频元素引用，以便在组件卸载时停止视频流
+  window.videoElement = videoElement;
 });
 watch(countdownStarted, (newVal) => {
   if (newVal) {
@@ -512,6 +518,92 @@ const backHome = () => {
 };
 onUnmounted(() => {
   // 组件卸载前的清理操作
+  console.log("正在清理Hands5.vue组件资源...");
+  
+  // 1. 清理MediaPipe hands实例
+  if (window.handsInstance) {
+    try {
+      // 关闭MediaPipe实例
+      window.handsInstance.close();
+      console.log("MediaPipe Hands实例已关闭");
+    } catch (error) {
+      console.error("关闭MediaPipe Hands实例时出错:", error);
+    }
+    window.handsInstance = null;
+  }
+
+  // 2. 停止视频流
+  if (window.videoElement && window.videoElement.srcObject) {
+    try {
+      // 获取所有轨道
+      const tracks = window.videoElement.srcObject.getTracks();
+      
+      // 停止每个轨道
+      tracks.forEach(track => {
+        track.stop();
+      });
+      
+      // 清除视频源
+      window.videoElement.srcObject = null;
+      console.log("视频流已停止并清理");
+    } catch (error) {
+      console.error("停止视频流时出错:", error);
+    }
+  }
+  
+  // 3. 停止MediaRecorder录制
+  if (mediaRecorder.value && mediaRecorder.value.state === "recording") {
+    try {
+      mediaRecorder.value.stop();
+      console.log("MediaRecorder已停止");
+    } catch (error) {
+      console.error("停止MediaRecorder时出错:", error);
+    }
+  }
+  
+  // 4. 清理stream资源
+  if (stream.value) {
+    try {
+      const tracks = stream.value.getTracks();
+      tracks.forEach(track => {
+        track.stop();
+      });
+      console.log("Stream流已停止");
+    } catch (error) {
+      console.error("清理Stream时出错:", error);
+    }
+    stream.value = null;
+  }
+  
+  // 5. 断开socket连接
+  try {
+    disconnect();
+    console.log("Socket连接已断开");
+  } catch (error) {
+    console.error("断开Socket连接时出错:", error);
+  }
+  
+  // 6. 清除计时器
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+    console.log("计时器已清理");
+  }
+  
+  // 7. 释放Blob URL资源
+  if (videoUrl.value) {
+    try {
+      URL.revokeObjectURL(videoUrl.value);
+      console.log("Blob URL已释放");
+    } catch (error) {
+      console.error("释放Blob URL时出错:", error);
+    }
+    videoUrl.value = "";
+  }
+  
+  // 8. 清空数据数组
+  recordedChunks.value = [];
+  resList.length = 0;
 });
 </script>
 <style lang="scss" scoped>
