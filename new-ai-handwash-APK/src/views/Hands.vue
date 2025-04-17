@@ -64,7 +64,7 @@ import * as controls from "@mediapipe/control_utils";
 import * as mpHands from "@mediapipe/hands";
 import * as drawingUtils from "@mediapipe/drawing_utils";
 import DeviceDetector from "device-detector-js";
-import { createConnect, disconnect, sendLog } from "../services/socket";
+import { createConnect, disconnect, sendLog } from "../services/socketAdapter";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { getTime } from "../utils/formatData";
@@ -363,7 +363,7 @@ onMounted(() => {
     if (results.multiHandLandmarks.length === 0) {
       startNumber = 0;
       endNumber = 25;
-      disconnect();
+      console.log("未检测到手部，但保持Socket连接");
     }
     canvasCtx.restore();
     if (results.multiHandWorldLandmarks) {
@@ -404,35 +404,63 @@ onMounted(() => {
     storedData.push(results);
     if (firstType) {
       if (storedData.length > 25) {
-       newData = storedData.slice(startNumber, endNumber);
-       try {
-        const res = await createConnect(newData, currentStep);  // 等待服务器返回数据
-        console.log("服务器返回:", res);
-        if (res && res.ans !== undefined) {  // 确保数据格式正确，并包含 ans
-          // 根据返回的 'True' 或 'False' 转换为布尔值
-          resList.push(res.ans === 'True'); 
+        newData = storedData.slice(startNumber, endNumber);
+        try {
+          // 使用防抖功能，避免快速连续请求
+          const res = await createConnect(newData, currentStep);
+          console.log("服务器返回:", res);
+          
+          // 确保数据格式正确，并包含 ans
+          if (res && res.ans !== undefined) {
+            // 根据返回的 'True' 或 'False' 转换为布尔值
+            resList.push(res.ans === 'True');
+            // 记录评估结果
+            sendLog("info", `步骤${currentStep}评估结果: ${res.ans}`);
+          } else if (res && res.error) {
+            // 处理错误情况
+            console.error(`步骤${currentStep}请求出错:`, res.error);
+            sendLog("error", `步骤${currentStep}请求出错: ${res.error}`);
+            // 出错时默认为False，但标记为错误
+            resList.push(false);
+          }
+        } catch (error) {
+          console.error('Socket通信错误:', error);
+          sendLog("error", `Socket通信错误: ${error.message}`);
+          // 通信错误时添加false结果
+          resList.push(false);
         }
-       } catch (error) {
-         console.error('Error during socket communication:', error);
-       }
-       firstType = false;
-       newData = [];
-       storedData.shift();
-     }
-   } else {
-     storedData.shift();
-     newData = storedData.slice(startNumber, endNumber);
-     try {
+        firstType = false;
+        newData = [];
+        storedData.shift();
+      }
+    } else {
+      storedData.shift();
+      newData = storedData.slice(startNumber, endNumber);
+      try {
+        // 使用防抖功能，避免快速连续请求
         const res = await createConnect(newData, currentStep);
         console.log("服务器返回:", res);
+        
+        // 确保数据格式正确，并包含 ans
         if (res && res.ans !== undefined) {
           // 根据返回的 'True' 或 'False' 转换为布尔值
-          resList.push(res.ans === 'True'); 
+          resList.push(res.ans === 'True');
+          // 记录评估结果
+          sendLog("info", `步骤${currentStep}评估结果: ${res.ans}`);
+        } else if (res && res.error) {
+          // 处理错误情况
+          console.error(`步骤${currentStep}请求出错:`, res.error);
+          sendLog("error", `步骤${currentStep}请求出错: ${res.error}`);
+          // 出错时默认为False，但标记为错误
+          resList.push(false);
         }
-       } catch (error) {
-         console.error('Error during socket communication:', error);
-       }
-     newData = [];
+      } catch (error) {
+        console.error('Socket通信错误:', error);
+        sendLog("error", `Socket通信错误: ${error.message}`);
+        // 通信错误时添加false结果
+        resList.push(false);
+      }
+      newData = [];
     }
   }
   const hands = new mpHands.Hands(config);
@@ -493,6 +521,12 @@ onMounted(() => {
       videoElement.classList.toggle("selfie", options.selfieMode);
       hands.setOptions(options);
     });
+  
+  // 保存hands实例到window对象，以便在组件卸载时释放
+  window.handsInstance = hands;
+  
+  // 保存视频元素引用，以便在组件卸载时停止视频流
+  window.videoElement = videoElement;
 });
 watch(countdownStarted, (newVal) => {
   if (newVal) {
@@ -512,6 +546,89 @@ const backHome = () => {
 };
 onUnmounted(() => {
   // 组件卸载前的清理操作
+  console.log("正在清理Hands.vue组件资源...");
+  
+  // 1. 清理MediaPipe hands实例
+  if (window.handsInstance) {
+    try {
+      // 关闭MediaPipe实例
+      window.handsInstance.close();
+      console.log("MediaPipe Hands实例已关闭");
+    } catch (error) {
+      console.error("关闭MediaPipe Hands实例时出错:", error);
+    }
+    window.handsInstance = null;
+  }
+
+  // 2. 停止视频流
+  if (window.videoElement && window.videoElement.srcObject) {
+    try {
+      // 获取所有轨道
+      const tracks = window.videoElement.srcObject.getTracks();
+      
+      // 停止每个轨道
+      tracks.forEach(track => {
+        track.stop();
+      });
+      
+      // 清除视频源
+      window.videoElement.srcObject = null;
+      console.log("视频流已停止并清理");
+    } catch (error) {
+      console.error("停止视频流时出错:", error);
+    }
+  }
+  
+  // 3. 停止MediaRecorder录制
+  if (mediaRecorder.value && mediaRecorder.value.state === "recording") {
+    try {
+      mediaRecorder.value.stop();
+      console.log("MediaRecorder已停止");
+    } catch (error) {
+      console.error("停止MediaRecorder时出错:", error);
+    }
+  }
+  
+  // 4. 清理stream资源
+  if (stream.value) {
+    try {
+      const tracks = stream.value.getTracks();
+      tracks.forEach(track => {
+        track.stop();
+      });
+      console.log("Stream流已停止");
+    } catch (error) {
+      console.error("清理Stream时出错:", error);
+    }
+    stream.value = null;
+  }
+  
+  // 5. 不再断开socket连接，保持全局单例
+  // 原代码：disconnect();
+  // 现在由App.vue在应用退出时统一处理
+  console.log("保持Socket连接，不在组件级别断开");
+  
+  // 6. 清除计时器
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+    console.log("计时器已清理");
+  }
+  
+  // 7. 释放Blob URL资源
+  if (videoUrl.value) {
+    try {
+      URL.revokeObjectURL(videoUrl.value);
+      console.log("Blob URL已释放");
+    } catch (error) {
+      console.error("释放Blob URL时出错:", error);
+    }
+    videoUrl.value = "";
+  }
+  
+  // 8. 清空数据数组
+  recordedChunks.value = [];
+  resList.length = 0;
 });
 </script>
 <style lang="scss" scoped>

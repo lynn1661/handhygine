@@ -164,6 +164,12 @@ onMounted(() => {
   const hands = new mpHands.Hands(config);
   console.log("📹 9: MediaPipe Hands 实例已创建");
 
+  // 保存hands实例到全局变量，以便在组件卸载时释放
+  window.handsInstance = hands;
+  
+  // 保存视频元素引用，以便在组件卸载时停止视频流
+  window.videoElement = videoElement;
+
   // 处理视频帧
   function onResults(results) {
     console.log("🔍 视频帧处理开始...");
@@ -286,6 +292,45 @@ watch(countdownStarted, (newVal) => {
 });
 onUnmounted(() => {
   // 组件卸载前的清理操作
+  console.log("正在清理MediaPipe资源...");
+  
+  // 清理MediaPipe hands实例
+  if (window.handsInstance) {
+    try {
+      // 关闭MediaPipe实例
+      window.handsInstance.close();
+      console.log("MediaPipe Hands实例已关闭");
+    } catch (error) {
+      console.error("关闭MediaPipe Hands实例时出错:", error);
+    }
+    window.handsInstance = null;
+  }
+
+  // 停止视频流
+  if (window.videoElement && window.videoElement.srcObject) {
+    try {
+      // 获取所有轨道
+      const tracks = window.videoElement.srcObject.getTracks();
+      
+      // 停止每个轨道
+      tracks.forEach(track => {
+        track.stop();
+      });
+      
+      // 清除视频源
+      window.videoElement.srcObject = null;
+      console.log("视频流已停止并清理");
+    } catch (error) {
+      console.error("停止视频流时出错:", error);
+    }
+  }
+  
+  // 清除定时器
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+    console.log("计时器已清理");
+  }
 });
 </script>
 <style lang="scss" scoped>
