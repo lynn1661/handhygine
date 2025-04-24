@@ -85,6 +85,9 @@
     "ratingrecommend":"您願意將此應用推薦給他人嗎？",
     "ratingcancel":"取消",
     "ratingsubmit":"提交",
-    "performance":"表現"
+    "performance":"表現",
+    "nextStep":"前往下一步...",
+    "tryAgain":"請再試一次",
+    "completion":"完成"
   }
 }

@@ -7,12 +7,6 @@ import AllRole from "@/views/AllRole.vue";
 import RoleRankList from "@/views/RoleRankList.vue";
 import Detecting from "@/views/Detecting.vue";
 import Hands from "@/views/Hands.vue";
-import Hands2 from "@/views/Hands2.vue";
-import Hands3 from "@/views/Hands3.vue";
-import Hands4 from "@/views/Hands4.vue";
-import Hands5 from "@/views/Hands5.vue";
-import Hands6 from "@/views/Hands6.vue";
-import Hands7 from "@/views/Hands7.vue";
 import HandwashingCompletion from "@/views/HandwashingCompletion.vue";
 const routes = [
   {
@@ -44,32 +38,12 @@ const routes = [
     component: Detecting,
   },
   {
-    path: "/hands",
+    path: "/hands/:step",
     component: Hands,
   },
   {
-    path: "/hands2",
-    component: Hands2,
-  },
-  {
-    path: "/hands3",
-    component: Hands3,
-  },
-  {
-    path: "/hands4",
-    component: Hands4,
-  },
-  {
-    path: "/hands5",
-    component: Hands5,
-  },
-  {
-    path: "/hands6",
-    component: Hands6,
-  },
-  {
-    path: "/hands7",
-    component: Hands7,
+    path: "/hands",
+    redirect: "/hands/1"
   },
   {
     path: "/handwashingCompletion",

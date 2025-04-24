@@ -4,37 +4,71 @@
   </nav> -->
   <router-view></router-view>
   
-  <!-- 添加Socket监控器，仅在开发环境显示 -->
-  <socket-monitor v-if="isDev && showMonitor" @close="showMonitor = false" />
+  <!-- 仅使用专业版Socket监控器 -->
+  <div class="monitor-container" v-if="showMonitor">
+    <socket-monitor-pro @close="showMonitor = false" :show="true" />
+  </div>
   
-  <!-- 在右下角添加一个小按钮用于显示/隐藏监控器 -->
-  <button 
-    v-if="isDev" 
-    class="monitor-toggle"
-    @click="showMonitor = !showMonitor"
-  >
-    🔌
-  </button>
+  <!-- 临时显示调试信息 -->
+  <div class="debug-info" v-if="showMonitor">
+    监控器已打开
+  </div>
+  
+  <!-- 始终显示监控按钮 -->
+  <div class="monitor-controls">
+    <button 
+      class="monitor-toggle"
+      @click="toggleMonitor"
+    >
+      🔌
+    </button>
+  </div>
 </template>
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useI18n } from "vue-i18n";
 import { initializeSocket, safeDisconnect } from "./services/socketAdapter";
-import SocketMonitor from "@/components/SocketMonitor.vue";
+import SocketMonitorPro from "@/components/SocketMonitorPro.vue";
 
 const t = useI18n();
 
-// 是否为开发环境
+// 是否为开发环境 - 不再使用此变量控制显示
 const isDev = import.meta.env 
   ? import.meta.env.MODE !== 'production' 
   : process.env.NODE_ENV !== 'production';
+
 // 是否显示Socket监控器
 const showMonitor = ref(false);
+
+// 切换监控器显示
+function toggleMonitor() {
+  console.log("切换Socket监控器显示");
+  showMonitor.value = !showMonitor.value;
+}
 
 // 全局初始化Socket连接
 onMounted(() => {
   console.log("🔌 初始化全局Socket连接");
   initializeSocket();
+  
+  // 检查URL参数，如果有debug=monitor参数自动显示监控器
+  const urlParams = new URLSearchParams(window.location.search);
+  const debugParam = urlParams.get('debug');
+  
+  // 可选择性地自动显示监控器
+  if (debugParam === 'monitor') {
+    showMonitor.value = true;
+  }
+  
+  // 防止MediaPipe错误
+  window.addEventListener('error', (event) => {
+    // 忽略特定的MediaPipe错误
+    if (event.error && event.error.message && 
+        event.error.message.includes('Cannot pass deleted object')) {
+      console.warn('已捕获MediaPipe错误，这通常是正常的组件卸载行为');
+      event.preventDefault();
+    }
+  });
 });
 
 // 应用退出前清理资源
@@ -76,10 +110,54 @@ function detectWebsiteLanguage() {
 }
 </script>
 <style>
-.monitor-toggle {
+/* 全局样式 */
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
+  box-sizing: border-box;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f8ff;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* 确保子元素不溢出容器 */
+img, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 监控器控件 */
+.monitor-controls {
   position: fixed;
   bottom: 20px;
   right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  z-index: 9998;
+}
+
+.monitor-toggle {
   width: 40px;
   height: 40px;
   background: #4a5c79;
@@ -92,10 +170,55 @@ function detectWebsiteLanguage() {
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  z-index: 9998;
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .monitor-toggle:hover {
   background: #0f387c;
+  transform: scale(1.05);
+}
+
+.monitor-toggle:active {
+  transform: scale(0.95);
+}
+
+.debug-info {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 9999;
+}
+
+/* 适配移动设备 */
+@media (max-width: 768px) {
+  .monitor-toggle {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+  
+  .monitor-controls {
+    bottom: 15px;
+    right: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .monitor-toggle {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+  
+  .monitor-controls {
+    bottom: 10px;
+    right: 10px;
+  }
 }
 </style>
+

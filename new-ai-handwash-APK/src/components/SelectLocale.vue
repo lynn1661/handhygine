@@ -29,37 +29,38 @@ const props = defineProps({
 .home-select {
   display: flex;
   justify-content: flex-end;
-  margin-right: 28px;
+  margin-right: 0;
 
   :deep(.el-select) {
-    margin-top: 54px;
+    margin-top: 0;
   }
   :deep(.el-input) {
-    width: 161px;
-    height: 63px;
+    width: 120px;
+    height: auto;
   }
   :deep(.el-input__inner) {
-    width: 76px;
+    width: auto;
     font-family: MicrosoftYaHei;
-    font-size: 22px;
+    font-size: 16px;
     color: #ffffff;
-    line-height: 35px;
+    line-height: 24px;
     text-align: left;
     font-style: normal;
     text-transform: none;
   }
   :deep(.el-input__wrapper) {
     background: none;
-    border-radius: 6px 6px 6px 6px;
-    border: 2px solid #ffffff;
+    border-radius: 6px;
+    border: 1px solid #ffffff;
+    padding: 0 8px;
   }
   :deep(.el-input__suffix) {
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
   }
   :deep(.el-input__suffix-inner) {
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
     background-image: url("../assets/change.png");
     background-repeat: no-repeat;
     background-position: center;
@@ -70,44 +71,45 @@ const props = defineProps({
   }
 }
 .custom-option {
-  font-size: 21px; /* 更改字体大小 */
+  font-size: 16px;
   height: 30px;
 }
 .home-change {
   display: flex;
   justify-content: flex-end;
-  margin-right: 28px;
+  margin-right: 0;
 
   :deep(.el-select) {
-    margin-top: 54px;
+    margin-top: 0;
   }
   :deep(.el-input) {
-    width: 161px;
-    height: 63px;
+    width: 120px;
+    height: auto;
   }
   :deep(.el-input__inner) {
-    width: 76px;
+    width: auto;
     font-family: MicrosoftYaHei;
-    font-size: 22px;
+    font-size: 16px;
     color: #0e78f7;
-    line-height: 35px;
+    line-height: 24px;
     text-align: left;
     font-style: normal;
     text-transform: none;
   }
   :deep(.el-input__wrapper) {
     background: none;
-    border-radius: 6px 6px 6px 6px;
+    border-radius: 6px;
     border: 1px solid #0e78f7;
+    padding: 0 8px;
   }
   :deep(.el-input__suffix) {
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
   }
   :deep(.el-input__suffix-inner) {
-    width: 44px;
-    height: 44px;
-    background-color: #0e78f7; /* 添加背景颜色 */
+    width: 32px;
+    height: 32px;
+    background-color: #0e78f7;
     background-image: url("../assets/change.png");
     background-repeat: no-repeat;
     background-position: center;

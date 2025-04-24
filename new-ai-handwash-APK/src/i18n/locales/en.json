@@ -85,6 +85,9 @@
     "ratingrecommend":"Would you recommend this app to others?",
     "ratingcancel":"Cancel",
     "ratingsubmit":"Submit",
-    "performance":"PERFORMANCE"
+    "performance":"PERFORMANCE",
+    "nextStep":"Going to next step...",
+    "tryAgain":"Please try again",
+    "completion":"Completion"
   }
 }
