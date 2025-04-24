@@ -1,21 +1,39 @@
 <template>
   <div class="home">
-    <div class="logo">
-      <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
-      <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
-    </div>
-    <div class="home-top">
-      <div class="back-home">
-        <img src="../assets/home.png" alt="" @click="backHome" />
+    <div class="content-wrapper">
+      <!-- 顶部区域 -->
+      <div class="home-top">
+        <div class="logo">
+          <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
+          <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
+        </div>
+        <div class="back-home">
+          <img src="../assets/home.png" alt="Home" @click="backHome" class="home-icon" />
+        </div>
       </div>
-      <select-locale :changeStyle="shouldChangeStyle"></select-locale>
-    </div>
-    <div class="role">
-      <el-button @click="allRole"> {{ $t("HandHygiene.allrole") }}</el-button>
-      <el-button @click="RoleRank('Doctor')"> {{ $t("HandHygiene.role1") }}</el-button>
-      <el-button @click="RoleRank('Nurse')"> {{ $t("HandHygiene.role2") }}</el-button>
-      <el-button @click="RoleRank('Allied Health')"> {{ $t("HandHygiene.role3") }}</el-button>
-      <el-button @click="RoleRank('Other')"> {{ $t("HandHygiene.role4") }}</el-button>
+      
+      <!-- 主要内容区域 -->
+      <div class="main-section">
+        <div class="role-container">
+          <div class="role-buttons">
+            <el-button @click="allRole" class="role-button">
+              {{ $t("HandHygiene.allrole") }}
+            </el-button>
+            <el-button @click="RoleRank('Doctor')" class="role-button">
+              {{ $t("HandHygiene.role1") }}
+            </el-button>
+            <el-button @click="RoleRank('Nurse')" class="role-button">
+              {{ $t("HandHygiene.role2") }}
+            </el-button>
+            <el-button @click="RoleRank('Allied Health')" class="role-button">
+              {{ $t("HandHygiene.role3") }}
+            </el-button>
+            <el-button @click="RoleRank('Other')" class="role-button">
+              {{ $t("HandHygiene.role4") }}
+            </el-button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -57,69 +75,189 @@ const backHome = () => {
 </script>
 <style lang="scss" scoped>
 @import "@/styles/main.scss";
-.selectOption {
-  font-family: "SourceHanSansCN";
-  font-size: 26px;
-}
-.logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: -40px;
-    }
-    .logo-image {
-      width: auto;
-      height: 50px;  
-    }
+
+/* 整体容器布局 */
 .home {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   background-image: url("../assets/HandHygienebg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  &-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-    .back-home {
-      width: 126px;
-      height: 126px;
-      margin-right: 10px;
-      img {
-        margin-top: 30px;
-        width: 100%;
-        height: 100%;
-      }
-    }
-  }
-}
-.role {
-  width: 90%;
-  margin: 270px auto 0;
-  
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px; 
+  box-sizing: border-box;
+  padding: 1rem;
+  overflow-x: hidden;
+}
 
-  :deep(.el-button) {
-    width: 580px;
-    height: 100px;
-    font-family: Helvetica85;
-    font-weight: 800;
-    font-size: 32px;
-    color: #ffffff;
-    line-height: 16px;
-    font-style: normal;
-    text-transform: none;
-    border-radius: 26px;
-    background-image: url(../assets/button.png);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+.content-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+/* 顶部区域 */
+.home-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+.logo-image {
+  width: auto;
+  height: 3.5rem;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+  
+  @media (max-width: 768px) {
+    height: 3rem;
+  }
+  
+  @media (max-width: 480px) {
+    height: 2.5rem;
+  }
+}
+
+.back-home {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.home-icon {
+  width: 4rem;
+  height: 4rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+  
+  @media (max-width: 768px) {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+/* 主要内容区域 */
+.main-section {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 30vh;
+}
+
+.role-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 0;
+}
+
+.role-buttons {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+:deep(.role-button) {
+  width: 100%;
+  max-width: 580px;
+  height: 90px;
+  font-family: Helvetica85;
+  font-weight: 800;
+  font-size: 28px;
+  color: #ffffff;
+  line-height: 16px;
+  font-style: normal;
+  text-transform: none;
+  border-radius: 26px;
+  background-image: url(../assets/button.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* 响应式设计优化 */
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 0.5rem;
+  }
+  
+  .main-section {
+    margin-top: 20vh;
+  }
+  
+  .role-container {
+    padding: 1rem 0;
+  }
+  
+  .role-buttons {
+    gap: 1.5rem;
+  }
+  
+  :deep(.role-button) {
+    height: 80px;
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-top {
+    margin-bottom: 1rem;
+  }
+  
+  .main-section {
+    margin-top: 12vh;
+  }
+  
+  .role-buttons {
+    gap: 1rem;
+  }
+  
+  :deep(.role-button) {
+    height: 70px;
+    font-size: 18px;
   }
 }
 </style>

@@ -1,26 +1,46 @@
 <template>
   <div class="home">
-    <div class="logo">
-      <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
-      <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
-    </div>
-    <div class="home-top">
-      <div class="back-home">
-        <img src="../assets/home.png" alt="" @click="backHome" />
+    <div class="content-wrapper">
+      <!-- 顶部区域：简化版 -->
+      <div class="home-top">
+        <div class="logo">
+          <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
+          <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
+        </div>
+        <div class="back-btn" @click="backHome">
+          <img src="../assets/home.png" alt="返回首页" />
+        </div>
       </div>
-      <select-locale :changeStyle="shouldChangeStyle"></select-locale>
-    </div>
-    <div class="home-input">
-      <el-input
-        v-model="userID"
-        :placeholder="$t('HandHygiene.userID')"
-      />
-    </div>
-    <div class="role">
-      <el-button @click="selectRole('Doctor')"> {{ $t("HandHygiene.role1") }}</el-button>
-      <el-button @click="selectRole('Nurse')"> {{ $t("HandHygiene.role2") }}</el-button>
-      <el-button @click="selectRole('Allied Health')"> {{ $t("HandHygiene.role3") }}</el-button>
-      <el-button @click="selectRole('Other')"> {{ $t("HandHygiene.role4") }}</el-button>
+
+      <!-- 主要内容区域 -->
+      <div class="main-section">
+        <!-- 用户ID输入区域 -->
+        <div class="user-input-section">
+          <el-input
+            v-model="userID"
+            :placeholder="$t('HandHygiene.userID')"
+            class="user-input"
+          />
+        </div>
+
+        <!-- 角色选择区域 - 移除标题 -->
+        <div class="role-selection">
+          <div class="role-buttons">
+            <button @click="selectRole('Doctor')" class="role-button doctor-btn">
+              {{ $t("HandHygiene.role1") }}
+            </button>
+            <button @click="selectRole('Nurse')" class="role-button nurse-btn">
+              {{ $t("HandHygiene.role2") }}
+            </button>
+            <button @click="selectRole('Allied Health')" class="role-button allied-btn">
+              {{ $t("HandHygiene.role3") }}
+            </button>
+            <button @click="selectRole('Other')" class="role-button other-btn">
+              {{ $t("HandHygiene.role4") }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -28,17 +48,16 @@
 <script setup>
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
-import SelectLocale from "@/components/SelectLocale.vue";
 import { ElNotification } from "element-plus";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
-import { ElButton } from 'element-plus';
 import { onMounted, onUnmounted } from 'vue';
+
 const store = useStore();
 const router = useRouter();
 const t = useI18n();
-const shouldChangeStyle = ref(false); // 默认不添加
 const userID = ref("");
+
 async function selectRole(role) {
   const accountID = localStorage.getItem("accountID");
   const res = await store.dispatch("user/updateRole", { 
@@ -52,6 +71,7 @@ async function selectRole(role) {
     path: "/detecting",
   });
 };
+
 const backHome = () => {
   localStorage.removeItem("accountID");
   sessionStorage.removeItem("accountID");
@@ -62,8 +82,9 @@ const backHome = () => {
     path: "/",
   });
 };
-let inactivityTimer = null;
 
+let inactivityTimer = null;
+/*
 const resetTimer = () => {
   if (inactivityTimer) clearTimeout(inactivityTimer);
   inactivityTimer = setTimeout(() => {
@@ -88,96 +109,251 @@ onUnmounted(() => {
   window.removeEventListener('touchstart', resetTimer);
   window.removeEventListener('keydown', resetTimer);
   clearTimeout(inactivityTimer);
-});
+});*/
 </script>
+
 <style lang="scss" scoped>
 @import "@/styles/main.scss";
-.selectOption {
-  font-family: "SourceHanSansCN";
-  font-size: 26px;
-}
-.logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: -40px;
-    }
-    .logo-image {
-      width: auto;
-      height: 50px;  
-    }
+
+/* 整体容器布局 */
 .home {
   width: 100%;
-  height: 100%;
-  background-image: url("../assets/HandHygienebg.png");
+  min-height: 100vh;
+  background-image: url("../assets/HandHygienebg.png"); /* 保持原有背景 */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  &-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-    .back-home {
-      width: 126px;
-      height: 126px;
-      margin-right: 10px;
-      img {
-        margin-top: 30px;
-        width: 100%;
-        height: 100%;
-      }
-    }
-  }
-}
-.home-input{
-  text-align: center;
-  
-  
-  //width: 90%;
-  margin: 260px auto 0;
-
-  :deep(.el-input) {
-    width: 626px;
-    height: 90px;
-    margin: 25px;
-  }
-  :deep(.el-input__wrapper) {
-    background: #f5f8fd;
-    border-radius: 26px 26px 26px 26px;
-  }
-  :deep(.el-input__inner) {
-    font-family: "SourceHanSansCN";
-    font-size: 26px;
-    color: #b4c1d5;
-    height: 60px;
-  }
-}
-.role {
-  //width: 90%;
-  //margin: 330px auto 0;
-  margin: 0 auto;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px; 
+  padding: 0.5rem;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
 
-  :deep(.el-button) {
-    width: 626px;
-    height: 100px;
-    font-family: Helvetica85;
-    font-weight: 800;
-    font-size: 32px;
-    color: #ffffff;
-    line-height: 16px;
-    font-style: normal;
-    text-transform: none;
-    border-radius: 26px;
-    background-image: url(../assets/button.png);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+.content-wrapper {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 90vh;
+  position: relative;
+  padding: 0.5rem;
+}
+
+/* 顶部区域样式 */
+.home-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  margin-bottom: 2rem;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-image {
+  width: auto;
+  height: 3.5rem;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+  
+  @media (max-width: 480px) {
+    height: 2.5rem;
+  }
+}
+
+.back-btn {
+  width: 4.5rem;
+  height: 4.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+  
+  img {
+    width: 100%;
+    height: 100%;
+  }
+  
+  @media (max-width: 480px) {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}
+
+/* 主要内容区域 */
+.main-section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
+  gap: 5rem;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15rem;
+  padding-bottom: 4rem;
+}
+
+/* 用户ID输入区域 */
+.user-input-section {
+  width: 100%;
+  max-width: 650px;
+  display: flex;
+  justify-content: center;
+}
+
+.user-input {
+  width: 100%;
+  
+  :deep(.el-input__wrapper) {
+    background: rgba(245, 248, 253, 0.9);
+    border-radius: 30px;
+    height: 70px;
+    box-shadow: 0 6px 16px rgba(15, 56, 124, 0.15);
+    border: 1px solid rgba(15, 56, 124, 0.1);
+  }
+  
+  :deep(.el-input__inner) {
+    font-family: "Helvetica85", sans-serif;
+    font-size: 1.4rem;
+    color: #0f387c;
+    height: 70px;
+    padding: 0 2rem;
+    
+    &::placeholder {
+      color: #7791bc;
+      opacity: 0.8;
+    }
+  }
+}
+
+/* 角色选择区域 */
+.role-selection {
+  width: 100%;
+  max-width: 650px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  //margin-top: 2rem;
+}
+
+.role-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.role-button {
+  width: 100%;
+  height: 95px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 20px;
+  border: none;
+  color: white;
+  font-family: "Helvetica85", sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0));
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    
+    &::before {
+      transform: translateX(100%);
+    }
+  }
+  
+  &:active {
+    transform: translateY(2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.doctor-btn,
+.nurse-btn,
+.allied-btn,
+.other-btn {
+  background-image: url(../assets/button.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* 响应式布局调整 */
+@media (max-width: 768px) {
+  .user-input {
+    :deep(.el-input__wrapper) {
+      height: 60px;
+    }
+    
+    :deep(.el-input__inner) {
+      height: 60px;
+      font-size: 1.25rem;
+    }
+  }
+  
+  .role-button {
+    height: 85px;
+    font-size: 1.4rem;
+  }
+  
+  .main-section {
+    gap: 2.5rem;
+  }
+}
+
+@media (max-height: 700px) {
+  .role-button {
+    height: 70px;
+    font-size: 1.2rem;
+  }
+  
+  .main-section {
+    margin-top: 5rem;
+    gap: 3rem;
   }
 }
 </style>

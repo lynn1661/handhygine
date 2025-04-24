@@ -1,170 +1,138 @@
 <template>
   <div v-loading="loading" class="home">
-    <div style="height: 20px"></div>
-    <div class="home-div">
+    <div class="content-wrapper">
+      <!-- 顶部区域：恢复原始风格 -->
       <div class="home-top">
         <div class="logo">
           <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
           <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
         </div>
-        <select-locale :changeStyle="shouldChangeStyle"></select-locale>
-      </div>
-      <div class="home-svg">
-        <div class="home-svg-img">
-          <img v-if="showImg === 'Novice'" src="/public/Novice.png" alt="" />
-          <img v-if="showImg === 'Pro'" src="/public/Pro.png" alt="" />
-          <img v-if="showImg === 'Master'" src="/public/Master.png" alt="" />
-        </div>
-        <div class="home-title">{{ $t("HandHygiene.congrat1") }}</div>
-        <!--<div class="home-title-vice">{{ $t("HandHygiene.congrat2") }}</div>-->
-        <div class="home-title-rankbeatmessage">
-          {{ $t("HandHygiene.rank1") }} 
-          <span class="number">{{ rankMessage }}</span>
-          {{ $t("HandHygiene.rank2") }}
+        <div class="locale-selector">
+          <select-locale :changeStyle="shouldChangeStyle"></select-locale>
         </div>
       </div>
-    </div>
-    <div class="home-content">
-      <el-scrollbar height="440px" always>
-        <div class="step-rating-container">
-          <!-- 对 list 进行循环，每一项代表一个步骤 -->
-          <div class="step-row" v-for="(item, index) in list" :key="index">
-            <!-- 星级评分部分 -->
-            <div class="star-section">
-              <div class="home-content-star">
-                <img
-                  v-if="item.Step === 'PERFECT'"
-                  src="/public/fullstar.png"
-                  alt=""
-                />
-                <img
-                v-else-if="item.Step === 'Need Improvement'"
-                src="/public/nullstar.png"
-                alt=""
-                />
-                <img
-                  v-else-if="item.Step === 'GOOD'"
-                src="/public/halfstar.png"
-                  alt=""
-                />
-              </div>
-            </div>
-            <!-- 描述部分 -->
-            <div class="comment-section">
-              <div class="comment-content">
-                <span class="comment-title">
-                {{ $t(`HandHygiene.step${index + 1}Title`) }}
-                </span>
-                <span class="comment-text">
-                {{ $t(`HandHygiene.step${index + 1}Content`) }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </el-scrollbar>
-      <!--
-      <div class="home-subContent">
-        {{ $t("HandHygiene.thankyou") }}
-      </div>-->
-    </div>
-    <div class="rating">
-      <div class="rating-content">
-        {{ $t(`HandHygiene.rating`) }}
-        <el-button 
-        type="primary" 
-        size="large" 
-        @click="openDialog" 
-        round
-        >
-        {{ $t(`HandHygiene.ratingbtn`) }}
-        </el-button>
-      </div>
-      
-      <!-- 直接显示评分区域 
-      <div class="rating-area">
-        <el-rate
-          v-model="value"
-          size="large"
-          :texts="['oops', 'disappointed', 'normal', 'good', 'great']"
-          show-text
-          text-color="#409EFF"
-          active-color="#409EFF"
-          void-color="#ccc"
-        />
-      </div>-->
-      
-      <!-- 评分对话框 -->
-      <el-dialog
-        :title="$t('HandHygiene.ratingtitle')"
-        v-model="dialogVisible"
-        width="400px"
-        :before-close="handleClose"
-      >
-        <!-- 评分行1：App UI -->
-        <div class="rating-row">
-          <div class="rating-description">{{ $t('HandHygiene.ratingui') }}</div>
-          <el-rate
-            class="custom-rate"
-            v-model="uiRating"
-            size="large"
-            @change="handleRatingChange('ui', $event)"
-          />
-        </div>
-        <!-- 评分行2：洗手培训功能 -->
-        <div class="rating-row">
-          <div class="rating-description">{{ $t('HandHygiene.ratingtraining') }}</div>
-          <el-rate
-            class="custom-rate"
-            v-model="trainingRating"
-            size="large"
-            @change="handleRatingChange('training', $event)"
-          />
-        </div>
-        <!-- 评分行3：推荐给他人使用 -->
-        <div class="rating-row">
-          <div class="rating-description">{{ $t('HandHygiene.ratingrecommend') }}</div>
-          <el-rate
-            class="custom-rate"
-            v-model="recommendRating"
-            size="large"
-            @change="handleRatingChange('recommend', $event)"
-          />
-        </div>
-        <!-- 对话框底部操作按钮 -->
-        <template #footer>
-          <el-button @click="dialogVisible = false">{{ $t(`HandHygiene.ratingcancel`) }}</el-button>
-          <el-button type="primary" @click="submitRating" :disabled="disabledRating">{{ $t(`HandHygiene.ratingsubmit`) }}</el-button>
-        </template>
-      </el-dialog>
 
-    </div>
-    <div>
-      <el-row class="home-btn">
-        <el-col :span="10">
-          <div>
-            <el-button @click="tryAgain">
-              <div style="height: 34px; line-height: 44px">
-                {{ $t("HandHygiene.tryagain") }}
-              </div></el-button>
+      <!-- 主要内容区域 - 垂直布局 -->
+      <div class="main-section">
+        <!-- 成就展示区域 -->
+        <div class="achievement-section">
+          <div class="achievement-image">
+            <img v-if="showImg === 'Novice'" src="/public/Novice.png" alt="Novice" />
+            <img v-if="showImg === 'Pro'" src="/public/Pro.png" alt="Pro" />
+            <img v-if="showImg === 'Master'" src="/public/Master.png" alt="Master" />
           </div>
-        </el-col>
-        <el-col :span="11">
-          <div>
-            <el-button @click="back">
-              <div style="margin-right: 10px">
-                <img
-                  src="../assets/homeIcon.png"
-                  style="width: 34px; height: 34px"
-                />
+          <div class="achievement-title">{{ $t("HandHygiene.congrat1") }}</div>
+          <div class="achievement-rank">
+            {{ $t("HandHygiene.rank1") }} 
+            <span class="rank-number">{{ rankMessage }}</span>
+            {{ $t("HandHygiene.rank2") }}
+          </div>
+        </div>
+
+        <!-- 步骤评分列表 -->
+        <div class="steps-review-section">
+          <el-scrollbar height="330px" always>
+            <div class="step-rating-container">
+              <div class="step-row" v-for="(item, index) in list" :key="index">
+                <div class="star-section">
+                  <div class="step-star">
+                    <el-rate
+                      :model-value="getStepRating(item.Step)"
+                      :max="1"
+                      :allow-half="true"
+                      disabled
+                      :colors="['#ffcc00', '#ffcc00', '#ffcc00']"
+                      void-color="#c0c4cc"
+                    />
+                  </div>
+                </div>
+                <div class="comment-section">
+                  <div class="comment-content">
+                    <span class="comment-title">
+                      {{ $t(`HandHygiene.step${index + 1}Title`) }}
+                    </span>
+                    <span class="comment-text">
+                      {{ $t(`HandHygiene.step${index + 1}Content`) }}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div style="height: 34px; line-height: 44px">
-                {{ $t("HandHygiene.homepage") }}
-              </div></el-button
+            </div>
+          </el-scrollbar>
+        </div>
+
+        <!-- 评分区域 -->
+        <div class="rating-section">
+          <div class="rating-content">
+            {{ $t(`HandHygiene.rating`) }}
+            <el-button 
+              type="primary" 
+              size="large" 
+              @click="openDialog" 
+              round
             >
+              {{ $t(`HandHygiene.ratingbtn`) }}
+            </el-button>
           </div>
-        </el-col>
-      </el-row>
+          
+          <!-- 评分对话框 -->
+          <el-dialog
+            :title="$t('HandHygiene.ratingtitle')"
+            v-model="dialogVisible"
+            width="400px"
+            :before-close="handleClose"
+          >
+            <!-- 评分行1：App UI -->
+            <div class="rating-row">
+              <div class="rating-description">{{ $t('HandHygiene.ratingui') }}</div>
+              <el-rate
+                class="custom-rate"
+                v-model="uiRating"
+                size="large"
+                @change="handleRatingChange('ui', $event)"
+              />
+            </div>
+            <!-- 评分行2：洗手培训功能 -->
+            <div class="rating-row">
+              <div class="rating-description">{{ $t('HandHygiene.ratingtraining') }}</div>
+              <el-rate
+                class="custom-rate"
+                v-model="trainingRating"
+                size="large"
+                @change="handleRatingChange('training', $event)"
+              />
+            </div>
+            <!-- 评分行3：推荐给他人使用 -->
+            <div class="rating-row">
+              <div class="rating-description">{{ $t('HandHygiene.ratingrecommend') }}</div>
+              <el-rate
+                class="custom-rate"
+                v-model="recommendRating"
+                size="large"
+                @change="handleRatingChange('recommend', $event)"
+              />
+            </div>
+            <!-- 对话框底部操作按钮 -->
+            <template #footer>
+              <el-button @click="dialogVisible = false">{{ $t(`HandHygiene.ratingcancel`) }}</el-button>
+              <el-button type="primary" @click="submitRating" :disabled="disabledRating">{{ $t(`HandHygiene.ratingsubmit`) }}</el-button>
+            </template>
+          </el-dialog>
+        </div>
+
+        <!-- 按钮区域 -->
+        <div class="buttons-section">
+          <div class="action-buttons">
+            <el-button @click="tryAgain" class="action-button try-again">
+              {{ $t("HandHygiene.tryagain") }}
+            </el-button>
+            <el-button @click="back" class="action-button home-button">
+              <img src="../assets/homeIcon.png" class="home-icon" />
+              {{ $t("HandHygiene.homepage") }}
+            </el-button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>  
 </template>
@@ -291,6 +259,13 @@ const list = ref();
 const showImg = ref("");
 const downloadName = ref();
 const rankMessage = ref("");
+const getStepRating = (score) => {
+  // 将0-15的分数转换为0-1的星星评分
+  if (typeof score !== 'number') return 0;
+  const rating = score / 15;
+  // 限制在0-1范围内
+  return Math.max(0, Math.min(1, rating));
+};
 onMounted(async () => {
   // Get the download name for the video based on the account's serial number
   downloadName.value = getTime(
@@ -323,7 +298,7 @@ onMounted(async () => {
   console.log(rankMessage.value); // Debug rankMessage value
 
   // Set the step correctness data from the backend response
-  list.value = res?.step_correctness;
+  list.value = res?.step_points;
   
   // Set the video file names for download from the backend response
   downloadVideoName.value = res?.step_video_files;
@@ -351,196 +326,443 @@ onMounted(async () => {
 </script>
 <style lang="scss" scoped>
 @import "@/styles/main.scss";
+
+/* 整体容器布局 */
 .home {
   width: 100%;
-  height: 100%;
+  min-height: 100vh;
   background-image: url("../assets/bg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  &-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 45px;
-    .logo {
-      display: flex;
-      align-items: center;
-      margin-top: 25px;
-    }
-    .logo-image {
-      width: auto;
-      height: 60px;  
-    }
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem; /* 减小边距 */
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 750px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 90vh;
+  position: relative;
+  padding: 0.5rem;
+}
+
+/* 顶部区域样式 - 优化为单行 */
+.home-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  margin-bottom: 0.75rem; /* 减小底部间距 */
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* 减小logo间距 */
+}
+
+.logo-image {
+  width: auto;
+  height: 3rem; /* 稍微减小logo尺寸 */
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
   }
-  &-div {
-    background-image: url("../assets/divBG.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    margin: 0px 63px 23px 63px;
+  
+  @media (max-width: 480px) {
+    height: 2.25rem;
   }
-  &-title {
-    text-align: center;
-    font-family: "Helvetica85";
+}
+
+.locale-selector {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 0;
+  
+  @media (max-width: 480px) {
+    width: auto;
+    height: auto;
+  }
+}
+
+/* 主要内容区域 */
+.main-section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  flex: 1;
+  gap: 0.75rem; /* 减小垂直间距 */
+  justify-content: flex-start; /* 改为顶部对齐 */
+  margin-bottom: 0.75rem; /* 减小底部间距 */
+}
+
+/* 成就展示区域 */
+.achievement-section {
+  background-color: rgba(255, 255, 255, 0.5); /* 改为半透明白色背景 */
+  border-radius: 16px;
+  padding: 1rem; /* 减小内边距 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 6px 16px rgba(15, 56, 124, 0.12);
+  margin-bottom: 0.25rem;
+  border: 1px solid rgba(15, 56, 124, 0.08);
+}
+
+.achievement-image {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.75rem; /* 减小底部间距 */
+  
+  img {
+    width: 120px; /* 减小图片尺寸 */
+    height: 120px;
+    border-radius: 50%;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    border: 3px solid rgba(255, 255, 255, 0.8);
+  }
+}
+
+.achievement-title {
+  font-family: "Helvetica85", sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem; /* 减小字体尺寸 */
+  color: #0f387c;
+  margin-bottom: 0.5rem; /* 减小底部间距 */
+  text-align: center;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.achievement-rank {
+  font-family: "Helvetica85", sans-serif;
+  font-weight: 600;
+  font-size: 1.3rem; /* 减小字体尺寸 */
+  color: #0f387c;
+  text-align: center;
+  line-height: 1.3;
+  
+  .rank-number {
+    color: #ffcc00;
+    font-size: 1.8rem;
     font-weight: 800;
-    font-size: 36px;
-    color: #0f387c;
-    font-style: normal;
-    text-transform: none;
-    margin-top: 12px;
-    &-rankbeatmessage {
-      text-align: center;
-      font-family: "Helvetica85";
-      font-weight: 800;
-      font-size: 34px;
-      color: #0f387c;
-      height: 60px;
-      line-height: 50px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    margin: 0 0.2rem;
+  }
+}
 
-      .number{
-        color: #ffcc00; //金色
-        font-size: 42px; 
-        font-weight: 900; 
-      }
-    }
-  }
-  &-svg {
-    margin: 10px auto;
-    &-img {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      img {
-        width: 170px;
-        height: 170px;
-        border-radius: 50%;
-      }
-    }
-  }
-  &-content {
-    background-color: #fff;
-    margin: 0px 63px 0px 63px;
-      .step-rating-container {
-        width: 100%;
-        margin: 15px auto;
-        
-        .step-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          
-          padding: 10px;
-          border-bottom: 1px solid #e0e0e0;
-          
-          height: 50px;
-          margin: 10px;
-          text-align: left;
-          border-radius: 4px;
-          background: #F2F6FC;
-          color: var(--el-color-primary-light-3);
-        }
+/* 步骤评分区域 */
+.steps-review-section {
+  background-color: rgba(255, 255, 255, 0.5); /* 改为半透明白色背景 */
+  border-radius: 16px;
+  padding: 0.75rem;
+  box-shadow: 0 6px 16px rgba(15, 56, 124, 0.12);
+  border: 1px solid rgba(15, 56, 124, 0.08);
+}
 
-        .star-section {
-          display: flex;
-          align-items: center;
-        }
-        
-        .home-content-star img {
-          width: 40px;
-          height: 40px;
-        }
-        
-        .comment-section {
-          flex: 1;
-          padding-left: 15px;
-        }
-        
-        .comment-content {
-          font-size: 16px;
-          //line-height: 1.4;
-        }
-        
-        .comment-title {
-          font-weight: 600;
-          margin-right: 5px;
-        }
-        
-        .comment-text {
-          color: #909399;
-        }
-    }
+.step-rating-container {
+  width: 100%;
+  padding: 0.25rem; /* 减小内边距 */
+}
+
+.step-row {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem; /* 减小内边距 */
+  margin-bottom: 0.5rem; /* 减小底部间距 */
+  background-color: #f2f6fc;
+  border-radius: 12px;
+  min-height: 3rem; /* 减小最小高度 */
+  box-shadow: 0 2px 6px rgba(15, 56, 124, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(15, 56, 124, 0.12);
   }
-  &-btn {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    margin-top: 15px;
-    :deep(.el-button) {
-      width: 80%;
-      height: 100px;
-      font-family: Helvetica85;
-      font-weight: 700;
-      font-size: 32px;
-      color: #ffffff;
-      line-height: 16px;
-      font-style: normal;
-      text-transform: none;
-      border-radius: 26px 26px 26px 26px;
-      background-image: url(../assets/button.png);
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      margin-bottom: 20px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.star-section {
+  width: 2.5rem; /* 减小宽度 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.step-star {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.step-star :deep(.el-rate) {
+  height: 2.25rem;
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.step-star :deep(.el-rate__icon) {
+  font-size: 2.25rem;
+  margin-right: 0;
+}
+
+.comment-section {
+  flex: 1;
+  padding-left: 0.75rem; /* 减小左边距 */
+}
+
+.comment-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.comment-title {
+  font-weight: 700;
+  color: #0f387c;
+  font-size: 0.95rem; /* 减小字体尺寸 */
+  margin-bottom: 0.25rem;
+}
+
+.comment-text {
+  color: #4a5568;
+  font-size: 0.85rem; /* 减小字体尺寸 */
+  line-height: 1.3;
+}
+
+/* 评分区域 */
+.rating-section {
+  background-color: rgba(255, 255, 255, 0.5); /* 改为半透明白色背景 */
+  border-radius: 16px;
+  padding: 0.75rem; /* 减小内边距 */
+  box-shadow: 0 6px 16px rgba(15, 56, 124, 0.12);
+  border: 1px solid rgba(15, 56, 124, 0.08);
+}
+
+.rating-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem; /* 减小垂直间距 */
+  font-size: 1.15rem; /* 减小字体尺寸 */
+  color: #0f387c;
+  padding: 0.25rem; /* 减小内边距 */
+  font-weight: 600;
+  text-align: center;
+  
+  :deep(.el-button) {
+    font-size: 1rem;
+    padding: 0.5rem 1.5rem; /* 减小按钮内边距 */
+    font-weight: 600;
+    background-color: #1a56db;
+    border-color: #1a56db;
+    
+    &:hover {
+      background-color: #1e429f;
+      border-color: #1e429f;
     }
   }
 }
-.rating{
-  background-color:#fff;
-  margin: 0px 63px 0px 63px;
-  padding: 10px;
-  &-content {
-    font-size: 24px;
-    font-weight: 500; 
-    text-align: center; 
-    //margin-bottom: 5px;
-    //margin-top: 10px;
-    color: var(--el-color-primary-dark-2); 
-    //line-height: 1.4;
-  }
-  &-btn {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  /*
-  &-area {
-    text-align: center; 
-    margin: 0 auto; 
-    transform: scale(1.6);
-  }*/
-}
+
 .rating-row {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 2px;
+  margin-bottom: 1rem;
 }
 
 .rating-description {
-  font-size: 16px;
-  //font-weight: bold;
-  color: #333;
-  //margin-bottom: 2px;
-  text-align: center;
+  font-size: 1rem;
+  color: #0f387c;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
 .custom-rate {
   display: flex;
   justify-content: center;
+  transform: scale(1.1); /* 略微减小星星尺寸 */
+  margin: 0.25rem 0;
+}
+
+/* 按钮区域 */
+.buttons-section {
+  margin-top: 0.5rem;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem; /* 减小按钮间距 */
+}
+
+.action-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.5rem; /* 减小按钮内边距 */
+  height: auto;
+  background-image: url("../assets/button.png");
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px;
+  border: none;
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem; /* 减小字体尺寸 */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s, box-shadow 0.3s;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  &.try-again {
+    background-color: #2563eb;
+  }
+  
+  &.home-button {
+    background-color: #1a56db;
+  }
+  
+  .home-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.5rem;
+  }
+}
+
+/* 响应式布局优化 */
+@media (min-height: 900px) {
+  .main-section {
+    gap: 1rem;
+  }
+  
+  .home-top {
+    margin-top: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* 在高屏幕上恢复较大尺寸 */
+  .achievement-image img {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .achievement-title {
+    font-size: 1.75rem;
+  }
+  
+  .step-row {
+    min-height: 3.5rem;
+    padding: 0.75rem;
+  }
+}
+
+@media (min-height: 700px) and (max-height: 899px) {
+  .main-section {
+    gap: 0.85rem;
+  }
+  
+  .achievement-image img {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+/* 添加额外的超小屏幕优化 */
+@media (max-height: 600px) {
+  .home-top {
+    margin-bottom: 0.5rem;
+  }
+  
+  .main-section {
+    gap: 0.5rem;
+  }
+  
+  .achievement-section,
+  .steps-review-section,
+  .rating-section {
+    padding: 0.5rem;
+  }
+  
+  .achievement-image {
+    margin-bottom: 0.5rem;
+  }
+  
+  .achievement-image img {
+    width: 90px;
+    height: 90px;
+  }
+  
+  .achievement-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .achievement-rank {
+    font-size: 1rem;
+    
+    .rank-number {
+      font-size: 1.3rem;
+    }
+  }
+  
+  .step-row {
+    padding: 0.4rem;
+    min-height: 2.5rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .star-section {
+    width: 2rem;
+  }
+  
+  .step-star img {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+  
+  .comment-title {
+    font-size: 0.85rem;
+  }
+  
+  .comment-text {
+    font-size: 0.75rem;
+  }
+  
+  .rating-content {
+    font-size: 1rem;
+  }
+  
+  .action-button {
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
 }
 </style>
+

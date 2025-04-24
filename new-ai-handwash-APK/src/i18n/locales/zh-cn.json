@@ -85,6 +85,9 @@
     "ratingrecommend":"您愿意推荐这款应用给他人吗？",
     "ratingcancel":"取消",
     "ratingsubmit":"提交",
-    "performance":"表现"
+    "performance":"表现",
+    "nextStep":"前往下一步...",
+    "tryAgain":"请再试一次",
+    "completion":"完成"
   }
 }

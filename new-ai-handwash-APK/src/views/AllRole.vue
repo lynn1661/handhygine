@@ -1,62 +1,74 @@
 <template>
   <div v-loading="loading" class="home">
-    <div style="height: 20px"></div>
-    <div class="home-div">
+    <div class="content-wrapper">
+      <!-- 顶部区域 -->
       <div class="home-top">
-        <div class="goback">
+        <div class="left-section">
           <el-button 
-          color="#409EFF" 
-          style="color: #fff"
-          size="large" 
-          round 
-          :icon="ArrowLeft" 
-          @click="goBack"
-        >Previous Page</el-button>
+            class="back-button"
+            round 
+            :icon="ArrowLeft" 
+            @click="goBack"
+          >
+            Previous Page
+          </el-button>
         </div>
-          <div class="logo">
+        <div class="logo">
           <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
           <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
         </div>
-        <div class="back-home">
-          <img src="../assets/home.png" alt="" @click="backHome" />
-        </div>
-      </div>
-      <div class="date-picker">
-        <div class="block">
-          <span class="demonstration">Date Range</span>
-          <el-date-picker
-            v-model="value"
-            type="daterange"
-            unlink-panels
-            range-separator="To"
-            start-placeholder="Start date"
-            end-placeholder="End date"
-            :shortcuts="shortcuts"
-            value-format="YYYY-MM-DD"
-          />
-        </div>
-      </div>
-      <div class="summary-stats" v-if="Object.keys(rankData).length > 0">
-        <h2>Overall Statistics</h2>
-        <div class="stats-grid">
-          <div v-for="(data, role) in rankData" :key="role" class="stat-card">
-            <h3>{{ role }}</h3>
-            <template v-if="Array.isArray(data)">
-              <p>Total Records: {{ data.length }}</p>
-              <p>Average Score: {{ calculateStats(data).average }}</p>
-              <p>Score Range: {{ calculateStats(data).min }} - {{ calculateStats(data).max }}</p>
-            </template>
-            <template v-else>
-              <p>Total Records: {{ data.stats?.count || 0 }}</p>
-              <p>Average Score: {{ data.stats?.average || 0 }}</p>
-              <p>Score Range: {{ data.stats?.min || 0 }} - {{ data.stats?.max || 0 }}</p>
-            </template>
+        <div class="right-section">
+          <div class="back-home">
+            <img src="../assets/home.png" alt="Home" @click="backHome" class="home-icon" />
           </div>
         </div>
       </div>
-      <div class="charts-container">
-        <div v-for="(data, role) in rankData" :key="role" class="chart">
-          <div :class="role.replace(/\s+/g, '-').toLowerCase() + '-chart'" class="chart-content"></div>
+      
+      <!-- 主要内容区域 -->
+      <div class="main-section">
+        <!-- 日期选择器 -->
+        <div class="date-picker-container">
+          <div class="date-picker">
+            <span class="date-label">Date Range</span>
+            <el-date-picker
+              v-model="value"
+              type="daterange"
+              unlink-panels
+              range-separator="To"
+              start-placeholder="Start date"
+              end-placeholder="End date"
+              :shortcuts="shortcuts"
+              value-format="YYYY-MM-DD"
+              class="date-picker-input"
+            />
+          </div>
+        </div>
+        
+        <!-- 统计摘要卡片 -->
+        <div class="summary-stats" v-if="Object.keys(rankData).length > 0">
+          <h2 class="section-title">Overall Statistics</h2>
+          <div class="stats-grid">
+            <div v-for="(data, role) in rankData" :key="role" class="stat-card">
+              <h3 class="role-title">{{ role }}</h3>
+              <template v-if="Array.isArray(data)">
+                <p class="stat-item">Total Records: {{ data.length }}</p>
+                <p class="stat-item">Average Score: {{ calculateStats(data).average }}</p>
+                <p class="stat-item">Score Range: {{ calculateStats(data).min }} - {{ calculateStats(data).max }}</p>
+              </template>
+              <template v-else>
+                <p class="stat-item">Total Records: {{ data.stats?.count || 0 }}</p>
+                <p class="stat-item">Average Score: {{ data.stats?.average || 0 }}</p>
+                <p class="stat-item">Score Range: {{ data.stats?.min || 0 }} - {{ data.stats?.max || 0 }}</p>
+              </template>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 图表容器 -->
+        <div class="charts-container">
+          <div v-for="(data, role) in rankData" :key="role" class="chart-card">
+            <div :class="role.replace(/\s+/g, '-').toLowerCase() + '-chart'" class="chart-content"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -386,6 +398,8 @@ watch(value, async () => {
 </script>
 <style lang="scss" scoped>
 @import "@/styles/main.scss";
+
+/* 整体容器布局 */
 .home {
   width: 100%;
   min-height: 100vh;
@@ -395,126 +409,291 @@ watch(value, async () => {
   background-repeat: no-repeat;
   background-attachment: fixed;
   position: relative;
-  overflow-y: auto;
-  &-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 55px;
-    .goback {
-      display: flex;
-      align-items: center;
-      margin-top: 25px;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      margin-top: 25px;
-    }
-    .logo-image {
-      width: auto;
-      height: 55px;  
-    }
-    .back-home {
-      width: 100px;
-      height: 100px;
-      img {
-        margin-top: 10px;
-        width: 100%;
-        height: 100%;
-      }
-    }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 1rem;
+  overflow-x: hidden;
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+/* 顶部区域 */
+.home-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+}
+
+.left-section, .right-section {
+  width: 150px;
+  display: flex;
+  align-items: center;
+}
+
+.left-section {
+  justify-content: flex-start;
+}
+
+.right-section {
+  justify-content: flex-end;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.logo-image {
+  width: auto;
+  height: 3rem;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
   }
-  &-div {
-    margin: 0px 63px 23px 63px;
-    min-height: calc(100vh - 23px);
-    background-color: rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(5px);
-    border-radius: 12px;
-    padding: 20px;
+  
+  @media (max-width: 768px) {
+    height: 2.5rem;
   }
+  
+  @media (max-width: 480px) {
+    height: 2.25rem;
+  }
+}
+
+.back-button {
+  background-color: #409EFF;
+  color: white;
+  border: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  
+  &:hover {
+    background-color: #66b1ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+.back-home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-icon {
+  width: 3rem;
+  height: 3rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+  
+  @media (max-width: 768px) {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
+
+/* 主要内容区域 */
+.main-section {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+  //background-color: rgba(255, 255, 255, 0);
+  //border-radius: 16px;
+  //box-shadow: 0 6px 16px rgba(15, 56, 124, 0.12);
+  //backdrop-filter: blur(5px);
+}
+
+/* 日期选择器 */
+.date-picker-container {
+  width: 100%;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .date-picker {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.date-label {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f387c;
+}
+
+.date-picker-input {
   width: 100%;
-  padding: 0;
-  flex-wrap: wrap;
+  max-width: 450px;
 }
 
-.date-picker .block {
-  padding: 20px 0;
-  text-align: center;
-  border-right: solid 1px var(--el-border-color);
-  flex: 1;
-}
-
-.date-picker .block:last-child {
-  border-right: none;
-}
-
-.date-picker .demonstration {
-  display: block;
-  color: var(--el-color-primary-dark-2);
-  font-size: 22px;
-  font-weight: 1000;
-  margin-bottom: 5px;
-}
+/* 统计摘要 */
 .summary-stats {
-  margin: 20px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.9);
+  width: 100%;
+  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.7);
   border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
 
-  h2 {
-    text-align: center;
-    color: #606266;
-    margin-bottom: 20px;
-  }
+.section-title {
+  text-align: center;
+  color: #0f387c;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  gap: 1rem;
 }
 
 .stat-card {
-  padding: 15px;
-  background: #f5f7fa;
-  border-radius: 8px;
-  text-align: center;
-
-  h3 {
-    color: #409EFF;
-    margin-bottom: 10px;
-  }
-
-  p {
-    margin: 5px 0;
-    color: #606266;
+  padding: 1rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
   }
 }
 
+.role-title {
+  color: #409EFF;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.stat-item {
+  margin: 0.5rem 0;
+  color: #606266;
+  font-size: 0.95rem;
+}
+
+/* 图表容器 */
 .charts-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 20px;
-  padding: 20px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(475px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+  }
 }
 
-.chart {
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  padding: 20px;
+.chart-card {
   height: 450px;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
 }
 
 .chart-content {
   width: 100%;
   height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+}
+
+/* 响应式设计优化 */
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 0.5rem;
+  }
+  
+  .main-section {
+    padding: 0.75rem;
+    gap: 1rem;
+  }
+  
+  .section-title {
+    font-size: 1.3rem;
+  }
+  
+  .role-title {
+    font-size: 1.1rem;
+  }
+  
+  .chart-card {
+    height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-top {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .left-section, .right-section {
+    width: auto;
+  }
+  
+  .logo {
+    order: -1;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .chart-card {
+    height: 350px;
+  }
 }
 </style>
