@@ -8,6 +8,8 @@ import RoleRankList from "@/views/RoleRankList.vue";
 import Detecting from "@/views/Detecting.vue";
 import Hands from "@/views/Hands.vue";
 import HandwashingCompletion from "@/views/HandwashingCompletion.vue";
+import UserFeedback from "@/views/UserFeedback.vue";
+
 const routes = [
   {
     path: "/",
@@ -48,6 +50,10 @@ const routes = [
   {
     path: "/handwashingCompletion",
     component: HandwashingCompletion,
+  },
+  {
+    path: "/feedback",
+    component: UserFeedback,
   },
 ];
 

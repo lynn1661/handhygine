@@ -11,7 +11,8 @@
     "accountID": "账号",
     "userID": "用户",
     "password": "密码",
-    "allrole": "所有",
+    "allrole": "所有角色统计",
+    "feedback": "用户反馈",
     "role1": "医生",
     "role2": "护士",
     "role3": "辅助医疗",
@@ -187,6 +188,24 @@
       "componentMountError": "Socket监控组件挂载错误",
       "componentUnmounting": "Socket监控组件正在卸载",
       "componentUnmountError": "Socket监控组件卸载错误"
+    }
+  },
+  "UserFeedback": {
+    "pageTitle": "用户反馈统计",
+    "pageDescription": "查看和分析系统用户的反馈评分数据",
+    "previousPage": "返回",
+    "dateRange": "选择日期范围",
+    "overallSummary": "总体评分摘要",
+    "totalUsers": "总用户数",
+    "categoryStats": "分类评分统计",
+    "responses": "响应数",
+    "averageScore": "平均分",
+    "scoreRange": "分数范围",
+    "distribution": "分数分布",
+    "categories": {
+      "UI": "界面体验",
+      "Training": "训练效果",
+      "Recommendation": "推荐度"
     }
   }
 }

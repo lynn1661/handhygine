@@ -11,7 +11,8 @@
     "accountID": "帳號",
     "userID": "用户",
     "password": "密碼",
-    "allrole": "所有",
+    "allrole": "所有角色統計",
+    "feedback": "用戶反饋", 
     "role1": "醫生",
     "role2": "護士",
     "role3": "輔助醫療",
@@ -187,6 +188,24 @@
       "componentMountError": "Socket監控組件掛載錯誤",
       "componentUnmounting": "Socket監控組件正在卸載",
       "componentUnmountError": "Socket監控組件卸載錯誤"
+    }
+  },
+  "UserFeedback": {
+    "pageTitle": "用戶反饋統計",
+    "pageDescription": "查看和分析系統用戶的反饋評分數據",
+    "previousPage": "返回",
+    "dateRange": "選擇日期範圍",
+    "overallSummary": "總體評分摘要",
+    "totalUsers": "總用戶數",
+    "categoryStats": "分類評分統計",
+    "responses": "響應數",
+    "averageScore": "平均分",
+    "scoreRange": "分數範圍",
+    "distribution": "分數分布",
+    "categories": {
+      "UI": "界面體驗",
+      "Training": "訓練效果",
+      "Recommendation": "推薦度"
     }
   }
 }
