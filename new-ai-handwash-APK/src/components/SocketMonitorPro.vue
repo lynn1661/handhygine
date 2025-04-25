@@ -2,7 +2,7 @@
   <div class="socket-monitor-pro" v-if="show && isReady">
     <div class="monitor-header">
       <div class="title">
-        <h3>Socket性能监控</h3>
+        <h3>{{ $t('SocketMonitor.title') }}</h3>
         <span class="version">Pro</span>
       </div>
       <div class="actions">
@@ -22,7 +22,7 @@
           :class="['tab', { active: activeTab === tab.id }]"
           @click="setActiveTab(tab.id)"
         >
-          {{ tab.name }}
+          {{ $t(`SocketMonitor.tabs.${tab.id}`) }}
         </div>
       </div>
       
@@ -30,34 +30,34 @@
       <div v-if="activeTab === 'status'" class="tab-content">
         <div class="status-panel">
           <div class="status-card">
-            <div class="card-header">连接状态</div>
+            <div class="card-header">{{ $t('SocketMonitor.connectionStatus') }}</div>
             <div class="card-content">
               <div class="status-item">
-                <span class="status-label">连接状态:</span>
+                <span class="status-label">{{ $t('SocketMonitor.status') }}:</span>
                 <span :class="['status-value', connected ? 'success' : 'error']">
-                  {{ connected ? '已连接' : '未连接' }}
+                  {{ connected ? $t('SocketMonitor.connected') : $t('SocketMonitor.disconnected') }}
                 </span>
               </div>
               <div class="status-item">
-                <span class="status-label">服务器:</span>
+                <span class="status-label">{{ $t('SocketMonitor.server') }}:</span>
                 <span class="status-value">{{ serverUrl }}</span>
               </div>
               <div class="status-item">
-                <span class="status-label">连接ID:</span>
-                <span class="status-value">{{ socketId || '未知' }}</span>
+                <span class="status-label">{{ $t('SocketMonitor.connectionId') }}:</span>
+                <span class="status-value">{{ socketId || $t('SocketMonitor.unknown') }}</span>
               </div>
               <div class="status-item">
-                <span class="status-label">上次活动:</span>
+                <span class="status-label">{{ $t('SocketMonitor.lastActivity') }}:</span>
                 <span class="status-value">{{ lastActivity }}</span>
               </div>
               <div class="status-item">
-                <span class="status-label">连接质量:</span>
+                <span class="status-label">{{ $t('SocketMonitor.connectionQuality') }}:</span>
                 <span :class="['status-value', connectionQualityClass]">
-                  {{ connectionQualityText }}
+                  {{ $t(`SocketMonitor.quality.${connectionQuality}`) }}
                 </span>
               </div>
               <div class="status-item">
-                <span class="status-label">心跳延迟:</span>
+                <span class="status-label">{{ $t('SocketMonitor.heartbeatLatency') }}:</span>
                 <span :class="['status-value', heartbeatLatencyClass]">
                   {{ heartbeatLatency }}ms
                 </span>
@@ -66,34 +66,34 @@
           </div>
           
           <div class="status-card">
-            <div class="card-header">性能指标</div>
+            <div class="card-header">{{ $t('SocketMonitor.performanceMetrics') }}</div>
             <div class="card-content">
               <div class="status-item">
-                <span class="status-label">请求总数:</span>
+                <span class="status-label">{{ $t('SocketMonitor.totalRequests') }}:</span>
                 <span class="status-value">{{ metrics.requests }}</span>
               </div>
               <div class="status-item">
-                <span class="status-label">成功数:</span>
+                <span class="status-label">{{ $t('SocketMonitor.successCount') }}:</span>
                 <span class="status-value">{{ metrics.success }}</span>
               </div>
               <div class="status-item">
-                <span class="status-label">失败数:</span>
+                <span class="status-label">{{ $t('SocketMonitor.failureCount') }}:</span>
                 <span class="status-value">{{ metrics.failures }}</span>
               </div>
               <div class="status-item">
-                <span class="status-label">成功率:</span>
+                <span class="status-label">{{ $t('SocketMonitor.successRate') }}:</span>
                 <span :class="['status-value', successRateClass]">
                   {{ metrics.successRate }}
                 </span>
               </div>
               <div class="status-item">
-                <span class="status-label">平均响应时间:</span>
+                <span class="status-label">{{ $t('SocketMonitor.avgResponseTime') }}:</span>
                 <span :class="['status-value', responseTimeClass]">
                   {{ metrics.avgResponseTime }}
                 </span>
               </div>
               <div class="status-item">
-                <span class="status-label">最近响应时间:</span>
+                <span class="status-label">{{ $t('SocketMonitor.lastResponseTime') }}:</span>
                 <span class="status-value">{{ metrics.lastResponseTime }}</span>
               </div>
             </div>
@@ -101,13 +101,13 @@
         </div>
         
         <div class="action-buttons">
-          <button @click="safeTestConnection" class="primary-btn">测试连接</button>
-          <button @click="safeForceReconnect" class="primary-btn">强制重连</button>
-          <button @click="safeResetStats" class="secondary-btn">重置统计</button>
+          <button @click="safeTestConnection" class="primary-btn">{{ $t('SocketMonitor.testConnection') }}</button>
+          <button @click="safeForceReconnect" class="primary-btn">{{ $t('SocketMonitor.forceReconnect') }}</button>
+          <button @click="safeResetStats" class="secondary-btn">{{ $t('SocketMonitor.resetStats') }}</button>
         </div>
         
         <div v-if="testResult" class="test-result">
-          <h4>测试结果:</h4>
+          <h4>{{ $t('SocketMonitor.testResult') }}:</h4>
           <pre>{{ typeof testResult === 'string' ? testResult : JSON.stringify(testResult, null, 2) }}</pre>
         </div>
       </div>
@@ -116,37 +116,37 @@
       <div v-if="activeTab === 'server'" class="tab-content">
         <div class="server-status">
           <div class="status-card full-width">
-            <div class="card-header">服务器状态</div>
+            <div class="card-header">{{ $t('SocketMonitor.serverStatus') }}</div>
             
             <!-- 正常数据显示 -->
             <div class="card-content" v-if="serverStats && !serverStats.error">
               <div class="status-item">
-                <span class="status-label">实例数:</span>
-                <span class="status-value">{{ serverStats.modelPoolSize || '未知' }}</span>
+                <span class="status-label">{{ $t('SocketMonitor.instanceCount') }}:</span>
+                <span class="status-value">{{ serverStats.modelPoolSize || $t('SocketMonitor.unknown') }}</span>
               </div>
               <div class="status-item">
-                <span class="status-label">系统负载:</span>
+                <span class="status-label">{{ $t('SocketMonitor.systemLoad') }}:</span>
                 <span :class="['status-value', serverLoadClass]">
-                  {{ serverStats.systemLoad ? serverStats.systemLoad.toFixed(2) : '未知' }}
+                  {{ serverStats.systemLoad ? serverStats.systemLoad.toFixed(2) : $t('SocketMonitor.unknown') }}
                 </span>
               </div>
               <div class="status-item">
-                <span class="status-label">总请求数:</span>
-                <span class="status-value">{{ serverStats.totalRequests || '未知' }}</span>
+                <span class="status-label">{{ $t('SocketMonitor.totalRequests') }}:</span>
+                <span class="status-value">{{ serverStats.totalRequests || $t('SocketMonitor.unknown') }}</span>
               </div>
               <div class="status-item">
-                <span class="status-label">平均处理时间:</span>
+                <span class="status-label">{{ $t('SocketMonitor.avgProcessingTime') }}:</span>
                 <span class="status-value">
-                  {{ serverStats.avgProcessingTime ? serverStats.avgProcessingTime.toFixed(2) + 's' : '未知' }}
+                  {{ serverStats.avgProcessingTime ? serverStats.avgProcessingTime.toFixed(2) + 's' : $t('SocketMonitor.unknown') }}
                 </span>
               </div>
               <div class="status-item">
-                <span class="status-label">线程池大小:</span>
-                <span class="status-value">{{ serverStats.threadPoolSize || '未知' }}</span>
+                <span class="status-label">{{ $t('SocketMonitor.threadPoolSize') }}:</span>
+                <span class="status-value">{{ serverStats.threadPoolSize || $t('SocketMonitor.unknown') }}</span>
               </div>
               <div class="status-item">
-                <span class="status-label">活跃线程:</span>
-                <span class="status-value">{{ serverStats.activeThreads || '未知' }}</span>
+                <span class="status-label">{{ $t('SocketMonitor.activeThreads') }}:</span>
+                <span class="status-value">{{ serverStats.activeThreads || $t('SocketMonitor.unknown') }}</span>
               </div>
             </div>
             
@@ -167,23 +167,23 @@
             <!-- 加载中状态 -->
             <div class="card-content" v-else>
               <div class="status-item">
-                <span>正在加载服务器数据...</span>
+                <span>{{ $t('SocketMonitor.loading') }}</span>
               </div>
             </div>
           </div>
         </div>
         
         <div class="action-buttons">
-          <button @click="safeFetchServerStats" class="primary-btn">刷新服务器数据</button>
+          <button @click="safeFetchServerStats" class="primary-btn">{{ $t('SocketMonitor.refreshServerData') }}</button>
         </div>
       </div>
       
       <!-- 优化建议选项卡 -->
       <div v-if="activeTab === 'tips'" class="tab-content">
         <div class="status-card full-width">
-          <div class="card-header">连接优化建议</div>
+          <div class="card-header">{{ $t('SocketMonitor.optimizationTips') }}</div>
           <div class="card-content">
-            <div v-for="(tip, index) in optimizationTips" :key="index" class="tip-item">
+            <div v-for="(tip, index) in localizedOptimizationTips" :key="index" class="tip-item">
               <div class="tip-title">{{ tip.title }}</div>
               <div class="tip-content">{{ tip.content }}</div>
             </div>
@@ -196,6 +196,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n'; // 导入i18n
 import { 
   getSocketPerformanceReport, 
   resetSocketPerformanceStats,
@@ -212,6 +213,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close']);
+const { t } = useI18n(); // 使用i18n
 
 // 防止组件在DOM更新前渲染，减少Vue渲染异常
 const isReady = ref(false);
@@ -223,7 +225,7 @@ const minimize = ref(false);
 const connected = ref(false);
 const socketId = ref('');
 const serverUrl = ref('');
-const lastActivity = ref('无');
+const lastActivity = ref(t('SocketMonitor.none'));
 const metrics = ref({
   requests: 0,
   success: 0,
@@ -236,36 +238,36 @@ const testResult = ref(null);
 const serverStats = ref(null);
 const heartbeatLatency = ref(0);
 const connectionQuality = ref('unknown');
-const connectionType = ref('未知');
+const connectionType = ref(t('SocketMonitor.unknown'));
 const isOnline = ref(true); // 默认假设在线
 
 // 选项卡管理
 const activeTab = ref('status');
 const tabs = [
-  { id: 'status', name: '实时状态' },
-  { id: 'server', name: '服务器状态' },
-  { id: 'tips', name: '优化建议' }
+  { id: 'status', name: t('SocketMonitor.tabs.status') },
+  { id: 'server', name: t('SocketMonitor.tabs.server') },
+  { id: 'tips', name: t('SocketMonitor.tabs.tips') }
 ];
 
-// 优化建议
-const optimizationTips = [
+// 使用计算属性获取本地化的优化建议
+const localizedOptimizationTips = computed(() => [
   {
-    title: '网络连接',
-    content: '确保使用稳定的网络连接，如果使用WiFi，请靠近路由器或考虑使用有线连接。'
+    title: t('SocketMonitor.tips.network.title'),
+    content: t('SocketMonitor.tips.network.content')
   },
   {
-    title: '避免密集请求',
-    content: '不要在短时间内发送过多请求，使用防抖或节流技术限制请求频率。'
+    title: t('SocketMonitor.tips.requests.title'),
+    content: t('SocketMonitor.tips.requests.content')
   },
   {
-    title: '服务器负载',
-    content: '如果服务器负载过高，请联系管理员增加服务器资源或优化后端处理逻辑。'
+    title: t('SocketMonitor.tips.serverLoad.title'),
+    content: t('SocketMonitor.tips.serverLoad.content')
   },
   {
-    title: '刷新连接',
-    content: '如果连接质量差，尝试点击"强制重连"按钮或刷新页面重新建立连接。'
+    title: t('SocketMonitor.tips.refresh.title'),
+    content: t('SocketMonitor.tips.refresh.content')
   }
-];
+]);
 
 // 计算属性
 const successRateClass = computed(() => {
@@ -297,26 +299,12 @@ const connectionQualityClass = computed(() => {
   return '';
 });
 
-const connectionQualityText = computed(() => {
-  if (connectionQuality.value === 'good') return '良好';
-  if (connectionQuality.value === 'fair') return '一般';
-  if (connectionQuality.value === 'poor') return '较差';
-  return '未知';
-});
-
-const heartbeatLatencyClass = computed(() => {
-  const latency = heartbeatLatency.value;
-  if (latency < 100) return 'success';
-  if (latency < 300) return 'warning';
-  return 'error';
-});
-
 // 安全函数包装器
 function safeCall(fn, ...args) {
   try {
     return fn(...args);
   } catch (error) {
-    console.error("操作失败:", error);
+    console.error(t('SocketMonitor.operationFailed'), error);
     return { error: error.message };
   }
 }
@@ -342,7 +330,7 @@ function initializeComponent() {
   if (isInitialized.value) return;
   
   try {
-    console.log("初始化Socket监控组件");
+    console.log(t('SocketMonitor.logs.initComponent'));
     
     // 初始化 Socket 连接
     const socket = initializeSocket();
@@ -361,13 +349,13 @@ function initializeComponent() {
           updateMetrics();
         }
       } catch (error) {
-        console.error("更新指标出错:", error);
+        console.error(t('SocketMonitor.logs.updateMetricsError'), error);
       }
     }, 2000);
     
     isInitialized.value = true;
   } catch (error) {
-    console.error("初始化Socket监控组件出错:", error);
+    console.error(t('SocketMonitor.logs.initComponentError'), error);
   }
 }
 
@@ -376,7 +364,7 @@ function cleanupComponent() {
   if (!isInitialized.value) return;
   
   try {
-    console.log("清理Socket监控组件");
+    console.log(t('SocketMonitor.logs.cleanupComponent'));
     
     // 清理定时器
     if (updateInterval) {
@@ -386,13 +374,13 @@ function cleanupComponent() {
     
     isInitialized.value = false;
   } catch (error) {
-    console.error("清理Socket监控组件出错:", error);
+    console.error(t('SocketMonitor.logs.cleanupComponentError'), error);
   }
 }
 
 // 监视show属性的变化，安全地处理组件显示/隐藏逻辑
 watch(() => props.show, (newValue, oldValue) => {
-  console.log(`Socket监控组件显示状态变更: ${oldValue} -> ${newValue}`);
+  console.log(t('SocketMonitor.logs.showStateChange', { oldValue, newValue }));
   
   if (newValue) {
     // 显示组件前，确保DOM已准备好
@@ -455,7 +443,7 @@ function safeForceReconnect() {
   try {
     const socket = initializeSocket();
     if (socket) {
-      testResult.value = { status: '正在重新连接...' };
+      testResult.value = { status: t('SocketMonitor.reconnecting') };
       
       // 先断开连接
       socket.disconnect();
@@ -466,37 +454,37 @@ function safeForceReconnect() {
         setTimeout(() => {
           if (socket.connected) {
             testResult.value = { 
-              status: '重连成功', 
+              status: t('SocketMonitor.reconnectSuccess'), 
               connected: true,
               socketId: socket.id
             };
           } else {
             testResult.value = { 
-              status: '重连失败', 
+              status: t('SocketMonitor.reconnectFailed'), 
               connected: false,
-              error: '无法建立连接，请检查网络'
+              error: t('SocketMonitor.connectionFailed')
             };
           }
         }, 1000);
       }, 500);
     }
   } catch (error) {
-    console.error("强制重连失败:", error);
-    testResult.value = { status: '重连失败', error: error.message };
+    console.error(t('SocketMonitor.logs.forceReconnectFailed'), error);
+    testResult.value = { status: t('SocketMonitor.reconnectFailed'), error: error.message };
   }
 }
 
 // 测试Socket连接 - 安全包装
 async function safeTestConnection() {
-  testResult.value = { status: '测试中...' };
+  testResult.value = { status: t('SocketMonitor.testing') };
   try {
     const socket = initializeSocket();
     if (!socket) {
-      throw new Error("Socket未初始化");
+      throw new Error(t('SocketMonitor.socketNotInitialized'));
     }
     
-    socketId.value = socket.id || '未知';
-    serverUrl.value = socket.io?.uri || '未知';
+    socketId.value = socket.id || t('SocketMonitor.unknown');
+    serverUrl.value = socket.io?.uri || t('SocketMonitor.unknown');
     
     // 记录开始时间
     const startTime = Date.now();
@@ -517,7 +505,7 @@ async function safeTestConnection() {
     heartbeatLatency.value = responseTime;
     
     testResult.value = {
-      status: '成功',
+      status: t('SocketMonitor.success'),
       connected: socket.connected,
       responseTime: `${responseTime}ms`,
       response
@@ -528,9 +516,9 @@ async function safeTestConnection() {
     
     lastActivity.value = new Date().toLocaleTimeString();
   } catch (error) {
-    console.error("测试连接失败:", error);
+    console.error(t('SocketMonitor.logs.testConnectionFailed'), error);
     testResult.value = {
-      status: '失败',
+      status: t('SocketMonitor.failed'),
       error: error.message
     };
     
@@ -544,10 +532,10 @@ function safeResetStats() {
   try {
     const result = resetSocketPerformanceStats();
     updateMetrics();
-    testResult.value = { status: '统计已重置', ...result };
+    testResult.value = { status: t('SocketMonitor.statsReset'), ...result };
   } catch (error) {
-    console.error("重置统计失败:", error);
-    testResult.value = { status: '重置失败', error: error.message };
+    console.error(t('SocketMonitor.logs.resetStatsFailed'), error);
+    testResult.value = { status: t('SocketMonitor.resetFailed'), error: error.message };
   }
 }
 
@@ -561,22 +549,22 @@ function updateMetrics() {
     if (socket) {
       connected.value = socket.connected;
       if (socket.connected) {
-        socketId.value = socket.id || '未知';
-        serverUrl.value = socket.io?.uri || '未知';
+        socketId.value = socket.id || t('SocketMonitor.unknown');
+        serverUrl.value = socket.io?.uri || t('SocketMonitor.unknown');
       }
     }
     
     // 更新连接质量评估
     evaluateConnectionQuality();
   } catch (error) {
-    console.error("更新指标失败:", error);
+    console.error(t('SocketMonitor.logs.updateMetricsFailed'), error);
   }
 }
 
 // 重写服务器统计功能，使用更简单的请求格式 - 安全包装
 async function safeFetchServerStats() {
   try {
-    console.log("获取服务器统计信息...");
+    console.log(t('SocketMonitor.logs.fetchingServerStats'));
     
     // 使用测试请求而不是专门的统计请求
     // 因为服务器可能不支持专门的统计请求
@@ -589,7 +577,7 @@ async function safeFetchServerStats() {
     };
     
     const response = await createConnect([testData], 0);
-    console.log("服务器测试响应:", response);
+    console.log(t('SocketMonitor.logs.serverTestResponse'), response);
     
     // 创建一个模拟的统计数据
     serverStats.value = {
@@ -603,10 +591,10 @@ async function safeFetchServerStats() {
     
     lastActivity.value = new Date().toLocaleTimeString();
   } catch (error) {
-    console.error('获取服务器统计失败:', error);
+    console.error(t('SocketMonitor.logs.fetchServerStatsFailed'), error);
     serverStats.value = { 
       error: error.message,
-      suggestion: '请检查服务器配置或联系管理员'
+      suggestion: t('SocketMonitor.checkServerConfig')
     };
   }
 }
@@ -621,20 +609,20 @@ function setupSocketListeners() {
       // 断开连接事件
       socket.on('disconnect', () => {
         connected.value = false;
-        console.log("[监控器] Socket断开连接");
+        console.log(t('SocketMonitor.logs.socketDisconnected'));
       });
       
       // 连接事件
       socket.on('connect', () => {
         connected.value = true;
-        socketId.value = socket.id || '未知';
+        socketId.value = socket.id || t('SocketMonitor.unknown');
         lastActivity.value = new Date().toLocaleTimeString();
-        console.log("[监控器] Socket已连接，ID:", socket.id);
+        console.log(t('SocketMonitor.logs.socketConnected'), socket.id);
       });
       
       // 错误事件
       socket.on('error', (error) => {
-        console.error("[监控器] Socket错误:", error);
+        console.error(t('SocketMonitor.logs.socketError'), error);
       });
       
       // 一般消息
@@ -646,14 +634,14 @@ function setupSocketListeners() {
       socket._monitorListenersAdded = true;
     }
   } catch (error) {
-    console.error("设置Socket监听器失败:", error);
+    console.error(t('SocketMonitor.logs.setupSocketListenersFailed'), error);
   }
 }
 
 // 组件挂载时初始化
 onMounted(() => {
   try {
-    console.log("Socket监控组件已挂载");
+    console.log(t('SocketMonitor.logs.componentMounted'));
     // 延迟准备好状态，确保DOM完全就绪
     nextTick(() => {
       if (props.show) {
@@ -662,18 +650,18 @@ onMounted(() => {
       }
     });
   } catch (error) {
-    console.error("Socket监控组件挂载错误:", error);
+    console.error(t('SocketMonitor.logs.componentMountError'), error);
   }
 });
 
 // 组件卸载时清理资源
 onUnmounted(() => {
   try {
-    console.log("Socket监控组件正在卸载");
+    console.log(t('SocketMonitor.logs.componentUnmounting'));
     cleanupComponent();
     isReady.value = false;
   } catch (error) {
-    console.error("Socket监控组件卸载错误:", error);
+    console.error(t('SocketMonitor.logs.componentUnmountError'), error);
   }
 });
 </script>
