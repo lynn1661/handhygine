@@ -108,11 +108,19 @@ const get_rank = async ({ data }) => {
   // Fetch all users from the database.
   const allUsers = await datap.mongo.read("user_info", {});
    // 把所有用户的 `total` 数组展开成一个大数组
-  const allScores = allUsers.flatMap(user =>
-    Array.isArray(user.total) 
-    ? user.total.map(score => parseFloat((score * (100 / 7)).toFixed(2))) 
-    : [parseFloat((user.total).toFixed(2))]
-  ).filter(score => score !== undefined && score !== null);
+  const allScores = allUsers.flatMap(user => {
+    if (Array.isArray(user.total)) {
+      return user.total.map(score => 
+        score !== undefined && score !== null 
+          ? parseFloat((score * (100 / 7)).toFixed(2)) 
+          : 0
+      );
+    } else {
+      return user.total !== undefined && user.total !== null 
+        ? [parseFloat((user.total).toFixed(2))] 
+        : [0];
+    }
+  }).filter(score => score !== undefined && score !== null);
   if (!allScores || allScores.length === 0) {
     const err = new Error("No user data found");
     err.code = 500;
