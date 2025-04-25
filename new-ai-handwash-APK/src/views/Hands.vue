@@ -1219,7 +1219,7 @@ function getNextStepTitle() {
   top: 0;
   left: 0;
   object-fit: cover;
-  transform: scaleY(-1);
+  //transform: scaleY(-1);
   background: transparent;
   border-radius: 12px;
 }

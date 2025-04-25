@@ -149,7 +149,7 @@ const categories = [
 
 // 日期选择器相关
 const dateRange = ref([
-  new Date(new Date().getFullYear(), 0, 1), // 今年1月1日
+  new Date(), // 今天
   new Date() // 今天
 ]);
 
@@ -210,10 +210,19 @@ const fetchFeedbackData = async () => {
     // 准备日期范围数据
     let dateRangeData = null;
     if (dateRange.value && dateRange.value.length === 2) {
-      dateRangeData = {
-        start: dateRange.value[0],
-        end: dateRange.value[1]
+      // 确保日期格式正确
+      const formatDate = (date) => {
+        if (typeof date === 'string') return date;
+        const d = new Date(date);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       };
+      
+      dateRangeData = {
+        start: formatDate(dateRange.value[0]),
+        end: formatDate(dateRange.value[1])
+      };
+      
+      console.log("使用日期范围:", dateRangeData);
     }
     
     // 调用store action获取数据
@@ -259,8 +268,8 @@ const getAverageScore = (categoryId) => {
 // 将100分制的平均分转换为5分制的星级评分
 const getStarRating = (categoryId) => {
   const stats = getCategoryStats(categoryId);
-  // 100分制转为5分制
-  return stats.average ? (stats.average / 20) : 0;
+  // 100分制转为5分制，并保留一位小数
+  return stats.average ? parseFloat((stats.average / 20).toFixed(1)) : 0;
 };
 
 // 初始化合并的柱状图
@@ -412,6 +421,9 @@ watch(() => i18n.locale.value, () => {
 
 // 组件挂载时获取数据
 onMounted(async () => {
+  // 确保初始日期设置正确
+  const today = new Date();
+  dateRange.value = [today, today]; 
   await fetchFeedbackData();
 });
 </script>
