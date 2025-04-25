@@ -46,7 +46,6 @@
     "rightHand": "Right Hand",
     "PERFECT": "PERFECT",
     "FAILED": "FAILED",
-    "congrat1": "CONGRATULATIONS!",
     "congrat2": "You have completed the test!",
     "rank1": "You have beaten",
     "rank2": "% of users!",
@@ -88,6 +87,8 @@
     "performance":"PERFORMANCE",
     "nextStep":"Going to next step...",
     "tryAgain":"Please try again",
-    "completion":"Completion"
+    "completion":"Completion",
+    "totalScore":"Congratulations! Your Score is "
+
   }
 }

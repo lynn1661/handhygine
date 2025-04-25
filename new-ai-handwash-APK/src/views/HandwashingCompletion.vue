@@ -21,7 +21,9 @@
             <img v-if="showImg === 'Pro'" src="/public/Pro.png" alt="Pro" />
             <img v-if="showImg === 'Master'" src="/public/Master.png" alt="Master" />
           </div>
-          <div class="achievement-title">{{ $t("HandHygiene.congrat1") }}</div>
+          <div class="achievement-header">
+            <span class="achievement-total">{{ $t("HandHygiene.totalScore") }} <span class="total-number">{{ total || 0 }}</span> !</span>
+          </div>
           <div class="achievement-rank">
             {{ $t("HandHygiene.rank1") }} 
             <span class="rank-number">{{ rankMessage }}</span>
@@ -154,6 +156,7 @@ const loading = ref(true);
 const t = useI18n();
 const shouldChangeStyle = ref(true); // 默认不添加
 const HandwashingType = ref();
+const total = ref(0); // 添加total变量
 const back = () => {
   localStorage.removeItem("accountID");
   sessionStorage.removeItem("accountID");
@@ -300,6 +303,9 @@ onMounted(async () => {
   // Set the step correctness data from the backend response
   list.value = res?.step_points;
   
+  // 设置用户总成绩，强制取整
+  total.value = Math.floor(res?.userScore || 0);
+  
   // Set the video file names for download from the backend response
   downloadVideoName.value = res?.step_video_files;
 
@@ -440,27 +446,45 @@ onMounted(async () => {
   }
 }
 
-.achievement-title {
+.achievement-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.achievement-total {
   font-family: "Helvetica85", sans-serif;
   font-weight: 700;
-  font-size: 1.5rem; /* 减小字体尺寸 */
+  font-size: 1.6rem;
   color: #0f387c;
-  margin-bottom: 0.5rem; /* 减小底部间距 */
   text-align: center;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+  line-height: 1.4;
+  
+  .total-number {
+    color: #ffcc00;
+    font-size: 2rem;
+    font-weight: 800;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    display: inline-block;
+    margin: 0 0.2rem;
+  }
 }
 
 .achievement-rank {
   font-family: "Helvetica85", sans-serif;
   font-weight: 600;
-  font-size: 1.3rem; /* 减小字体尺寸 */
+  font-size: 1.75rem; /* 增大字体尺寸 */
   color: #0f387c;
   text-align: center;
   line-height: 1.3;
   
   .rank-number {
     color: #ffcc00;
-    font-size: 1.8rem;
+    font-size: 2.2rem; /* 增大数字字体 */
     font-weight: 800;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
     display: inline-block;
@@ -563,14 +587,16 @@ onMounted(async () => {
 
 .rating-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 0.75rem; /* 减小垂直间距 */
+  justify-content: center;
+  gap: 1rem; /* 水平间距 */
   font-size: 1.15rem; /* 减小字体尺寸 */
   color: #0f387c;
-  padding: 0.25rem; /* 减小内边距 */
+  padding: 0.5rem; /* 减小内边距 */
   font-weight: 600;
   text-align: center;
+  flex-wrap: wrap; /* 在小屏幕上可以换行 */
   
   :deep(.el-button) {
     font-size: 1rem;
@@ -673,10 +699,6 @@ onMounted(async () => {
     height: 140px;
   }
   
-  .achievement-title {
-    font-size: 1.75rem;
-  }
-  
   .step-row {
     min-height: 3.5rem;
     padding: 0.75rem;
@@ -719,16 +741,25 @@ onMounted(async () => {
     height: 90px;
   }
   
-  .achievement-title {
-    font-size: 1.2rem;
-    margin-bottom: 0.25rem;
+  .achievement-header {
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .achievement-total {
+    font-size: 1.3rem;
+    
+    .total-number {
+      font-size: 1.6rem;
+    }
   }
   
   .achievement-rank {
-    font-size: 1rem;
+    font-size: 1.5rem;
     
     .rank-number {
-      font-size: 1.3rem;
+      font-size: 1.8rem;
     }
   }
   

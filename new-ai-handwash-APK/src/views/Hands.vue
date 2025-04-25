@@ -53,7 +53,7 @@
               {{ t(`HandHygiene.performance`) }}
             </div>
             <div class="feedback-rating">
-              <el-rate v-model="resultValue" disabled />
+              <el-rate v-model="resultValue"  />
             </div>
           </div>
         </div>
