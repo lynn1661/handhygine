@@ -90,5 +90,103 @@
     "tryAgain":"请再试一次",
     "completion":"完成",
     "totalScore":"恭喜！您的得分是"
+  },
+  "SocketMonitor": {
+    "title": "Socket性能监控",
+    "tabs": {
+      "status": "实时状态",
+      "server": "服务器状态",
+      "tips": "优化建议"
+    },
+    "connectionStatus": "连接状态",
+    "status": "连接状态",
+    "connected": "已连接",
+    "disconnected": "未连接",
+    "server": "服务器",
+    "connectionId": "连接ID",
+    "lastActivity": "上次活动",
+    "connectionQuality": "连接质量",
+    "heartbeatLatency": "心跳延迟",
+    "performanceMetrics": "性能指标",
+    "totalRequests": "请求总数",
+    "successCount": "成功数",
+    "failureCount": "失败数",
+    "successRate": "成功率",
+    "avgResponseTime": "平均响应时间",
+    "lastResponseTime": "最近响应时间",
+    "testConnection": "测试连接",
+    "forceReconnect": "强制重连",
+    "resetStats": "重置统计",
+    "testResult": "测试结果",
+    "serverStatus": "服务器状态",
+    "instanceCount": "实例数",
+    "systemLoad": "系统负载",
+    "avgProcessingTime": "平均处理时间",
+    "threadPoolSize": "线程池大小",
+    "activeThreads": "活跃线程",
+    "loading": "正在加载服务器数据...",
+    "refreshServerData": "刷新服务器数据",
+    "optimizationTips": "连接优化建议",
+    "unknown": "未知",
+    "none": "无",
+    "quality": {
+      "good": "良好",
+      "fair": "一般",
+      "poor": "较差",
+      "unknown": "未知"
+    },
+    "reconnecting": "正在重新连接...",
+    "reconnectSuccess": "重连成功",
+    "reconnectFailed": "重连失败",
+    "connectionFailed": "无法建立连接，请检查网络",
+    "testing": "测试中...",
+    "socketNotInitialized": "Socket未初始化",
+    "success": "成功",
+    "failed": "失败",
+    "statsReset": "统计已重置",
+    "resetFailed": "重置失败",
+    "checkServerConfig": "请检查服务器配置或联系管理员",
+    "operationFailed": "操作失败",
+    "tips": {
+      "network": {
+        "title": "网络连接",
+        "content": "确保使用稳定的网络连接，如果使用WiFi，请靠近路由器或考虑使用有线连接。"
+      },
+      "requests": {
+        "title": "避免密集请求",
+        "content": "不要在短时间内发送过多请求，使用防抖或节流技术限制请求频率。"
+      },
+      "serverLoad": {
+        "title": "服务器负载",
+        "content": "如果服务器负载过高，请联系管理员增加服务器资源或优化后端处理逻辑。"
+      },
+      "refresh": {
+        "title": "刷新连接",
+        "content": "如果连接质量差，尝试点击“强制重连”按钮或刷新页面重新建立连接。"
+      }
+    },
+    "logs": {
+      "initComponent": "初始化Socket监控组件",
+      "updateMetricsError": "更新指标出错",
+      "initComponentError": "初始化Socket监控组件出错",
+      "cleanupComponent": "清理Socket监控组件",
+      "cleanupComponentError": "清理Socket监控组件出错",
+      "showStateChange": "Socket监控组件显示状态变更: {oldValue} -> {newValue}",
+      "forceReconnectFailed": "强制重连失败",
+      "testConnectionFailed": "测试连接失败",
+      "resetStatsFailed": "重置统计失败",
+      "updateMetricsFailed": "更新指标失败",
+      "fetchingServerStats": "获取服务器统计信息...",
+      "serverTestResponse": "服务器测试响应",
+      "fetchServerStatsFailed": "获取服务器统计失败",
+      "socketDisconnected": "[监控器] Socket断开连接",
+      "socketConnected": "[监控器] Socket已连接，ID:",
+      "socketError": "[监控器] Socket错误:",
+      "setupSocketListenersFailed": "设置Socket监听器失败",
+      "componentMounted": "Socket监控组件已挂载",
+      "componentMountError": "Socket监控组件挂载错误",
+      "componentUnmounting": "Socket监控组件正在卸载",
+      "componentUnmountError": "Socket监控组件卸载错误"
+    }
   }
 }

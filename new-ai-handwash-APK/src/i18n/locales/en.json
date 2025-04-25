@@ -89,6 +89,103 @@
     "tryAgain":"Please try again",
     "completion":"Completion",
     "totalScore":"Congratulations! Your Score is "
-
+  },
+  "SocketMonitor": {
+    "title": "Socket Performance Monitor",
+    "tabs": {
+      "status": "Live Status",
+      "server": "Server Status",
+      "tips": "Optimization Tips"
+    },
+    "connectionStatus": "Connection Status",
+    "status": "Status",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "server": "Server",
+    "connectionId": "Connection ID",
+    "lastActivity": "Last Activity",
+    "connectionQuality": "Connection Quality",
+    "heartbeatLatency": "Heartbeat Latency",
+    "performanceMetrics": "Performance Metrics",
+    "totalRequests": "Total Requests",
+    "successCount": "Success Count",
+    "failureCount": "Failure Count",
+    "successRate": "Success Rate",
+    "avgResponseTime": "Avg Response Time",
+    "lastResponseTime": "Last Response Time",
+    "testConnection": "Test Connection",
+    "forceReconnect": "Force Reconnect",
+    "resetStats": "Reset Stats",
+    "testResult": "Test Result",
+    "serverStatus": "Server Status",
+    "instanceCount": "Instance Count",
+    "systemLoad": "System Load",
+    "avgProcessingTime": "Avg Processing Time",
+    "threadPoolSize": "Thread Pool Size",
+    "activeThreads": "Active Threads",
+    "loading": "Loading server data...",
+    "refreshServerData": "Refresh Server Data",
+    "optimizationTips": "Connection Optimization Tips",
+    "unknown": "Unknown",
+    "none": "None",
+    "quality": {
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor",
+      "unknown": "Unknown"
+    },
+    "reconnecting": "Reconnecting...",
+    "reconnectSuccess": "Reconnect Successful",
+    "reconnectFailed": "Reconnect Failed",
+    "connectionFailed": "Failed to establish connection, please check your network",
+    "testing": "Testing...",
+    "socketNotInitialized": "Socket not initialized",
+    "success": "Success",
+    "failed": "Failed",
+    "statsReset": "Statistics Reset",
+    "resetFailed": "Reset Failed",
+    "checkServerConfig": "Please check server configuration or contact administrator",
+    "operationFailed": "Operation Failed",
+    "tips": {
+      "network": {
+        "title": "Network Connection",
+        "content": "Ensure you're using a stable network connection. If using WiFi, stay close to the router or consider using a wired connection."
+      },
+      "requests": {
+        "title": "Avoid Intensive Requests",
+        "content": "Don't send too many requests in a short period. Use debounce or throttle techniques to limit request frequency."
+      },
+      "serverLoad": {
+        "title": "Server Load",
+        "content": "If server load is high, contact the administrator to increase server resources or optimize backend processing logic."
+      },
+      "refresh": {
+        "title": "Refresh Connection",
+        "content": "If connection quality is poor, try clicking the 'Force Reconnect' button or refresh the page to establish a new connection."
+      }
+    },
+    "logs": {
+      "initComponent": "Initializing Socket Monitor component",
+      "updateMetricsError": "Error updating metrics",
+      "initComponentError": "Error initializing Socket Monitor component",
+      "cleanupComponent": "Cleaning up Socket Monitor component",
+      "cleanupComponentError": "Error cleaning up Socket Monitor component",
+      "showStateChange": "Socket Monitor component display state changed: {oldValue} -> {newValue}",
+      "forceReconnectFailed": "Force reconnect failed",
+      "testConnectionFailed": "Test connection failed",
+      "resetStatsFailed": "Reset stats failed",
+      "updateMetricsFailed": "Update metrics failed",
+      "fetchingServerStats": "Fetching server statistics...",
+      "serverTestResponse": "Server test response",
+      "fetchServerStatsFailed": "Failed to fetch server stats",
+      "socketDisconnected": "[Monitor] Socket disconnected",
+      "socketConnected": "[Monitor] Socket connected, ID:",
+      "socketError": "[Monitor] Socket error:",
+      "setupSocketListenersFailed": "Failed to setup Socket listeners",
+      "componentMounted": "Socket Monitor component mounted",
+      "componentMountError": "Socket Monitor component mount error",
+      "componentUnmounting": "Socket Monitor component unmounting",
+      "componentUnmountError": "Socket Monitor component unmount error"
+    }
   }
 }
