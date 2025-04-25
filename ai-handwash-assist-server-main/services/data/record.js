@@ -110,8 +110,8 @@ const get_rank = async ({ data }) => {
    // 把所有用户的 `total` 数组展开成一个大数组
   const allScores = allUsers.flatMap(user =>
     Array.isArray(user.total) 
-    ? user.total.map(score => score * (100 / 7)) 
-    : [user.total]
+    ? user.total.map(score => parseFloat((score * (100 / 7)).toFixed(2))) 
+    : [parseFloat((user.total).toFixed(2))]
   ).filter(score => score !== undefined && score !== null);
   if (!allScores || allScores.length === 0) {
     const err = new Error("No user data found");
