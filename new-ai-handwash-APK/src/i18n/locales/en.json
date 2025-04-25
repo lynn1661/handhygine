@@ -11,7 +11,8 @@
     "accountID": "Account",
     "userID": "ID",
     "password": "Password",
-    "allrole": "ALL",
+    "allrole": "ALL ROLES STATISTICS",
+    "feedback": "USER FEEDBACK",
     "role1": "DOCTOR",
     "role2": "NURSE",
     "role3": "ALLIED HEALTH",
@@ -186,6 +187,24 @@
       "componentMountError": "Socket Monitor component mount error",
       "componentUnmounting": "Socket Monitor component unmounting",
       "componentUnmountError": "Socket Monitor component unmount error"
+    }
+  },
+  "UserFeedback": {
+    "pageTitle": "User Feedback Statistics",
+    "pageDescription": "View and analyze user feedback ratings",
+    "previousPage": "Back",
+    "dateRange": "Select Date Range",
+    "overallSummary": "Overall Rating Summary",
+    "totalUsers": "Total Users",
+    "categoryStats": "Category Statistics",
+    "responses": "Responses",
+    "averageScore": "Average Score",
+    "scoreRange": "Score Range",
+    "distribution": "Score Distribution",
+    "categories": {
+      "UI": "UI Experience",
+      "Training": "Training Effect",
+      "Recommendation": "Recommendation"
     }
   }
 }

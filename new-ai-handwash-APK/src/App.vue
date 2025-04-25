@@ -5,17 +5,17 @@
   <router-view></router-view>
   
   <!-- 仅使用专业版Socket监控器 -->
-  <div class="monitor-container" v-if="showMonitor">
+  <div class="monitor-container" v-if="showMonitor && !isExcludedPage">
     <socket-monitor-pro @close="showMonitor = false" :show="true" />
   </div>
   
   <!-- 临时显示调试信息 -->
-  <div class="debug-info" v-if="showMonitor">
+  <div class="debug-info" v-if="showMonitor && !isExcludedPage">
     监控器已打开
   </div>
   
-  <!-- 始终显示监控按钮 -->
-  <div class="monitor-controls">
+  <!-- 仅在非排除页面显示监控按钮 -->
+  <div class="monitor-controls" v-if="!isExcludedPage">
     <button 
       class="monitor-toggle"
       @click="toggleMonitor"
@@ -25,12 +25,14 @@
   </div>
 </template>
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRoute } from "vue-router";
 import { initializeSocket, safeDisconnect } from "./services/socketAdapter";
 import SocketMonitorPro from "@/components/SocketMonitorPro.vue";
 
 const t = useI18n();
+const route = useRoute();
 
 // 是否为开发环境 - 不再使用此变量控制显示
 const isDev = import.meta.env 
@@ -39,6 +41,20 @@ const isDev = import.meta.env
 
 // 是否显示Socket监控器
 const showMonitor = ref(false);
+
+// 定义需要排除socket监控的页面路径
+const excludedPages = [
+  '/admin',
+  '/allrole',
+  '/rolerank',
+  '/roleranklist',
+  '/feedback'
+];
+
+// 检查当前页面是否在排除列表中
+const isExcludedPage = computed(() => {
+  return excludedPages.some(path => route.path.startsWith(path));
+});
 
 // 切换监控器显示
 function toggleMonitor() {
@@ -56,7 +72,7 @@ onMounted(() => {
   const debugParam = urlParams.get('debug');
   
   // 可选择性地自动显示监控器
-  if (debugParam === 'monitor') {
+  if (debugParam === 'monitor' && !isExcludedPage.value) {
     showMonitor.value = true;
   }
   

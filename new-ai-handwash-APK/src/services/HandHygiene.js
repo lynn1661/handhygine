@@ -39,3 +39,10 @@ export async function submitRating(params) {
     ...params,
   });
 }
+
+// 新增API函数，获取所有用户的评分反馈数据
+export function getAllRatings(data) {
+  return axiosInstance.post("/data/rate/get_ratings", {
+    ...data,
+  });
+}

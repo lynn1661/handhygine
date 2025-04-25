@@ -16,20 +16,34 @@
       <div class="main-section">
         <div class="role-container">
           <div class="role-buttons">
-            <el-button @click="allRole" class="role-button">
+            <!-- 第一行：单独按钮 -->
+            <el-button @click="allRole" class="role-button full-width">
               {{ $t("HandHygiene.allrole") }}
             </el-button>
-            <el-button @click="RoleRank('Doctor')" class="role-button">
-              {{ $t("HandHygiene.role1") }}
-            </el-button>
-            <el-button @click="RoleRank('Nurse')" class="role-button">
-              {{ $t("HandHygiene.role2") }}
-            </el-button>
-            <el-button @click="RoleRank('Allied Health')" class="role-button">
-              {{ $t("HandHygiene.role3") }}
-            </el-button>
-            <el-button @click="RoleRank('Other')" class="role-button">
-              {{ $t("HandHygiene.role4") }}
+            
+            <!-- 第二行：两个按钮 -->
+            <div class="button-row">
+              <el-button @click="RoleRank('Doctor')" class="role-button half-width">
+                {{ $t("HandHygiene.role1") }}
+              </el-button>
+              <el-button @click="RoleRank('Nurse')" class="role-button half-width">
+                {{ $t("HandHygiene.role2") }}
+              </el-button>
+            </div>
+            
+            <!-- 第三行：两个按钮 -->
+            <div class="button-row">
+              <el-button @click="RoleRank('Allied Health')" class="role-button half-width">
+                {{ $t("HandHygiene.role3") }}
+              </el-button>
+              <el-button @click="RoleRank('Other')" class="role-button half-width">
+                {{ $t("HandHygiene.role4") }}
+              </el-button>
+            </div>
+            
+            <!-- 第四行：单独按钮 -->
+            <el-button @click="goToFeedback" class="role-button full-width feedback-button">
+              {{ $t("HandHygiene.feedback") }}
             </el-button>
           </div>
         </div>
@@ -70,6 +84,13 @@ const backHome = () => {
   sessionStorage.removeItem("accountID");
   router.push({
     path: "/admin",
+  });
+};
+
+// 跳转到用户反馈页面
+const goToFeedback = () => {
+  router.push({
+    path: "/feedback",
   });
 };
 </script>
@@ -194,9 +215,26 @@ const backHome = () => {
   gap: 1.5rem;
 }
 
-:deep(.role-button) {
+/* 按钮行样式 */
+.button-row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* 按钮宽度类 */
+:deep(.role-button.full-width) {
   width: 100%;
   max-width: 580px;
+}
+
+:deep(.role-button.half-width) {
+  width: calc(50% - 0.5rem);
+  max-width: 290px;
+}
+
+:deep(.role-button) {
   height: 90px;
   font-family: Helvetica85;
   font-weight: 800;
@@ -253,6 +291,16 @@ const backHome = () => {
   
   .role-buttons {
     gap: 1rem;
+  }
+  
+  .button-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  :deep(.role-button.half-width) {
+    width: 100%;
+    max-width: 580px;
   }
   
   :deep(.role-button) {

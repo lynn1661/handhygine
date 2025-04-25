@@ -11,9 +11,6 @@
           <div class="back-home" v-if="!HandHygiene">
             <img src="../assets/home.png" alt="" @click="backHome" />
           </div>
-          <div class="locale-selector">
-            <select-locale :changeStyle="shouldChangeStyle"></select-locale>
-          </div>
         </div>
       </div>
       
