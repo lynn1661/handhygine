@@ -119,7 +119,7 @@ function startHeartbeat() {
 export function initializeSocket() {
   if (!socket) {
     console.log('初始化Socket连接，配置:', SOCKET_CONFIG);
-    socket = io("https://ai2.polyuhandhygiene.com", SOCKET_CONFIG);
+    socket = io("https://ai.polyuhandhygiene.com", SOCKET_CONFIG);
     
     // 设置事件监听器
     socket.on("connect", () => {
