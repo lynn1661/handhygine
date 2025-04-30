@@ -1,7 +1,7 @@
 import axios from "axios";
 import router from "./../router";
 const axiosInstance = axios.create({ 
-  baseURL: "https://backend.polyuhandhygiene.com",
+  baseURL: "https://backend2.polyuhandhygiene.com",
   timeout: 1000 * 20,
 });
 
