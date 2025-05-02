@@ -120,9 +120,9 @@ export function initializeSocket() {
   if (!socket) {
     console.log('初始化Socket连接，配置:', SOCKET_CONFIG);
     
-    // 在Docker环境中使用服务名称，在开发环境中使用localhost
+    // 使用相对路径，让请求由Nginx代理
     const socketUrl = process.env.NODE_ENV === 'production' 
-      ? "http://ai:9500" 
+      ? "/api/socket"  // 使用相对路径，由Nginx转发
       : "http://localhost:9500";
     
     console.log('Socket连接URL:', socketUrl);
