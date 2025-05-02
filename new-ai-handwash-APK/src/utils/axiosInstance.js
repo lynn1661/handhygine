@@ -1,7 +1,9 @@
 import axios from "axios";
 import router from "./../router";
 const axiosInstance = axios.create({ 
-  baseURL: "https://backend2.polyuhandhygiene.com",
+  baseURL: process.env.NODE_ENV === 'production' 
+    ? "http://backend:3000"  // Docker环境中使用服务名称
+    : "http://localhost:3000", // 本地开发环境使用localhost
   timeout: 1000 * 20,
 });
 

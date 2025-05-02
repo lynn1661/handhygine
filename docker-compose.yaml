@@ -7,6 +7,11 @@ services:
     restart: always
     volumes:
       - nginx_config:/etc/nginx/conf.d
+    networks:
+      - app-network
+    depends_on:
+      - backend
+      - ai
 
   backend:
     build: 
@@ -14,6 +19,8 @@ services:
     ports:
       - "3000:3000"
     restart: always
+    networks:
+      - app-network
 
   ai:
     build: 
@@ -21,6 +28,12 @@ services:
     ports:
       - "9500:9500"
     restart: always
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   nginx_config:
