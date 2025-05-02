@@ -119,7 +119,14 @@ function startHeartbeat() {
 export function initializeSocket() {
   if (!socket) {
     console.log('初始化Socket连接，配置:', SOCKET_CONFIG);
-    socket = io("https://ai2.polyuhandhygiene.com", SOCKET_CONFIG);
+    
+    // 在Docker环境中使用服务名称，在开发环境中使用localhost
+    const socketUrl = process.env.NODE_ENV === 'production' 
+      ? "http://ai:9500" 
+      : "http://localhost:9500";
+    
+    console.log('Socket连接URL:', socketUrl);
+    socket = io(socketUrl, SOCKET_CONFIG);
     
     // 设置事件监听器
     socket.on("connect", () => {
