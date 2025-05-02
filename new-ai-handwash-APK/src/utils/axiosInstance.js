@@ -2,7 +2,7 @@ import axios from "axios";
 import router from "./../router";
 const axiosInstance = axios.create({ 
   baseURL: process.env.NODE_ENV === 'production' 
-    ? "http://backend:3000"  // Docker环境中使用服务名称
+    ? "/api/backend"  // 使用相对路径，由Nginx转发
     : "http://localhost:3000", // 本地开发环境使用localhost
   timeout: 1000 * 20,
 });
