@@ -60,16 +60,16 @@
       </div>
     </div>
     
-    <!-- 转场动画 - 修改为不显示下一步步骤名称 -->
+    <!-- 转场动画 - 修改为固定显示当前步骤的下一步 -->
     <transition name="fade">
       <div class="transition-overlay" v-show="showTransition">
         <div class="transition-content">
           <!-- 仅在不是最后一步时显示"下一步"文本 -->
-          <div class="transition-next" v-if="currentStep < 7">{{ t('HandHygiene.nextStep') || 'Next Step' }}</div>
+          <div class="transition-next" v-if="transitionFromStep < 7">{{ t('HandHygiene.nextStep') || 'Next Step' }}</div>
           <!-- 只在不是最后一步时显示下一步骤名称 -->
-          <div class="transition-result" v-if="currentStep < 7">{{ t(`HandHygiene.step${currentStep + 1}`) }}</div>
+          <div class="transition-result" v-if="transitionFromStep < 7">{{ t(`HandHygiene.step${transitionFromStep + 1}`) }}</div>
           <!-- 在最后一步显示完成文本 -->
-          <div class="transition-result" v-if="currentStep >= 7">{{ t('HandHygiene.completion') || 'Completion' }}</div>
+          <div class="transition-result" v-if="transitionFromStep >= 7">{{ t('HandHygiene.completion') || 'Completion' }}</div>
           <div class="transition-spinner"></div>
         </div>
       </div>
@@ -170,6 +170,8 @@ let firstType = true;
 
 // 添加转场效果变量
 const showTransition = ref(false);
+// 添加记录转场前步骤的变量
+const transitionFromStep = ref(1);
 
 // 媒体设置
 const setupMedia = async () => {
@@ -397,6 +399,8 @@ async function stopCountdown() {
           });
         } else {
           // 不是最后一步，显示转场效果
+          // 保存当前步骤，用于显示正确的下一步信息
+          transitionFromStep.value = currentStep.value;
           showTransition.value = true;
           console.log("转场效果已激活:", showTransition.value);
           
@@ -449,6 +453,8 @@ async function stopCountdown() {
             replace: true
           });
         } else {
+          // 保存当前步骤，用于显示正确的下一步信息
+          transitionFromStep.value = currentStep.value;
           // 显示转场效果
           showTransition.value = true;
           console.log("转场效果已激活（失败场景）:", showTransition.value);
@@ -484,6 +490,8 @@ async function stopCountdown() {
         // 最后一步直接跳转，无需转场
         window.location.href = `/#${targetPath}`;
       } else {
+        // 保存当前步骤，用于显示正确的下一步信息
+        transitionFromStep.value = currentStep.value;
         // 显示转场效果
         showTransition.value = true;
         console.log("转场效果已激活（故障安全）:", showTransition.value);
@@ -506,6 +514,8 @@ onMounted(() => {
   // 确保转场效果初始为隐藏状态
   console.log("组件挂载，初始化转场效果状态");
   showTransition.value = false;
+  // 初始化转场步骤值
+  transitionFromStep.value = currentStep.value;
   
   downloadName.value = getTime(
     sessionStorage.getItem("accountSerialNumber") || localStorage.getItem("accountSerialNumber")
