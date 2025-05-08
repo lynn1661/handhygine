@@ -42,7 +42,8 @@ const props = defineProps({
     width: auto;
     font-family: MicrosoftYaHei;
     font-size: 16px;
-    color: #ffffff;
+    color: #0f387c;
+    font-weight: 200;
     line-height: 24px;
     text-align: left;
     font-style: normal;
@@ -51,7 +52,7 @@ const props = defineProps({
   :deep(.el-input__wrapper) {
     background: none;
     border-radius: 6px;
-    border: 1px solid #ffffff;
+    border: 2px solid #0f387c;
     padding: 0 8px;
   }
   :deep(.el-input__suffix) {
@@ -90,7 +91,8 @@ const props = defineProps({
     width: auto;
     font-family: MicrosoftYaHei;
     font-size: 16px;
-    color: #0e78f7;
+    color: #0f387c;
+    font-weight: 600;
     line-height: 24px;
     text-align: left;
     font-style: normal;
@@ -99,7 +101,7 @@ const props = defineProps({
   :deep(.el-input__wrapper) {
     background: none;
     border-radius: 6px;
-    border: 1px solid #0e78f7;
+    border: 2px solid #0f387c;
     padding: 0 8px;
   }
   :deep(.el-input__suffix) {
@@ -109,7 +111,7 @@ const props = defineProps({
   :deep(.el-input__suffix-inner) {
     width: 32px;
     height: 32px;
-    background-color: #0e78f7;
+    background-color: #0f387c;
     background-image: url("../assets/change.png");
     background-repeat: no-repeat;
     background-position: center;

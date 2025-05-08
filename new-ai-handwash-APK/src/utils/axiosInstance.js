@@ -1,11 +1,33 @@
 import axios from "axios";
 import router from "./../router";
+
+console.log('创建Axios实例，当前环境:', process.env.NODE_ENV);
+
+// 根据环境判断使用哪个baseURL
+const getBaseURL = () => {
+  // 开发环境也指向远程服务器的相对路径
+  // 因为实际服务运行在EC2上，本地只是开发UI
+  if (process.env.NODE_ENV === 'development') {
+    // 使用相对路径，通过Vite代理转发到远程服务器
+    return "/api/backend";
+  }
+  
+  // 在测试环境中（如果有）
+  if (process.env.NODE_ENV === 'test') {
+    return "https://trainingtest.polyuhandhygiene.com/api/backend";
+  }
+  
+  // 在生产环境中使用相对路径
+  return "/api/backend"; // 相对路径，将通过Nginx转发
+};
+
 const axiosInstance = axios.create({ 
-  baseURL: process.env.NODE_ENV === 'production' 
-    ? "https://backend.polyuhandhygiene.com"  // 使用指定的后端服务地址  //? "/api/backend"  // 使用相对路径，不硬编码域名
-    : "http://localhost:3000", // 本地开发环境使用localhost
+  baseURL: getBaseURL(),
   timeout: 1000 * 20,
+  withCredentials: true, // 启用跨域请求时发送凭证
 });
+
+console.log('Axios baseURL:', axiosInstance.defaults.baseURL);
 
 axiosInstance.interceptors.request.use((config) => {
   let reqData = {};

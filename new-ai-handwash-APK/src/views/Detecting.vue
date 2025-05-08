@@ -28,7 +28,7 @@
             <!-- 加载指示器 -->
             <div class="loading">
               <div class="spinner"></div>
-              <div class="message">Loading</div>
+              <div class="message">{{ $t('Loading') || 'Loading' }}</div>
             </div>
             
             <!-- 完成图标覆盖层 -->
@@ -48,9 +48,6 @@
               </div>
             </div>
           </div>
-          
-          <!-- 控制面板 - 隐藏但保留功能 -->
-          <div class="control-panel" style="display: none;"></div>
         </div>
       </div>
     </div>
@@ -76,6 +73,11 @@ let timer = null; // 声明计时器变量
 const state = reactive({
   redirectTimeoutId: true,
 });
+
+// 添加状态变量，用于处理加载和初始化
+const isInitializing = ref(true);
+const hasError = ref(false);
+const errorMessage = ref('');
 
 const startCountdown = () => {
   countdown.value = 3; // 重置倒计时
@@ -118,41 +120,62 @@ const stopCountdown = () => {
   percentage.value = 100;
 };
 
+// 显式添加控制面板DOM元素
+function addControlPanel() {
+  const controlPanel = document.createElement('div');
+  controlPanel.className = 'control-panel';
+  controlPanel.style.display = 'none';
+  document.querySelector('.camera-section').appendChild(controlPanel);
+  return controlPanel;
+}
+
 onMounted(() => {
   console.log("📹 初始化视频流...");
+  isInitializing.value = true;
   
   // 使用setTimeout延迟初始化MediaPipe，确保DOM已完全渲染
   setTimeout(() => {
-    initializeMediaPipe();
-  }, 300);
+    try {
+      initializeMediaPipe();
+    } catch (error) {
+      console.error("MediaPipe初始化失败:", error);
+      hasError.value = true;
+      errorMessage.value = error.message;
+      isInitializing.value = false;
+    }
+  }, 500);
 });
 
 // 将MediaPipe初始化提取为独立函数
 function initializeMediaPipe() {
   // 获取视频元素并检查是否存在
-  const videoElement = document.getElementsByClassName("input_video")[0];
+  const videoElement = document.querySelector(".input_video");
   if (!videoElement) {
     console.error("📹 1: 未找到视频元素，初始化失败");
-    return;
+    throw new Error("未找到视频元素");
   }
   console.log("📹 1: 视频元素已成功获取");
 
   // 获取 canvas 元素并检查是否存在
-  const canvasElement = document.getElementsByClassName("output_canvas")[0];
+  const canvasElement = document.querySelector(".output_canvas");
   if (!canvasElement) {
     console.error("📹 2: 未找到 Canvas 元素，初始化失败");
-    return;
+    throw new Error("未找到Canvas元素");
   }
   console.log("📹 2: Canvas 元素已成功获取");
 
-  // 获取控制面板元素
-  const controlsElement = document.getElementsByClassName("control-panel")[0];
+  // 获取或创建控制面板元素
+  let controlsElement = document.querySelector(".control-panel");
+  if (!controlsElement) {
+    console.log("📹 3: 未找到控制面板，将创建一个");
+    controlsElement = addControlPanel();
+  }
   console.log("📹 3: 控制面板元素:", controlsElement);
 
   const canvasCtx = canvasElement ? canvasElement.getContext("2d") : null;
   if (!canvasCtx) {
     console.error("📹 4: 获取 Canvas 上下文失败，初始化失败");
-    return;
+    throw new Error("无法获取Canvas上下文");
   }
   console.log("📹 4: Canvas 上下文已成功获取");
 
@@ -204,6 +227,14 @@ function initializeMediaPipe() {
     // 处理视频帧
     function onResults(results) {
       try {
+        // 初始化完成
+        isInitializing.value = false;
+        
+        // 隐藏加载指示器
+        if (spinner && spinner.style.display !== 'none') {
+          spinner.style.display = 'none';
+        }
+        
         // 安全检查 - 如果组件已卸载或Canvas上下文不可用，则不处理结果
         if (!canvasCtx || !canvasElement) {
           console.warn("Canvas元素或上下文不可用，跳过处理结果");
@@ -341,6 +372,7 @@ function initializeMediaPipe() {
     }
   } catch (error) {
     console.error("初始化MediaPipe时出错:", error);
+    throw error;
   }
 }
 
@@ -423,7 +455,7 @@ onUnmounted(() => {
 .home {
   width: 100%;
   min-height: 100vh;
-  background-image: url("../assets/deletingBG.png");  /* 恢复原来的背景 */
+  background-image: url("../assets/deletingBG.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -439,7 +471,7 @@ onUnmounted(() => {
 
 .content-wrapper {
   width: 100%;
-  max-width: 100%;  /* 修改为100%，使内容区域占满屏幕宽度 */
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -513,15 +545,17 @@ onUnmounted(() => {
   flex: 1;
   gap: 1rem;
   justify-content: center;
+  align-items: center;
 }
 
 /* 指导区域 */
 .instruction-section {
   text-align: center;
   margin-bottom: 1rem;
-  max-width: 800px;  /* 限制指导文本宽度 */
+  max-width: 800px;
   margin-left: auto;
   margin-right: auto;
+  padding: 0 1rem;
 }
 
 .detecting-title {
@@ -559,8 +593,8 @@ onUnmounted(() => {
 }
 
 .camera-container {
-  width: 100%;
-  max-width: 90%;  /* 增加视频容器的最大宽度 */
+  width: 90%;
+  max-width: 800px;
   position: relative;
   background: transparent;
   border-radius: 16px;
@@ -568,28 +602,32 @@ onUnmounted(() => {
   box-shadow: 0 6px 16px rgba(15, 56, 124, 0.15);
   aspect-ratio: 16/9;
   margin: 0 auto;
+  min-height: 300px;
+  display: block;
 }
 
 .output_canvas {
-  width: 100%;
-  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   transform: scaleY(-1);
   background: transparent;
   border-radius: 16px;
+  display: block;
 }
 
 .input_video {
-  background: transparent;
-  border-radius: 16px;
-  width: 100%;
-  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border-radius: 16px;
+  display: block;
 }
 
 /* 加载指示器 */
@@ -706,61 +744,25 @@ onUnmounted(() => {
 }
 
 /* 响应式布局调整 */
-@media (max-height: 600px) {
-  .instruction-section {
-    margin-bottom: 0.5rem;
-  }
-  
-  .detecting-title {
-    font-size: 1.25rem;
-    margin-bottom: 0.3rem;
-  }
-  
-  .detecting-subtitle {
-    font-size: 0.9rem;
-  }
-  
+@media (max-width: 600px) {
   .camera-container {
-    max-width: 450px;
-  }
-  
-  .complete-overlay img {
-    width: 120px;
-    height: 120px;
-  }
-  
-  .detect-text {
-    font-size: 1.25rem;
+    width: 95%;
   }
 }
 
-@media (min-height: 900px) {
-  .main-section {
-    gap: 2rem;
-  }
-  
-  .instruction-section {
-    margin-bottom: 1.5rem;
-  }
-  
-  .detecting-title {
-    font-size: 2rem;
-  }
-  
-  .detecting-subtitle {
-    font-size: 1.25rem;
-  }
-}
-
+/* 大屏幕优化 */
 @media (min-width: 1200px) {
   .camera-container {
-    max-width: 95%;  /* 在大屏幕上占据更多空间 */
+    width: 75%;
+    max-width: 1000px;
   }
 }
 
-@media (max-width: 768px) {
-  .content-wrapper {
-    padding: 0.25rem;  /* 减小内边距，提供更多空间给视频 */
+/* 超大屏幕优化 */
+@media (min-width: 1600px) {
+  .camera-container {
+    width: 60%;
+    max-width: 1200px;
   }
 }
 </style>
