@@ -101,7 +101,7 @@ const goToFeedback = () => {
 .home {
   width: 100%;
   min-height: 100vh;
-  background-image: url("../assets/HandHygienebg.png");
+  background-image: url("../assets/bg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -195,7 +195,6 @@ const goToFeedback = () => {
   flex-direction: column;
   justify-content: center;
   gap: 1.5rem;
-  margin-top: 30vh;
 }
 
 .role-container {

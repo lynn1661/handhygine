@@ -47,6 +47,21 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     // https: true,
+    proxy: {
+      // API请求代理 - 指向远程EC2服务器
+      '/api/backend': {
+        target: 'https://trainingtest.polyuhandhygiene.com',
+        changeOrigin: true,
+        secure: true
+      },
+      // Socket.io连接代理 - 指向远程EC2服务器
+      '/socket.io': {
+        target: 'https://trainingtest.polyuhandhygiene.com',
+        changeOrigin: true,
+        secure: true, // 对于HTTPS必需
+        ws: true, // 支持WebSocket
+      }
+    },
   },
   optimizeDeps: {
     disabled: false,

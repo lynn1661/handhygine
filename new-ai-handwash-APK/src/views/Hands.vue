@@ -20,7 +20,7 @@
         </div>
       </header>
 
-      <!-- 主要内容区域 - 垂直布局 -->
+      <!-- 主要内容区域 - 具有响应式布局 -->
       <div class="main-section">
         <!-- 指导图片区域 -->
         <div class="guide-section">
@@ -34,17 +34,20 @@
           </div>
         </div>
 
-        <!-- 相机预览区域 -->
-        <div class="camera-section">
-          <div class="camera-container">
-            <video class="input_video"></video>
-            <canvas class="output_canvas" width="1280px" height="720px"></canvas>
-            <div class="loading" v-if="loading"></div>
-          </div>
-          
-          <!-- 将控制面板设为隐藏，但保留功能 -->
-          <div class="controls-wrapper" style="display: none;">
-            <div class="control-panel"></div>
+        <!-- 右侧区域：相机预览和评分 -->
+        <div class="right-section">
+          <!-- 相机预览区域 -->
+          <div class="camera-section">
+            <div class="camera-container">
+              <video class="input_video"></video>
+              <canvas class="output_canvas" width="1280px" height="720px"></canvas>
+              <div class="loading" v-if="loading"></div>
+            </div>
+            
+            <!-- 将控制面板设为隐藏，但保留功能 -->
+            <div class="controls-wrapper" style="display: none;">
+              <div class="control-panel"></div>
+            </div>
           </div>
           
           <!-- 评分反馈区域 -->
@@ -1032,7 +1035,7 @@ function getNextStepTitle() {
 
 .content-wrapper {
   width: 100%;
-  max-width: 700px;
+  max-width: 1400px; /* 增加最大宽度以适应水平布局 */
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -1042,6 +1045,11 @@ function getNextStepTitle() {
   min-height: 90vh;
   position: relative;
   padding: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(15, 56, 124, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 /* 顶部区域样式 - 进一步减小间距 */
@@ -1051,6 +1059,11 @@ function getNextStepTitle() {
   margin-bottom: 0.5rem; /* 进一步减小底部间距 */
   position: relative;
   margin-top: 0.25rem;
+  
+  @media (min-width: 768px) {
+    padding: 0.5rem 0 !important;
+    margin-bottom: 1rem !important;
+  }
 }
 
 .header-content {
@@ -1059,6 +1072,11 @@ function getNextStepTitle() {
   justify-content: space-between;
   gap: 0.75rem;
   width: 100%;
+  
+  @media (min-width: 768px) {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
 }
 
 .logo-container {
@@ -1081,6 +1099,10 @@ function getNextStepTitle() {
   
   @media (max-width: 480px) {
     height: 1.75rem;
+  }
+  
+  @media (min-width: 768px) {
+    height: 3rem !important;
   }
 }
 
@@ -1128,17 +1150,29 @@ function getNextStepTitle() {
     width: 2.5rem;
     height: 2.5rem;
   }
+  
+  @media (min-width: 768px) {
+    width: 4rem !important;
+    height: 4rem !important;
+  }
 }
 
-/* 主要内容区域 - 减小垂直间距 */
+/* 主要内容区域 - 桌面时为水平布局，移动时为垂直布局 */
 .main-section {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* 默认为垂直布局 */
   width: 100%;
   box-sizing: border-box;
   flex: 1;
-  gap: 0.75rem; /* 进一步减小主要内容间的间距 */
+  gap: 0.75rem; /* 减小主要内容间的间距 */
   justify-content: center;
+  
+  /* 在桌面屏幕上使用水平布局 - 降低阈值确保更广泛兼容 */
+  @media (min-width: 768px) {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 1.5rem !important;
+  }
 }
 
 /* 指导区域 */
@@ -1146,7 +1180,25 @@ function getNextStepTitle() {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: 0.25rem; /* 进一步减少底部间距 */
+  margin-bottom: 0.25rem;
+  
+  @media (min-width: 768px) {
+    width: 48% !important; /* 在桌面端占用接近一半宽度 */
+    margin-bottom: 0 !important;
+  }
+}
+
+/* 右侧区域容器 */
+.right-section {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 0.75rem;
+  
+  @media (min-width: 768px) {
+    width: 48% !important; /* 在桌面端占用接近一半宽度 */
+    padding-top: 2rem !important;
+  }
 }
 
 .guide-image-container {
@@ -1154,6 +1206,10 @@ function getNextStepTitle() {
   width: 100%;
   max-width: 450px;
   margin: 0 auto;
+  
+  @media (min-width: 768px) {
+    max-width: 100% !important;
+  }
 }
 
 .guide-image {
@@ -1220,6 +1276,11 @@ function getNextStepTitle() {
   margin: 0 auto;
   margin-bottom: 0.5rem;
   z-index: 1;
+  
+  @media (min-width: 768px) {
+    max-width: 100% !important;
+    margin-bottom: 1rem !important;
+  }
 }
 
 .output_canvas {
@@ -1261,6 +1322,10 @@ function getNextStepTitle() {
   box-shadow: 0 4px 12px rgba(15, 56, 124, 0.1);
   z-index: 1;
   margin-bottom: 0.5rem;
+  
+  @media (min-width: 768px) {
+    max-width: 100% !important;
+  }
 }
 
 .feedback-title {
@@ -1377,6 +1442,33 @@ function getNextStepTitle() {
   z-index: 10;
 }
 
+/* 进一步优化桌面布局 */
+@media (min-width: 768px) {
+  .content-wrapper {
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    padding: 1rem !important;
+  }
+  
+  .main-section {
+    flex: 1 !important;
+    margin-top: 1rem !important;
+  }
+  
+  .guide-image-container {
+    max-width: 100% !important;
+  }
+  
+  .camera-container {
+    max-width: 100% !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .feedback-card {
+    max-width: 100% !important;
+  }
+}
+
 /* 响应式布局优化 */
 @media (min-height: 900px) {
   .main-section {
@@ -1462,5 +1554,70 @@ function getNextStepTitle() {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* 桌面端特定样式优化 */
+@media (min-width: 1200px) {
+  .content-wrapper {
+    max-width: 1600px; /* 在超大屏幕上进一步增加宽度 */
+  }
+  
+  .main-section {
+    gap: 2rem !important; /* 增加左右两侧的间距 */
+  }
+  
+  .guide-image {
+    border-radius: 16px; /* 在大屏幕上增加圆角 */
+  }
+  
+  .camera-container {
+    border-radius: 16px; /* 在大屏幕上增加圆角 */
+  }
+  
+  .feedback-card {
+    padding: 1rem 1.5rem; /* 在大屏幕上增加内边距 */
+  }
+  
+  .feedback-title {
+    font-size: 1.5rem; /* 在大屏幕上增加字体大小 */
+  }
+}
+
+/* 调整图片容器在水平布局中的高度比例 */
+@media (min-width: 768px) {
+  .guide-image {
+    max-height: 70vh;
+    width: auto;
+    margin: 0 auto;
+    display: block;
+  }
+  
+  .camera-container {
+    margin-bottom: 1rem !important;
+    height: auto;
+    min-height: 350px;
+  }
+  
+  /* 调整评分卡片在水平布局中的样式 */
+  .feedback-card {
+    margin-top: 0;
+  }
+  
+  /* 增强标题在水平布局中的可见性 */
+  .step-title {
+    font-size: 2rem;
+  }
+}
+
+/* 针对超宽显示器的优化 */
+@media (min-width: 1600px) {
+  .guide-section, .right-section {
+    width: 45% !important;
+  }
+  
+  .main-section {
+    justify-content: center !important;
+    gap: 4rem !important;
+  }
 }
 </style> 

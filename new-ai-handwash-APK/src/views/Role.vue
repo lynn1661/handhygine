@@ -119,7 +119,7 @@ onUnmounted(() => {
 .home {
   width: 100%;
   min-height: 100vh;
-  background-image: url("../assets/HandHygienebg.png"); /* 保持原有背景 */
+  background-image: url("../assets/bg.png"); /* 保持原有背景 */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -212,7 +212,7 @@ onUnmounted(() => {
   gap: 5rem;
   justify-content: center;
   align-items: center;
-  margin-top: 15rem;
+  //margin-top: 15rem;
   padding-bottom: 4rem;
 }
 
