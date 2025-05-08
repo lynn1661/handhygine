@@ -2,7 +2,7 @@ import axios from "axios";
 import router from "./../router";
 const axiosInstance = axios.create({ 
   baseURL: process.env.NODE_ENV === 'production' 
-    ? "/api/backend"  // 使用相对路径，不硬编码域名
+    ? "https://backend.polyuhandhygiene.com"  // 使用指定的后端服务地址  //? "/api/backend"  // 使用相对路径，不硬编码域名
     : "http://localhost:3000", // 本地开发环境使用localhost
   timeout: 1000 * 20,
 });
