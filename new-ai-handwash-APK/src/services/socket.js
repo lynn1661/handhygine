@@ -120,9 +120,10 @@ export function initializeSocket() {
   if (!socket) {
     console.log('初始化Socket连接，配置:', SOCKET_CONFIG);
     
-    // 使用相对URL，不硬编码域名
+    // 使用固定的URL地址
+    //? window.location.origin  // 自动使用当前页面的域名
     const socketUrl = process.env.NODE_ENV === 'production' 
-      ? window.location.origin  // 自动使用当前页面的域名
+      ? "https://ai.polyuhandhygiene.com"  // 使用固定的AI服务地址
       : "http://localhost:9500";
     
     console.log('Socket连接URL:', socketUrl);
