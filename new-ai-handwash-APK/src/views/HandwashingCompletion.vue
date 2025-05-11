@@ -269,6 +269,28 @@ const getStepRating = (score) => {
   // 限制在0-1范围内
   return Math.max(0, Math.min(1, rating));
 };
+
+// 分数映射函数 - 非线性调整分数
+const mapScore = (score) => {
+  if (score >= 0 && score < 20) {
+    return 30 + ((score - 0) / 20) * (40 - 30);
+  } else if (score >= 20 && score < 40) {
+    return 40 + ((score - 20) / 20) * (60 - 40);
+  } else if (score >= 40 && score < 60) {
+    return 60 + ((score - 40) / 20) * (70 - 60);
+  } else if (score >= 60 && score < 70) {
+    return 70 + ((score - 60) / 10) * (80 - 70);
+  } else if (score >= 70 && score < 80) {
+    return 80 + ((score - 70) / 10) * (90 - 80);
+  } else if (score >= 80 && score < 90) {
+    return 90 + ((score - 80) / 10) * (95 - 90);
+  } else if (score >= 90 && score <= 100) {
+    return 95 + ((score - 90) / 10) * (100 - 95);
+  } else {
+    return 0; // 处理超出范围的值
+  }
+};
+
 onMounted(async () => {
   // Get the download name for the video based on the account's serial number
   downloadName.value = getTime(
@@ -303,8 +325,8 @@ onMounted(async () => {
   // Set the step correctness data from the backend response
   list.value = res?.step_points;
   
-  // 设置用户总成绩，强制取整
-  total.value = Math.floor(res?.userScore || 0);
+  // 将原始分数通过映射函数处理后再赋值给total
+  total.value = Math.floor(mapScore(res?.userScore || 0));
   
   // Set the video file names for download from the backend response
   downloadVideoName.value = res?.step_video_files;
