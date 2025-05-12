@@ -68,11 +68,11 @@
       <div class="transition-overlay" v-show="showTransition">
         <div class="transition-content">
           <!-- 仅在不是最后一步时显示"下一步"文本 -->
-          <div class="transition-next" v-if="transitionFromStep < 7">{{ t('HandHygiene.nextStep') || 'Next Step' }}</div>
+          <div class="transition-next" v-if="transitionFromStep < 6">{{ t('HandHygiene.nextStep') || 'Next Step' }}</div>
           <!-- 只在不是最后一步时显示下一步骤名称 -->
-          <div class="transition-result" v-if="transitionFromStep < 7">{{ t(`HandHygiene.step${transitionFromStep + 1}`) }}</div>
+          <div class="transition-result" v-if="transitionFromStep < 6">{{ t(`HandHygiene.step${transitionFromStep + 1}`) }}</div>
           <!-- 在最后一步显示完成文本 -->
-          <div class="transition-result" v-if="transitionFromStep >= 7">{{ t('HandHygiene.completion') || 'Completion' }}</div>
+          <div class="transition-result" v-if="transitionFromStep >= 6">{{ t('HandHygiene.completion') || 'Completion' }}</div>
           <div class="transition-spinner"></div>
         </div>
       </div>
@@ -102,7 +102,6 @@ import gif3 from '../assets/3.gif';
 import gif4 from '../assets/4.gif';
 import gif5 from '../assets/5.gif';
 import gif6 from '../assets/6.gif';
-import gif7 from '../assets/7.gif';
 
 // 路由相关
 const router = useRouter();
@@ -112,13 +111,13 @@ const store = useStore();
 // 当前步骤（从路由参数获取，默认为1）
 const currentStep = computed(() => {
   const step = parseInt(route.params.step || "1");
-  return isNaN(step) ? 1 : Math.min(Math.max(step, 1), 7);
+  return isNaN(step) ? 1 : Math.min(Math.max(step, 1), 6);
 });
 
 // 下一个步骤的路由路径
 const nextRoutePath = computed(() => {
   const nextStep = currentStep.value + 1;
-  if (nextStep > 7) {
+  if (nextStep > 6) {
     return "/handwashingCompletion";
   }
   return `/hands/${nextStep}`;
@@ -132,8 +131,7 @@ function getStepGif() {
     3: gif3,
     4: gif4,
     5: gif5,
-    6: gif6,
-    7: gif7
+    6: gif6
   };
   return gifs[currentStep.value];
 }
@@ -378,7 +376,7 @@ async function stopCountdown() {
       await store.dispatch("user/rating", {
         id: sessionStorage.getItem("accountSerialNumber") || localStorage.getItem("accountSerialNumber"),
         rating: text.value,
-        points: parseFloat((trueRatio / 7).toFixed(3)),
+        points: parseFloat((trueRatio / 6).toFixed(3)),
         step_video_file: `${downloadName.value}-step${currentStep.value}`,
       });
       console.log("成功保存评分数据");
@@ -390,8 +388,8 @@ async function stopCountdown() {
         // 准备跳转路径和参数
         const targetPath = nextRoutePath.value;
         
-        // 判断是否是最后一步（第7步）- 如果是，直接跳转不显示转场
-        const isLastStep = currentStep.value >= 7;
+        // 判断是否是最后一步（第6步）- 如果是，直接跳转不显示转场
+        const isLastStep = currentStep.value >= 6;
         
         if (isLastStep) {
           // 最后一步直接跳转，无需转场
@@ -446,8 +444,8 @@ async function stopCountdown() {
         
         const targetPath = nextRoutePath.value;
         
-        // 判断是否是最后一步（第7步）
-        const isLastStep = currentStep.value >= 7;
+        // 判断是否是最后一步（第6步）
+        const isLastStep = currentStep.value >= 6;
         
         if (isLastStep) {
           // 最后一步直接跳转，无需转场
@@ -486,8 +484,8 @@ async function stopCountdown() {
       
       const targetPath = nextRoutePath.value;
       
-      // 判断是否是最后一步（第7步）
-      const isLastStep = currentStep.value >= 7;
+      // 判断是否是最后一步（第6步）
+      const isLastStep = currentStep.value >= 6;
       
       if (isLastStep) {
         // 最后一步直接跳转，无需转场

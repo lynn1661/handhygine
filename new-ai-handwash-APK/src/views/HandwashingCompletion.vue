@@ -275,26 +275,31 @@ const getStepRating = (score) => {
   return Math.max(0, Math.min(1, rating));
 };
 
-// 分数映射函数，根据原始分数映射到新的分数范围
-function mapScore(score) {
-  if (score >= 0 && score < 20) {
-    return 30 + ((score - 0) / 20) * (40 - 30);
-  } else if (score >= 20 && score < 40) {
-    return 40 + ((score - 20) / 20) * (60 - 40);
-  } else if (score >= 40 && score < 60) {
-    return 60 + ((score - 40) / 20) * (70 - 60);
-  } else if (score >= 60 && score < 70) {
-    return 70 + ((score - 60) / 10) * (80 - 70);
-  } else if (score >= 70 && score < 80) {
-    return 80 + ((score - 70) / 10) * (90 - 80);
-  } else if (score >= 80 && score < 90) {
-    return 90 + ((score - 80) / 10) * (95 - 90);
-  } else if (score >= 90 && score <= 100) {
-    return 95 + ((score - 90) / 10) * (100 - 95);
-  } else {
-    return 0; // 处理范围外的值
+// 根据原始分数映射到一个更适合显示的分数范围
+const mapScore = (originalScore) => {
+  // 确保输入是有效数字
+  if (typeof originalScore !== 'number' || isNaN(originalScore)) {
+    return 0;
   }
-}
+  
+  // 现在是6步，所以原始分数范围是0-1，需要映射到0-100
+  const score = originalScore * 100;
+  
+  // 应用非线性映射，使得低分也能显示为更高的数值，提高用户信心
+  if (score < 20) {
+    // 低分区域：即使是很低的分数也给用户60以上的分数
+    return 60 + (score / 20) * 10;
+  } else if (score < 50) {
+    // 中低分区域：50-75分的范围
+    return 70 + ((score - 20) / 30) * 5;
+  } else if (score < 80) {
+    // 中高分区域：75-85分的范围
+    return 75 + ((score - 50) / 30) * 10;
+  } else {
+    // 高分区域：85-100分的范围
+    return 85 + ((score - 80) / 20) * 15;
+  }
+};
 
 onMounted(async () => {
   // Get the download name for the video based on the account's serial number
@@ -343,12 +348,12 @@ onMounted(async () => {
     ? list.value.reduce((count, step) => count + (step.Step ? 1 : 0), 0)
     : 0;
 
-  // Update the rank image based on the number of correct steps
-  if (trueCount >= 0 && trueCount <= 3) {
+  // Update the rank image based on the number of correct steps - 调整为6步版本
+  if (trueCount >= 0 && trueCount <= 2) {
     showImg.value = "Novice";
-  } else if (trueCount >= 4 && trueCount <= 6) {
+  } else if (trueCount >= 3 && trueCount <= 5) {
     showImg.value = "Pro";
-  } else if (trueCount === 7) {
+  } else if (trueCount === 6) {
     showImg.value = "Master";
   }
 

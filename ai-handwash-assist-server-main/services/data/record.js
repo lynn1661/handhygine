@@ -112,7 +112,7 @@ const get_rank = async ({ data }) => {
     if (Array.isArray(user.total)) {
       return user.total.map(score => 
         score !== undefined && score !== null 
-          ? parseFloat((score * (100 / 7)).toFixed(2)) 
+          ? parseFloat((score * (100 / 6)).toFixed(2))
           : 0
       );
     } else {
