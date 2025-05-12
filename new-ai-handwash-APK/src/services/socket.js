@@ -119,22 +119,14 @@ function startHeartbeat() {
 export function initializeSocket() {
   if (!socket) {
     console.log('初始化Socket连接，配置:', SOCKET_CONFIG);
-    console.log('当前环境:', process.env.NODE_ENV);
     
-    // 所有环境都使用同一个远程服务器
-    // 因为实际服务运行在EC2上，本地只是开发UI
-    const socketUrl = "https://trainingtest.polyuhandhygiene.com";
-    
-    // 使用相对路径方式，通过当前域名+路径
-    // const socketUrl = window.location.origin;
+    // 使用相对URL，不硬编码域名
+    const socketUrl = process.env.NODE_ENV === 'production' 
+      ? window.location.origin  // 自动使用当前页面的域名
+      : "http://localhost:9500";
     
     console.log('Socket连接URL:', socketUrl);
-    
-    // 创建Socket连接
-    socket = io(socketUrl, {
-      ...SOCKET_CONFIG,
-      path: '/socket.io/', // 显式指定socket.io路径
-    });
+    socket = io(socketUrl, SOCKET_CONFIG);
     
     // 设置事件监听器
     socket.on("connect", () => {
