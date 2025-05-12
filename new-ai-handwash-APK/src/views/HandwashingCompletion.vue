@@ -282,8 +282,9 @@ const mapScore = (originalScore) => {
     return 0;
   }
   
-  // 现在是6步，所以原始分数范围是0-1，需要映射到0-100
-  const score = originalScore * 100;
+  // 输入已经是0-100范围，无需再乘以100
+  const score = originalScore;
+  console.log("原始分数:", score);
   
   // 应用非线性映射，使得低分也能显示为更高的数值，提高用户信心
   if (score < 20) {
@@ -337,8 +338,11 @@ onMounted(async () => {
   
   // 设置用户总成绩，使用映射函数计算后取整
   const originalScore = res?.userScore || 0;
+  console.log("从后端接收到的原始分数:", originalScore);
   const mappedScore = mapScore(originalScore);
+  console.log("映射后的分数:", mappedScore);
   total.value = Math.round(mappedScore);
+  console.log("最终显示分数:", total.value);
   
   // Set the video file names for download from the backend response
   downloadVideoName.value = res?.step_video_files;
