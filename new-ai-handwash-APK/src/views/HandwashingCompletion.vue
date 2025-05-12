@@ -12,7 +12,7 @@
         </div>
       </div>
 
-      <!-- 主要内容区域 - 响应式布局 -->
+      <!-- 主要内容区域 - 固定布局 -->
       <div class="main-section">
         <!-- 左侧：成就展示区域 -->
         <div class="left-column">
@@ -364,21 +364,20 @@ onMounted(async () => {
   flex-direction: column;
   box-sizing: border-box;
   flex: 1;
-  min-height: 90vh;
+  min-height: auto; /* 移除最小高度限制，避免内容过高需要滚动 */
   position: relative;
   padding: 1.5rem;
   background-color: rgba(255, 255, 255, 0.15);
   border-radius: 24px;
-  box-shadow: 0 10px 40px rgba(15, 56, 124, 0.15);
+  box-shadow: none; /* 移除阴影效果 */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  transition: all 0.3s ease;
   
   @media (min-width: 768px) {
     &:hover {
-      box-shadow: 0 15px 50px rgba(15, 56, 124, 0.2);
-      transform: translateY(-5px);
+      box-shadow: none; /* 移除悬浮时的阴影效果 */
+      transform: none; /* 移除悬浮时的上移效果 */
     }
   }
 }
@@ -388,9 +387,9 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0 1.5rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid rgba(15, 56, 124, 0.1);
+  padding: 0 0 1.5rem;
+  //margin-bottom: 1rem;
+  //border-bottom: 1px solid rgba(15, 56, 124, 0.1);
 }
 
 .logo {
@@ -442,46 +441,34 @@ onMounted(async () => {
   }
 }
 
-/* 主要内容区域 - 响应式布局 */
+/* 主要内容区域 - 固定布局 */
 .main-section {
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* 始终保持水平布局 */
   width: 100%;
   box-sizing: border-box;
   flex: 1;
-  gap: 1.5rem;
+  gap: 2rem;
   justify-content: flex-start;
   margin-bottom: 1.5rem;
-  
-  /* 桌面端左右分栏布局 */
-  @media (min-width: 768px) {
-    flex-direction: row !important;
-    gap: 2rem !important;
-    align-items: stretch !important;
-  }
+  align-items: stretch;
 }
 
 /* 左栏样式 */
 .left-column {
-  width: 100%;
+  width: 45%;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  
-  @media (min-width: 768px) {
-    width: 45% !important;
-  }
 }
 
 /* 右栏样式 */
 .right-column {
-  width: 100%;
+  width: 55%;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  
-  @media (min-width: 768px) {
-    width: 55% !important;
-  }
 }
 
 /* 成就展示区域 */
@@ -907,6 +894,7 @@ onMounted(async () => {
   margin-top: 1rem;
   width: 100%;
   position: relative;
+  margin-bottom: 0.5rem; /* 确保底部有足够空间 */
 }
 
 .action-buttons {
