@@ -32,6 +32,7 @@
               show-password
               :placeholder="$t('HandHygiene.password')"
               class="login-input"
+              @keyup.enter="started"
             />
           </div>
           
@@ -63,6 +64,7 @@ const shouldChangeStyle = ref(false); // 默认不添加
 const accountID = ref("");
 const password = ref("");
 const HandHygiene = ref(true);
+
 async function started() {
   try {
     const res = await store.dispatch("user/login", {
@@ -194,7 +196,6 @@ async function started() {
   justify-content: center;
   flex: 1;
   width: 100%;
-  margin-top: 5vh;
   
   @media (max-height: 700px) {
     margin-top: 2vh;
