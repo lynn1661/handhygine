@@ -430,11 +430,10 @@ onMounted(async () => {
   transition: transform 0.2s ease;
   padding: 0.5rem;
   border-radius: 10px;
-  border: 2px solid #0f387c;
+  border: none;
   
   &:hover {
     transform: scale(1.05);
-    border-color: #4a89dc;
   }
   
   @media (max-width: 480px) {

@@ -32,6 +32,7 @@
               show-password
               :placeholder="$t('HandHygiene.password')"
               class="login-input"
+              @keyup.enter="started"
             />
           </div>
           
@@ -62,6 +63,7 @@ const t = useI18n();
 const shouldChangeStyle = ref(false); // 默认不添加
 const accountID = ref("");
 const password = ref("");
+
 async function started() {
   try {
     const res = await store.dispatch("user/login", {
@@ -155,6 +157,14 @@ async function started() {
   justify-content: flex-end;
   cursor: pointer;
   flex-shrink: 0;
+  padding: 0.5rem;
+  border-radius: 10px;
+  border: none;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
 }
 
 /* 主要内容区域 */
@@ -165,7 +175,6 @@ async function started() {
   justify-content: center;
   flex: 1;
   width: 100%;
-  margin-top: 5vh; /* 从10vh减少到5vh，向上移动 */
   
   @media (max-height: 700px) {
     margin-top: 2vh; /* 更小屏幕上更靠上 */
