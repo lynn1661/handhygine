@@ -275,32 +275,26 @@ const getStepRating = (score) => {
   return Math.max(0, Math.min(1, rating));
 };
 
-// 根据原始分数映射到一个更适合显示的分数范围
-const mapScore = (originalScore) => {
-  // 确保输入是有效数字
-  if (typeof originalScore !== 'number' || isNaN(originalScore)) {
-    return 0;
-  }
-  
-  // 输入已经是0-100范围，无需再乘以100
-  const score = originalScore;
-  console.log("原始分数:", score);
-  
-  // 应用非线性映射，使得低分也能显示为更高的数值，提高用户信心
-  if (score < 20) {
-    // 低分区域：即使是很低的分数也给用户60以上的分数
-    return 60 + (score / 20) * 10;
-  } else if (score < 50) {
-    // 中低分区域：50-75分的范围
-    return 70 + ((score - 20) / 30) * 5;
-  } else if (score < 80) {
-    // 中高分区域：75-85分的范围
-    return 75 + ((score - 50) / 30) * 10;
+// 根据原始分数映射到一个更合理的分数范围
+function mapScore(score) {
+  if (score >= 0 && score < 20) {
+      return 30 + ((score - 0) / 20) * (40 - 30);
+  } else if (score >= 20 && score < 40) {
+      return 40 + ((score - 20) / 20) * (60 - 40);
+  } else if (score >= 40 && score < 60) {
+      return 60 + ((score - 40) / 20) * (70 - 60);
+  } else if (score >= 60 && score < 70) {
+      return 70 + ((score - 60) / 10) * (80 - 70);
+  } else if (score >= 70 && score < 80) {
+      return 80 + ((score - 70) / 10) * (90 - 80);
+  } else if (score >= 80 && score < 90) {
+      return 90 + ((score - 80) / 10) * (95 - 90);
+  } else if (score >= 90 && score <= 100) {
+      return 95 + ((score - 90) / 10) * (100 - 95);
   } else {
-    // 高分区域：85-100分的范围
-    return 85 + ((score - 80) / 20) * 15;
+      return 0; // 处理范围外的值
   }
-};
+}
 
 onMounted(async () => {
   // Get the download name for the video based on the account's serial number
@@ -336,7 +330,7 @@ onMounted(async () => {
   // Set the step correctness data from the backend response
   list.value = res?.step_points;
   
-  // 设置用户总成绩，使用映射函数计算后取整
+  // 设置用户总成绩，使用映射函数计算
   const originalScore = res?.userScore || 0;
   console.log("从后端接收到的原始分数:", originalScore);
   const mappedScore = mapScore(originalScore);
