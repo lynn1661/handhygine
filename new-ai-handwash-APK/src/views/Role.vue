@@ -141,9 +141,9 @@ onUnmounted(() => {
   flex-direction: column;
   box-sizing: border-box;
   flex: 1;
-  min-height: 90vh;
+  min-height: 95vh;
   position: relative;
-  padding: 0.5rem;
+  padding: 0.5rem 2rem;
 }
 
 /* 顶部区域样式 */
@@ -151,21 +151,21 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
-  margin-bottom: 2rem;
+  padding: 0.3rem 0;
+  margin-bottom: 0.8rem;
   width: 100%;
-  margin-top: 1.5rem;
+  margin-top: 0.3rem;
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .logo-image {
   width: auto;
-  height: 3.5rem;
+  height: 2.75rem;
   transition: transform 0.3s ease;
   
   &:hover {
@@ -173,13 +173,13 @@ onUnmounted(() => {
   }
   
   @media (max-width: 480px) {
-    height: 2.5rem;
+    height: 2.25rem;
   }
 }
 
 .back-btn {
-  width: 4.5rem;
-  height: 4.5rem;
+  width: 3rem;
+  height: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -197,8 +197,8 @@ onUnmounted(() => {
   }
   
   @media (max-width: 480px) {
-    width: 3.5rem;
-    height: 3.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
   }
 }
 
@@ -209,17 +209,18 @@ onUnmounted(() => {
   width: 100%;
   box-sizing: border-box;
   flex: 1;
-  gap: 5rem;
+  gap: 2rem;
   justify-content: center;
   align-items: center;
-  //margin-top: 15rem;
-  padding-bottom: 4rem;
+  margin-top: 1rem;
+  padding-top: 0;
+  padding-bottom: 2rem;
 }
 
 /* 用户ID输入区域 */
 .user-input-section {
   width: 100%;
-  max-width: 650px;
+  max-width: 500px;
   display: flex;
   justify-content: center;
 }
@@ -230,7 +231,7 @@ onUnmounted(() => {
   :deep(.el-input__wrapper) {
     background: rgba(245, 248, 253, 0.9);
     border-radius: 30px;
-    height: 70px;
+    height: 60px;
     box-shadow: 0 6px 16px rgba(15, 56, 124, 0.15);
     border: 1px solid rgba(15, 56, 124, 0.1);
   }
@@ -239,7 +240,7 @@ onUnmounted(() => {
     font-family: "Helvetica85", sans-serif;
     font-size: 1.4rem;
     color: #0f387c;
-    height: 70px;
+    height: 60px;
     padding: 0 2rem;
     
     &::placeholder {
@@ -252,23 +253,22 @@ onUnmounted(() => {
 /* 角色选择区域 */
 .role-selection {
   width: 100%;
-  max-width: 650px;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  //margin-top: 2rem;
 }
 
 .role-buttons {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
   width: 100%;
 }
 
 .role-button {
   width: 100%;
-  height: 95px;
+  height: 70px;
   background-size: cover;
   background-position: center;
   border-radius: 20px;
@@ -276,7 +276,7 @@ onUnmounted(() => {
   color: white;
   font-family: "Helvetica85", sans-serif;
   font-weight: 700;
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   transition: all 0.3s;
   position: relative;
@@ -324,36 +324,64 @@ onUnmounted(() => {
 
 /* 响应式布局调整 */
 @media (max-width: 768px) {
+  .content-wrapper {
+    padding: 0.5rem 1rem;
+  }
+  
+  .user-input-section,
+  .role-selection {
+    max-width: 100%;
+  }
+  
   .user-input {
     :deep(.el-input__wrapper) {
-      height: 60px;
+      height: 55px;
     }
     
     :deep(.el-input__inner) {
-      height: 60px;
+      height: 55px;
       font-size: 1.25rem;
     }
   }
   
   .role-button {
-    height: 85px;
-    font-size: 1.4rem;
+    height: 65px;
+    font-size: 1.3rem;
   }
   
   .main-section {
-    gap: 2.5rem;
+    gap: 2rem;
   }
 }
 
 @media (max-height: 700px) {
   .role-button {
-    height: 70px;
+    height: 60px;
     font-size: 1.2rem;
   }
   
   .main-section {
-    margin-top: 5rem;
-    gap: 3rem;
+    margin-top: 0;
+    padding-top: 1rem;
+    gap: 1.5rem;
+  }
+}
+
+/* 添加紧凑布局的媒体查询 */
+@media (max-height: 600px) {
+  .home-top {
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+  }
+  
+  .main-section {
+    padding-top: 0;
+    gap: 1rem;
+  }
+  
+  .role-button {
+    height: 50px;
+    font-size: 1.1rem;
   }
 }
 </style>

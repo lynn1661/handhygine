@@ -487,8 +487,9 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
-  margin-bottom: 1rem;
+  padding: 0.3rem 0;
+  margin-bottom: 0.5rem;
+  margin-top: 0.3rem;
 }
 
 .logo {
@@ -499,7 +500,7 @@ onUnmounted(() => {
 
 .logo-image {
   width: auto;
-  height: 3rem;
+  height: 2.5rem;
   transition: transform 0.3s ease;
   
   &:hover {
@@ -507,13 +508,13 @@ onUnmounted(() => {
   }
   
   @media (max-width: 480px) {
-    height: 2.25rem;
+    height: 2rem;
   }
 }
 
 .back-btn {
-  width: 3rem;
-  height: 3rem;
+  width: 2.5rem;
+  height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -543,15 +544,16 @@ onUnmounted(() => {
   width: 100%;
   box-sizing: border-box;
   flex: 1;
-  gap: 1rem;
-  justify-content: center;
+  gap: 0.5rem;
+  justify-content: flex-start;
   align-items: center;
+  padding-top: 0.5rem;
 }
 
 /* 指导区域 */
 .instruction-section {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
@@ -561,13 +563,13 @@ onUnmounted(() => {
 .detecting-title {
   font-family: "Helvetica85", sans-serif;
   font-weight: 700;
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   color: #0f387c;
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 0.5rem 0;
   
   @media (max-width: 480px) {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
   }
 }
 
@@ -593,8 +595,8 @@ onUnmounted(() => {
 }
 
 .camera-container {
-  width: 90%;
-  max-width: 800px;
+  width: 80%;
+  max-width: 650px;
   position: relative;
   background: transparent;
   border-radius: 16px;
@@ -602,7 +604,7 @@ onUnmounted(() => {
   box-shadow: 0 6px 16px rgba(15, 56, 124, 0.15);
   aspect-ratio: 16/9;
   margin: 0 auto;
-  min-height: 300px;
+  min-height: 250px;
   display: block;
 }
 
@@ -613,7 +615,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleY(-1);
+  //transform: scaleY(-1);
   background: transparent;
   border-radius: 16px;
   display: block;
@@ -746,23 +748,28 @@ onUnmounted(() => {
 /* 响应式布局调整 */
 @media (max-width: 600px) {
   .camera-container {
-    width: 95%;
+    width: 90%;
+    min-height: 200px;
   }
 }
 
 /* 大屏幕优化 */
 @media (min-width: 1200px) {
   .camera-container {
-    width: 75%;
-    max-width: 1000px;
+    width: 65%;
+    max-width: 800px;
+  }
+  
+  .content-wrapper {
+    padding-top: 0.5rem;
   }
 }
 
 /* 超大屏幕优化 */
 @media (min-width: 1600px) {
   .camera-container {
-    width: 60%;
-    max-width: 1200px;
+    width: 50%;
+    max-width: 900px;
   }
 }
 </style>

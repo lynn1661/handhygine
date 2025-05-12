@@ -1035,42 +1035,38 @@ function getNextStepTitle() {
 
 .content-wrapper {
   width: 100%;
-  max-width: 1400px; /* 增加最大宽度以适应水平布局 */
+  max-width: 1400px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
   flex: 1;
-  justify-content: space-between; /* 改为space-between让元素更紧凑 */
-  min-height: 90vh;
+  justify-content: flex-start; /* 改为flex-start让内容靠顶部 */
+  min-height: 95vh; /* 稍微增加高度 */
   position: relative;
-  padding: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.1);
+  padding: 0.3rem; /* 减少整体内边距 */
+  background-color: transparent;
   border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(15, 56, 124, 0.1);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
 }
 
-/* 顶部区域样式 - 进一步减小间距 */
+/* 顶部区域样式 - 显著减小 */
 .header {
-  padding: 0.25rem 0; /* 减小内边距 */
+  padding: 0.1rem 0; /* 进一步减小内边距 */
   width: 100%;
-  margin-bottom: 0.5rem; /* 进一步减小底部间距 */
+  margin-bottom: 0.1rem; /* 显著减小底部间距 */
   position: relative;
-  margin-top: 0.25rem;
-  
-  @media (min-width: 768px) {
-    padding: 0.5rem 0 !important;
-    margin-bottom: 1rem !important;
-  }
+  margin-top: 0; /* 移除顶部间距 */
 }
 
 .header-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.5rem; /* 减少间隔 */
   width: 100%;
   
   @media (min-width: 768px) {
@@ -1082,14 +1078,14 @@ function getNextStepTitle() {
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem; /* 减少logo间间距 */
   justify-content: center;
   flex: 1;
   order: 2;
 }
 
 .logo-image {
-  height: 2.25rem;
+  height: 2rem; /* 进一步减小logo大小 */
   width: auto;
   transition: transform 0.3s ease;
   
@@ -1098,18 +1094,14 @@ function getNextStepTitle() {
   }
   
   @media (max-width: 480px) {
-    height: 1.75rem;
-  }
-  
-  @media (min-width: 768px) {
-    height: 3rem !important;
+    height: 1.8rem; /* 小屏幕上更小 */
   }
 }
 
 .step-title {
+  font-size: 1.4rem; /* 进一步减小标题文字 */
   font-family: "Helvetica85", sans-serif;
   font-weight: 700;
-  font-size: 1.75rem;
   color: #0f387c;
   margin: 0;
   animation: fadeIn 0.5s ease;
@@ -1122,13 +1114,13 @@ function getNextStepTitle() {
   text-overflow: ellipsis;
   
   @media (max-width: 480px) {
-    font-size: 1.25rem;
+    font-size: 1.1rem; /* 小屏幕上更小 */
   }
 }
 
 .back-btn {
-  width: 3rem;
-  height: 3rem;
+  width: 2.2rem; /* 进一步减小返回按钮尺寸 */
+  height: 2.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1147,31 +1139,35 @@ function getNextStepTitle() {
   }
   
   @media (max-width: 480px) {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2rem;
+    height: 2rem;
   }
   
   @media (min-width: 768px) {
-    width: 4rem !important;
-    height: 4rem !important;
+    width: 3rem !important; /* 桌面版也减小尺寸 */
+    height: 3rem !important;
   }
 }
 
-/* 主要内容区域 - 桌面时为水平布局，移动时为垂直布局 */
+/* 主要内容区域 - 减少间距和大小 */
 .main-section {
   display: flex;
   flex-direction: column; /* 默认为垂直布局 */
   width: 100%;
   box-sizing: border-box;
   flex: 1;
-  gap: 0.75rem; /* 减小主要内容间的间距 */
-  justify-content: center;
+  gap: 0.3rem; /* 进一步减少间距 */
+  justify-content: flex-start; /* 改为flex-start让内容靠上 */
+  padding-top: 0; /* 移除顶部内边距 */
+  margin-top: 0.1rem; /* 添加极小的顶部外边距 */
   
   /* 在桌面屏幕上使用水平布局 - 降低阈值确保更广泛兼容 */
   @media (min-width: 768px) {
     flex-direction: row !important;
     align-items: center !important;
-    gap: 1.5rem !important;
+    gap: 0.8rem !important; /* 减少间距 */
+    margin-top: 0 !important; /* 移除顶部间距 */
+    padding-top: 0 !important; /* 确保没有内边距 */
   }
 }
 
@@ -1183,7 +1179,7 @@ function getNextStepTitle() {
   margin-bottom: 0.25rem;
   
   @media (min-width: 768px) {
-    width: 48% !important; /* 在桌面端占用接近一半宽度 */
+    width: 48% !important; /* 稍微减少两侧宽度比例 */
     margin-bottom: 0 !important;
   }
 }
@@ -1196,7 +1192,7 @@ function getNextStepTitle() {
   gap: 0.75rem;
   
   @media (min-width: 768px) {
-    width: 48% !important; /* 在桌面端占用接近一半宽度 */
+    width: 48% !important; /* 稍微减少两侧宽度比例 */
     padding-top: 2rem !important;
   }
 }
@@ -1265,8 +1261,8 @@ function getNextStepTitle() {
 }
 
 .camera-container {
-  width: 90%;
-  max-width: 450px;
+  width: 85%; /* 减小宽度 */
+  max-width: 650px; /* 减小最大宽度 */
   position: relative;
   background: transparent;
   border-radius: 12px;
@@ -1274,12 +1270,12 @@ function getNextStepTitle() {
   box-shadow: 0 4px 12px rgba(15, 56, 124, 0.1);
   aspect-ratio: 16/9;
   margin: 0 auto;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem; /* 减小底部间距 */
   z-index: 1;
   
   @media (min-width: 768px) {
     max-width: 100% !important;
-    margin-bottom: 1rem !important;
+    min-height: 280px !important; /* 桌面端视频容器高度 */
   }
 }
 
@@ -1290,7 +1286,7 @@ function getNextStepTitle() {
   top: 0;
   left: 0;
   object-fit: cover;
-  transform: scaleY(-1);
+  //transform: scaleY(-1);
   background: transparent;
   border-radius: 12px;
 }
@@ -1586,38 +1582,33 @@ function getNextStepTitle() {
 /* 调整图片容器在水平布局中的高度比例 */
 @media (min-width: 768px) {
   .guide-image {
-    max-height: 70vh;
+    max-height: 55vh; /* 进一步限制指导图片高度 */
     width: auto;
     margin: 0 auto;
     display: block;
   }
   
   .camera-container {
-    margin-bottom: 1rem !important;
+    margin-bottom: 0.5rem !important; /* 减少底部边距 */
     height: auto;
-    min-height: 350px;
+    min-height: 300px; /* 减少最小高度 */
   }
   
-  /* 调整评分卡片在水平布局中的样式 */
-  .feedback-card {
-    margin-top: 0;
-  }
-  
-  /* 增强标题在水平布局中的可见性 */
+  /* 增强标题在水平布局中的可见性，但不要太大 */
   .step-title {
-    font-size: 2rem;
+    font-size: 1.7rem; /* 桌面端略减小标题 */
   }
 }
 
 /* 针对超宽显示器的优化 */
 @media (min-width: 1600px) {
   .guide-section, .right-section {
-    width: 45% !important;
+    width: 42% !important; /* 进一步减少占用空间 */
   }
   
   .main-section {
     justify-content: center !important;
-    gap: 4rem !important;
+    gap: 2rem !important; /* 增加间距 */
   }
 }
 </style> 

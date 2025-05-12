@@ -274,6 +274,28 @@ const getStepRating = (score) => {
   // 限制在0-1范围内
   return Math.max(0, Math.min(1, rating));
 };
+
+// 分数映射函数，根据原始分数映射到新的分数范围
+function mapScore(score) {
+  if (score >= 0 && score < 20) {
+    return 30 + ((score - 0) / 20) * (40 - 30);
+  } else if (score >= 20 && score < 40) {
+    return 40 + ((score - 20) / 20) * (60 - 40);
+  } else if (score >= 40 && score < 60) {
+    return 60 + ((score - 40) / 20) * (70 - 60);
+  } else if (score >= 60 && score < 70) {
+    return 70 + ((score - 60) / 10) * (80 - 70);
+  } else if (score >= 70 && score < 80) {
+    return 80 + ((score - 70) / 10) * (90 - 80);
+  } else if (score >= 80 && score < 90) {
+    return 90 + ((score - 80) / 10) * (95 - 90);
+  } else if (score >= 90 && score <= 100) {
+    return 95 + ((score - 90) / 10) * (100 - 95);
+  } else {
+    return 0; // 处理范围外的值
+  }
+}
+
 onMounted(async () => {
   // Get the download name for the video based on the account's serial number
   downloadName.value = getTime(
@@ -308,8 +330,10 @@ onMounted(async () => {
   // Set the step correctness data from the backend response
   list.value = res?.step_points;
   
-  // 设置用户总成绩，强制取整
-  total.value = Math.floor(res?.userScore || 0);
+  // 设置用户总成绩，使用映射函数计算后取整
+  const originalScore = res?.userScore || 0;
+  const mappedScore = mapScore(originalScore);
+  total.value = Math.round(mappedScore);
   
   // Set the video file names for download from the backend response
   downloadVideoName.value = res?.step_video_files;
@@ -366,7 +390,7 @@ onMounted(async () => {
   flex: 1;
   min-height: auto; /* 移除最小高度限制，避免内容过高需要滚动 */
   position: relative;
-  padding: 1.5rem;
+  padding: 1rem; /* 减小内边距 */
   background-color: rgba(255, 255, 255, 0.15);
   border-radius: 24px;
   box-shadow: none; /* 移除阴影效果 */
@@ -382,25 +406,25 @@ onMounted(async () => {
   }
 }
 
-/* 顶部区域样式 */
+/* 顶部区域样式 - 减小空间 */
 .home-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 0 1.5rem;
-  //margin-bottom: 1rem;
+  padding: 0 0 0.75rem; /* 减小内边距 */
+  margin-bottom: 0.5rem; /* 减小底部间距 */
   //border-bottom: 1px solid rgba(15, 56, 124, 0.1);
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.75rem; /* 减小logo间距 */
 }
 
 .logo-image {
   width: auto;
-  height: 3rem;
+  height: 2.5rem; /* 减小logo大小 */
   transition: transform 0.3s ease;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   
@@ -410,11 +434,11 @@ onMounted(async () => {
   }
   
   @media (max-width: 480px) {
-    height: 2.25rem;
+    height: 2rem;
   }
   
   @media (min-width: 768px) {
-    height: 4rem;
+    height: 3rem; /* 减小桌面端logo尺寸 */
   }
 }
 
@@ -427,7 +451,7 @@ onMounted(async () => {
   margin-top: 0;
   position: relative;
   transition: transform 0.2s ease;
-  padding: 0.5rem;
+  padding: 0.3rem; /* 减小内边距 */
   border-radius: 10px;
   border: none;
   
@@ -1076,8 +1100,8 @@ onMounted(async () => {
   }
   
   .achievement-image img {
-    width: 110px;
-    height: 110px;
+    width: 200px;
+    height: 200px;
   }
   
   .achievement-header {
