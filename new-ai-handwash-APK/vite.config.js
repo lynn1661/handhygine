@@ -35,7 +35,7 @@ export default defineConfig({
         categories: ["test"],
         icons: [
           {
-            src: "/public/OIP.png",
+            src: "OIP.png",
             sizes: "256x256",
             type: "image/png",
           },
