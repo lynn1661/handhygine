@@ -42,6 +42,16 @@
               <video class="input_video"></video>
               <canvas class="output_canvas" width="1280px" height="720px"></canvas>
               <div class="loading" v-if="loading"></div>
+              
+              <!-- 添加卡尔曼滤波开关 -->
+              <div class="filter-toggle">
+                <label class="toggle-switch">
+                  <input type="checkbox" v-model="kalmanFilterEnabled" @change="toggleFilter">
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="toggle-label">{{ kalmanFilterEnabled ? '滤波开启' : '滤波关闭' }}</span>
+              </div>
+              
             </div>
             
             <!-- 将控制面板设为隐藏，但保留功能 -->
@@ -91,6 +101,9 @@ import { useStore } from "vuex";
 import { useI18n } from "vue-i18n";
 import { getTime } from "../utils/formatData";
 import { ElRate } from 'element-plus';
+
+// 导入卡尔曼滤波器
+import KalmanFilter from '../utils/KalmanFilter';
 
 // 使用 vue-i18n
 const { t } = useI18n();
@@ -175,6 +188,42 @@ let firstType = true;
 const showTransition = ref(false);
 // 添加记录转场前步骤的变量
 const transitionFromStep = ref(1);
+
+// 历史轨迹和卡尔曼滤波相关变量
+const handTrackHistory = ref([]);
+const historyLength = 30; // 保存最近30帧的历史数据
+const kalmanFilters = {}; // 存储每个关键点的卡尔曼滤波器
+const filteredLandmarks = ref([]); // 存储滤波后的关键点
+const trajectoryAnalysisEnabled = ref(true); // 是否启用轨迹分析
+const kalmanFilterEnabled = ref(true); // 是否启用卡尔曼滤波
+const motionPatterns = {
+  1: "rub_palm_circular", // 掌心搓手
+  2: "right_over_left", // 手背搓手-右手覆盖左手
+  3: "left_over_right", // 手背搓手-左手覆盖右手
+  4: "finger_interlocked", // 指缝相互揉搓
+  5: "rotational_right_thumb", // 旋转揉搓右手拇指
+  6: "rotational_left_thumb", // 旋转揉搓左手拇指
+  7: "circular_wrist_motion" // 腕部揉搓
+};
+
+// 手部遮挡检测相关变量
+const handOcclusionState = {
+  Left: {
+    occluded: false,
+    lastSeenFrame: 0,
+    confidence: 1.0,
+    predictedLandmarks: null
+  },
+  Right: {
+    occluded: false,
+    lastSeenFrame: 0,
+    confidence: 1.0,
+    predictedLandmarks: null
+  }
+};
+const occlusionThreshold = 5; // 连续多少帧不可见判定为遮挡
+const maxPredictionFrames = 30; // 最多预测多少帧
+let frameCounter = 0; // 全局帧计数器
 
 // 媒体设置
 const setupMedia = async () => {
@@ -545,7 +594,10 @@ onMounted(() => {
 
 // 将MediaPipe初始化提取为一个独立函数
 function initializeMediaPipe() {
-  console.log("初始化MediaPipe...");
+  console.log("初始化MediaPipe和卡尔曼滤波器...");
+  
+  // 初始化卡尔曼滤波器
+  initializeKalmanFilters();
   
   // 媒体设置
   const videoElement = document.getElementsByClassName("input_video")[0];
@@ -632,98 +684,258 @@ function initializeMediaPipe() {
         return;
       }
   
-      if (results.multiHandLandmarks && results.multiHandedness) {
-        for (let index = 0; index < results.multiHandLandmarks.length; index++) {
-          const combinedData = {};
-          const classification = results.multiHandedness[index];
-          const isRightHand = classification.label === "Right";
-          const landmarks = results.multiHandLandmarks[index];
-          
-          results.multiHandedness.forEach((item) => {
-            const label = item.label;
+      // 准备组合数据，包括遮挡预测
+      const combinedData = {};
+      
+      // 检测到手的情况
+      if (results.multiHandLandmarks && results.multiHandedness && results.multiHandLandmarks.length > 0) {
+        // 设置组合数据结构
+        results.multiHandedness.forEach((item) => {
+          const label = item.label;
+          if (!combinedData[label]) {
             combinedData[label] = [];
-          });
-  
-          results.multiHandLandmarks.forEach((item, index) => {
-            const label = results.multiHandedness[index].label;
-            const keypoints = item.map((point) => ({
-              x: point.x,
-              y: point.y,
-              z: point.z,
-            }));
-            const score = results.multiHandedness[index].score;
-            const handedness = label;
-  
-            if (!combinedData[label]) {
-              combinedData[label] = [];
-            }
-  
-            const newData = {
-              keypoints,
-              score,
-              handedness,
-            };
-            combinedData[label].push(newData);
-          });
-          
-          // 如果检测到手且未开始评估，自动开始倒计时
-          if (!isEvaluating.value && !isFinished.value) {
-            console.log("检测到手部，自动开始倒计时");
-            countdownStarted.value = true;
           }
-          
-          // 绘制手部轮廓
-          drawingUtils.drawConnectors(
-            canvasCtx,
-            landmarks,
-            mpHands.HAND_CONNECTIONS,
-            { color: isRightHand ? "#00FF00" : "#FF0000" }
-          );
-          
-          drawingUtils.drawLandmarks(canvasCtx, landmarks, {
-            color: isRightHand ? "#00FF00" : "#FF0000",
-            fillColor: isRightHand ? "#FF0000" : "#00FF00",
-            radius: (data) => {
-              return drawingUtils.lerp(data.from.z, -0.15, 0.1, 10, 1);
-            },
+        });
+
+        // 如果检测到手部且未开始评估，自动开始倒计时
+        if (!isEvaluating.value && !isFinished.value && !countdownStarted.value) {
+          console.log("检测到手部，自动开始倒计时");
+          countdownStarted.value = true;
+        }
+
+        // 填充组合数据
+        for (let i = 0; i < results.multiHandLandmarks.length; i++) {
+          const label = results.multiHandedness[i].label;
+          const keypoints = results.multiHandLandmarks[i].map((point) => ({
+            x: point.x,
+            y: point.y,
+            z: point.z,
+          }));
+          const score = results.multiHandedness[i].score;
+          const handedness = label;
+
+          if (!combinedData[label]) {
+            combinedData[label] = [];
+          }
+
+          combinedData[label].push({
+            keypoints,
+            score,
+            handedness,
           });
-          
-          // 如果正在评估中，则继续检测手势
-          if (isEvaluating.value && !isFinished.value) {
-            // 检查手部状态
-            const leftHand = combinedData["Left"] && combinedData["Left"].length > 0 
-              ? combinedData["Left"][0].keypoints 
-              : null;
-            const rightHand = combinedData["Right"] && combinedData["Right"].length > 0 
-              ? combinedData["Right"][0].keypoints 
-              : null;
-  
-            const landmarksList = [];
-            if (leftHand) landmarksList.push(leftHand);
-            if (rightHand) landmarksList.push(rightHand);
-  
-            try {
-              const overlap = await isOverlapping(landmarksList);
-              if (!overlap) {
-                console.log("⚠️ 未检测到手或双手摊开，直接判定 FALSE");
-                resList.push(false);
-              } else {
-                console.log("✅ 正常洗手，执行后续检测");
-                storeDataEverySecond(combinedData);
-              }
-            } catch (error) {
-              console.error("手部检测过程中出错:", error);
-              resList.push(false);
+        }
+        
+        // 应用卡尔曼滤波处理关键点，包括预测遮挡手部
+        const filteredData = applyKalmanFilter(combinedData);
+        
+        // 轮流处理左右手的数据
+        for (let handType of ['Left', 'Right']) {
+          if (filteredData[handType] && filteredData[handType].length > 0) {
+            const handData = filteredData[handType][0];
+            const isCurrentRightHand = handType === 'Right';
+            const landmarks = handData.keypoints.map(p => ({x: p.x, y: p.y, z: p.z}));
+            const isOccluded = handData.isOccluded === true;
+            
+            // 使用不同颜色绘制检测到的手和预测的手
+            const connectionColor = isOccluded ? 
+                                   (isCurrentRightHand ? "rgba(0, 255, 0, 0.5)" : "rgba(255, 0, 0, 0.5)") : 
+                                   (isCurrentRightHand ? "#00FF00" : "#FF0000");
+            
+            const landmarkColor = isOccluded ?
+                                 (isCurrentRightHand ? "rgba(255, 0, 0, 0.5)" : "rgba(0, 255, 0, 0.5)") :
+                                 (isCurrentRightHand ? "#FF0000" : "#00FF00");
+            
+            // 绘制手部轮廓
+            drawingUtils.drawConnectors(
+              canvasCtx,
+              landmarks,
+              mpHands.HAND_CONNECTIONS,
+              { color: connectionColor }
+            );
+            
+            // 对于预测的手，使用较小的点和半透明样式
+            drawingUtils.drawLandmarks(canvasCtx, landmarks, {
+              color: landmarkColor,
+              fillColor: isCurrentRightHand ? "#FF0000" : "#00FF00",
+              radius: (data) => {
+                const baseSize = isOccluded ? 0.7 : 1.0;
+                return drawingUtils.lerp(data.from.z, -0.15, 0.1, 10 * baseSize, 1 * baseSize);
+              },
+            });
+            
+            // 如果是预测的手，添加提示文本
+            if (isOccluded) {
+              canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+              canvasCtx.font = '16px Arial';
+              canvasCtx.fillText(`预测的${handType}手 (${(handData.score * 100).toFixed(0)}%)`, 
+                                landmarks[0].x * canvasElement.width, 
+                                landmarks[0].y * canvasElement.height - 10);
             }
           }
         }
-      } else if (results.multiHandLandmarks && results.multiHandLandmarks.length === 0) {
-        // 处理没有检测到手的情况
+        
+        // 存储历史轨迹数据，包括预测的数据
+        handTrackHistory.value.push(JSON.parse(JSON.stringify(filteredData || combinedData)));
+        
+        // 保持固定历史长度
+        if (handTrackHistory.value.length > historyLength) {
+          handTrackHistory.value.shift();
+        }
+        
+        // 如果正在评估中，则继续检测手势
         if (isEvaluating.value && !isFinished.value) {
-          console.log("未检测到手");
-          if (startNumber !== undefined && endNumber !== undefined) {
-            startNumber = 0;
-            endNumber = 25;
+          // 提取手部数据，优先使用实际检测到的手，如果没有则使用预测数据
+          const leftHand = getHandLandmarks(filteredData, 'Left');
+          const rightHand = getHandLandmarks(filteredData, 'Right');
+          
+          const landmarksList = [];
+          if (leftHand) landmarksList.push(leftHand);
+          if (rightHand) landmarksList.push(rightHand);
+
+          try {
+            // 修改重叠检测，考虑预测的手
+            let overlap = false;
+            
+            // 如果有两只手，直接检测重叠
+            if (landmarksList.length === 2) {
+              overlap = await isOverlapping(landmarksList);
+            } 
+            // 只有一只手，可能另一只手被遮挡
+            else if (landmarksList.length === 1) {
+              // 检查是否有一只手被预测
+              const leftOccluded = handOcclusionState['Left'].occluded && handOcclusionState['Left'].confidence > 0.5;
+              const rightOccluded = handOcclusionState['Right'].occluded && handOcclusionState['Right'].confidence > 0.5;
+              
+              // 如果有一只手被预测，并且预测置信度足够高，假设重叠成立
+              if (leftOccluded || rightOccluded) {
+                overlap = true;
+                console.log("一只手可见，另一只手被预测，假设重叠成立");
+              }
+            }
+            
+            // 使用历史轨迹分析和手部重叠判断相结合
+            if (!overlap) {
+              console.log("⚠️ 未检测到手或双手摊开，直接判定 FALSE");
+              resList.push(false);
+            } else {
+              console.log("✅ 正常洗手，执行后续检测");
+              
+              // 增加：使用轨迹分析辅助判断
+              if (trajectoryAnalysisEnabled.value && handTrackHistory.value.length >= 10) {
+                const trajectoryMatch = analyzeHandTrajectory(currentStep.value);
+                console.log(`👉 轨迹分析结果: ${trajectoryMatch ? "匹配" : "不匹配"}`);
+                
+                // 如果轨迹分析非常确定(匹配或不匹配)，直接使用其结果
+                // 否则采用原有服务器分析方式
+                if (trajectoryMatch) {
+                  console.log("📊 轨迹分析判定为匹配，直接加入TRUE结果");
+                  resList.push(true);
+                } else {
+                  // 不匹配或不确定时，使用原有服务器分析
+                  storeDataEverySecond(filteredData || combinedData);
+                }
+              } else {
+                // 轨迹分析未启用或数据不足，使用原有服务器分析
+                storeDataEverySecond(filteredData || combinedData);
+              }
+            }
+          } catch (error) {
+            console.error("手部检测过程中出错:", error);
+            resList.push(false);
+          }
+        }
+      } 
+      // 没有检测到手的情况
+      else {
+        // 尝试使用预测来填补检测缺失
+        const filteredData = applyKalmanFilter(combinedData);
+        
+        // 检查是否有预测的手部数据
+        const hasPredictedHands = (filteredData && 
+                                 ((filteredData['Left'] && filteredData['Left'].length > 0) || 
+                                  (filteredData['Right'] && filteredData['Right'].length > 0)));
+        
+        // 如果有预测的手部，则绘制它们
+        if (hasPredictedHands) {
+          // 轮流处理左右手的数据
+          for (let handType of ['Left', 'Right']) {
+            if (filteredData[handType] && filteredData[handType].length > 0) {
+              const handData = filteredData[handType][0];
+              const isCurrentRightHand = handType === 'Right';
+              const landmarks = handData.keypoints.map(p => ({x: p.x, y: p.y, z: p.z}));
+              
+              // 绘制预测的手部
+              drawingUtils.drawConnectors(
+                canvasCtx,
+                landmarks,
+                mpHands.HAND_CONNECTIONS,
+                { color: isCurrentRightHand ? "rgba(0, 255, 0, 0.5)" : "rgba(255, 0, 0, 0.5)" }
+              );
+              
+              drawingUtils.drawLandmarks(canvasCtx, landmarks, {
+                color: isCurrentRightHand ? "rgba(255, 0, 0, 0.5)" : "rgba(0, 255, 0, 0.5)",
+                fillColor: isCurrentRightHand ? "rgba(255, 0, 0, 0.5)" : "rgba(0, 255, 0, 0.5)",
+                radius: (data) => {
+                  return drawingUtils.lerp(data.from.z, -0.15, 0.1, 7, 1) * 0.7;
+                },
+              });
+              
+              // 显示提示文本
+              canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+              canvasCtx.font = '16px Arial';
+              canvasCtx.fillText(`预测的${handType}手 (${(handData.score * 100).toFixed(0)}%)`, 
+                                landmarks[0].x * canvasElement.width, 
+                                landmarks[0].y * canvasElement.height - 10);
+            }
+          }
+          
+          // 保存预测数据到历史轨迹
+          handTrackHistory.value.push(JSON.parse(JSON.stringify(filteredData)));
+          if (handTrackHistory.value.length > historyLength) {
+            handTrackHistory.value.shift();
+          }
+          
+          // 如果正在评估中，使用预测数据继续分析
+          if (isEvaluating.value && !isFinished.value) {
+            const leftHand = getHandLandmarks(filteredData, 'Left');
+            const rightHand = getHandLandmarks(filteredData, 'Right');
+            
+            if (leftHand || rightHand) {
+              // 如果预测置信度足够高，继续进行分析
+              const highConfidence = (handOcclusionState['Left'].confidence > 0.6 || 
+                                    handOcclusionState['Right'].confidence > 0.6);
+              
+              if (highConfidence && trajectoryAnalysisEnabled.value && handTrackHistory.value.length >= 10) {
+                const trajectoryMatch = analyzeHandTrajectory(currentStep.value);
+                console.log(`👉 [预测模式] 轨迹分析结果: ${trajectoryMatch ? "匹配" : "不匹配"}`);
+                
+                if (trajectoryMatch) {
+                  console.log("📊 [预测模式] 轨迹分析判定为匹配，直接加入TRUE结果");
+                  resList.push(true);
+                } else {
+                  console.log("⚠️ [预测模式] 轨迹分析判定为不匹配");
+                  resList.push(false);
+                }
+              } else {
+                console.log("⚠️ [预测模式] 预测置信度不足或轨迹数据不足");
+                // 在置信度不足时不添加结果，避免误判
+              }
+            } else {
+              console.log("未检测到手，重置数据处理索引");
+              if (startNumber !== undefined && endNumber !== undefined) {
+                startNumber = 0;
+                endNumber = 25;
+              }
+            }
+          }
+        } else {
+          // 没有预测的手部数据
+          if (isEvaluating.value && !isFinished.value) {
+            console.log("未检测到手");
+            if (startNumber !== undefined && endNumber !== undefined) {
+              startNumber = 0;
+              endNumber = 25;
+            }
           }
         }
       }
@@ -1010,6 +1222,694 @@ onUnmounted(() => {
 function getNextStepTitle() {
   return ""; // 返回空值，不再显示下一步标题
 }
+
+// 初始化卡尔曼滤波器（为每个手的每个关键点创建一个滤波器）
+function initializeKalmanFilters() {
+  // 为左右手各21个关键点创建滤波器
+  for (let hand of ['Left', 'Right']) {
+    kalmanFilters[hand] = [];
+    for (let i = 0; i < 21; i++) {
+      // 为x, y, z三个坐标分别创建滤波器
+      kalmanFilters[hand][i] = {
+        x: new KalmanFilter({R: 0.01, Q: 0.1}), // 测量噪声R小，过程噪声Q适中
+        y: new KalmanFilter({R: 0.01, Q: 0.1}),
+        z: new KalmanFilter({R: 0.05, Q: 0.1})  // z方向噪声较大
+      };
+    }
+  }
+  console.log("卡尔曼滤波器初始化完成");
+}
+
+// 应用卡尔曼滤波器处理手部关键点，现在增加预测功能
+function applyKalmanFilter(handData) {
+  if (!handData) return null;
+  
+  frameCounter++; // 每次处理都增加帧计数
+  const result = {};
+  
+  // 处理每只手的数据
+  for (let hand of ['Left', 'Right']) {
+    // 检查手是否存在于当前帧
+    const handExists = handData[hand] && handData[hand].length > 0;
+    
+    // 更新手部遮挡状态
+    if (handExists) {
+      // 手部可见，重置遮挡状态
+      handOcclusionState[hand].occluded = false;
+      handOcclusionState[hand].lastSeenFrame = frameCounter;
+      handOcclusionState[hand].confidence = 1.0;
+    } else {
+      // 检查是否满足遮挡条件
+      const framesSinceLastSeen = frameCounter - handOcclusionState[hand].lastSeenFrame;
+      if (framesSinceLastSeen > occlusionThreshold) {
+        handOcclusionState[hand].occluded = true;
+        // 随着预测时间增加，降低置信度
+        if (framesSinceLastSeen <= maxPredictionFrames) {
+          handOcclusionState[hand].confidence = Math.max(0.1, 1 - (framesSinceLastSeen / maxPredictionFrames));
+        } else {
+          handOcclusionState[hand].confidence = 0; // 超过最大预测帧数，不再预测
+        }
+      }
+    }
+    
+    // 初始化结果对象
+    if (!result[hand]) {
+      result[hand] = [];
+    }
+    
+    // 如果手部存在，正常进行滤波
+    if (handExists) {
+      // 复制手部信息
+      result[hand] = JSON.parse(JSON.stringify(handData[hand]));
+      
+      // 对每个关键点应用滤波
+      for (let handIndex = 0; handIndex < handData[hand].length; handIndex++) {
+        const keypoints = handData[hand][handIndex].keypoints;
+        
+        // 创建滤波后的关键点数组
+        const filteredKeypoints = [];
+        
+        // 对每个关键点进行滤波
+        for (let i = 0; i < keypoints.length; i++) {
+          if (!kalmanFilters[hand] || !kalmanFilters[hand][i]) continue;
+          
+          const point = keypoints[i];
+          
+          // 根据开关决定是否应用滤波
+          if (kalmanFilterEnabled.value) {
+            // 应用滤波
+            const filteredX = kalmanFilters[hand][i].x.filter(point.x);
+            const filteredY = kalmanFilters[hand][i].y.filter(point.y);
+            const filteredZ = kalmanFilters[hand][i].z.filter(point.z);
+            
+            // 存储滤波后的点
+            filteredKeypoints.push({
+              x: filteredX,
+              y: filteredY,
+              z: filteredZ
+            });
+          } else {
+            // 不应用滤波，直接使用原始点
+            // 但仍让数据通过滤波器以更新其状态（不使用结果）
+            kalmanFilters[hand][i].x.filter(point.x);
+            kalmanFilters[hand][i].y.filter(point.y);
+            kalmanFilters[hand][i].z.filter(point.z);
+            
+            // 使用原始点
+            filteredKeypoints.push({
+              x: point.x,
+              y: point.y, 
+              z: point.z
+            });
+          }
+        }
+        
+        // 替换为滤波后的关键点
+        result[hand][handIndex].keypoints = filteredKeypoints;
+        
+        // 保存当前滤波后的关键点用于未来预测
+        handOcclusionState[hand].predictedLandmarks = [...filteredKeypoints];
+      }
+    } 
+    // 手部被遮挡且在预测时间窗口内，使用预测值
+    else if (handOcclusionState[hand].occluded && handOcclusionState[hand].confidence > 0) {
+      // 如果有历史预测值，使用卡尔曼滤波继续预测
+      if (handOcclusionState[hand].predictedLandmarks) {
+        const predictedKeypoints = [];
+        
+        // 对每个关键点进行预测（仅使用上次状态和卡尔曼滤波器的预测能力）
+        for (let i = 0; i < handOcclusionState[hand].predictedLandmarks.length; i++) {
+          if (!kalmanFilters[hand] || !kalmanFilters[hand][i]) continue;
+          
+          const lastPoint = handOcclusionState[hand].predictedLandmarks[i];
+          
+          // 仅在启用滤波时进行预测
+          if (kalmanFilterEnabled.value) {
+            // 纯预测模式 - 使用滤波器的lastValue，并微调状态
+            const predictedX = kalmanFilters[hand][i].x.filter(lastPoint.x);
+            const predictedY = kalmanFilters[hand][i].y.filter(lastPoint.y);
+            const predictedZ = kalmanFilters[hand][i].z.filter(lastPoint.z);
+            
+            predictedKeypoints.push({
+              x: predictedX,
+              y: predictedY,
+              z: predictedZ
+            });
+          } else {
+            // 滤波禁用时，保持最后已知位置不变
+            predictedKeypoints.push({
+              x: lastPoint.x,
+              y: lastPoint.y,
+              z: lastPoint.z
+            });
+          }
+        }
+        
+        // 更新预测关键点
+        handOcclusionState[hand].predictedLandmarks = predictedKeypoints;
+        
+        // 创建预测的手部数据
+        result[hand].push({
+          keypoints: predictedKeypoints,
+          score: handOcclusionState[hand].confidence, // 使用递减的置信度
+          handedness: hand,
+          isOccluded: true // 标记为预测的遮挡数据
+        });
+        
+        console.log(`预测${hand}手关键点，置信度: ${handOcclusionState[hand].confidence.toFixed(2)}`);
+      }
+    }
+  }
+  
+  return result;
+}
+
+// 切换卡尔曼滤波状态
+function toggleFilter() {
+  console.log(`${kalmanFilterEnabled.value ? '启用' : '禁用'}卡尔曼滤波`);
+  
+  // 如果关闭滤波，重置所有滤波器状态
+  if (!kalmanFilterEnabled.value) {
+    for (let hand of ['Left', 'Right']) {
+      for (let i = 0; i < 21; i++) {
+        if (kalmanFilters[hand] && kalmanFilters[hand][i]) {
+          kalmanFilters[hand][i].x.reset();
+          kalmanFilters[hand][i].y.reset();
+          kalmanFilters[hand][i].z.reset();
+        }
+      }
+    }
+  }
+}
+
+// 分析手部运动轨迹
+function analyzeHandTrajectory(currentStep) {
+  if (handTrackHistory.value.length < 10) return false; // 数据不足
+  
+  // 获取最近的10帧数据进行分析
+  const recentFrames = handTrackHistory.value.slice(-10);
+  
+  // 基于当前步骤选择匹配的动作模式
+  const targetPattern = motionPatterns[currentStep];
+  let matchScore = 0;
+  
+  switch(targetPattern) {
+    case "rub_palm_circular": // 步骤1: 掌心搓手
+      matchScore = detectCircularPalmRubbing(recentFrames);
+      break;
+    case "right_over_left": // 步骤2: 右手搓左手背
+      matchScore = detectHandOverHand(recentFrames, "Right", "Left");
+      break;
+    case "left_over_right": // 步骤3: 左手搓右手背
+      matchScore = detectHandOverHand(recentFrames, "Left", "Right");
+      break;
+    case "finger_interlocked": // 步骤4: 指缝相互揉搓
+      matchScore = detectInterlockingFingers(recentFrames);
+      break;
+    case "rotational_right_thumb": // 步骤5: 旋转揉搓右手拇指
+      matchScore = detectThumbRotation(recentFrames, "Right");
+      break;
+    case "rotational_left_thumb": // 步骤6: 旋转揉搓左手拇指
+      matchScore = detectThumbRotation(recentFrames, "Left");
+      break;
+    case "circular_wrist_motion": // 步骤7: 腕部揉搓
+      matchScore = detectWristMotion(recentFrames);
+      break;
+    default:
+      matchScore = 0.5; // 默认中等匹配度
+  }
+  
+  console.log(`步骤${currentStep}动作匹配度: ${matchScore.toFixed(2)}`);
+  
+  // 匹配度大于0.7认为是正确动作
+  return matchScore > 0.7;
+}
+
+// 检测掌心环形搓洗动作
+function detectCircularPalmRubbing(frames) {
+  try {
+    // 提取掌心轨迹点（手掌中心关键点，通常为9号点）
+    const palmTrajectories = {
+      Left: frames.map(frame => {
+        if (frame.Left && frame.Left[0] && frame.Left[0].keypoints) 
+          return frame.Left[0].keypoints[9];
+        return null;
+      }).filter(Boolean),
+      
+      Right: frames.map(frame => {
+        if (frame.Right && frame.Right[0] && frame.Right[0].keypoints) 
+          return frame.Right[0].keypoints[9];
+        return null;
+      }).filter(Boolean)
+    };
+    
+    // 如果没有足够的轨迹点，返回低匹配度
+    if (palmTrajectories.Left.length < 5 || palmTrajectories.Right.length < 5) {
+      return 0.3;
+    }
+    
+    // 检测圆形运动
+    const leftCircularity = calculateCircularity(palmTrajectories.Left);
+    const rightCircularity = calculateCircularity(palmTrajectories.Right);
+    
+    // 计算手掌距离 - 掌心搓手手掌应该接近
+    const palmDistance = calculateAverageDistance(frames, 9, 9);
+    const distanceScore = palmDistance < 0.15 ? 1.0 : (palmDistance < 0.3 ? 0.5 : 0.1);
+    
+    // 计算最终匹配度
+    return (leftCircularity + rightCircularity) * 0.4 + distanceScore * 0.2;
+  } catch (error) {
+    console.error("检测掌心环形搓洗动作时出错:", error);
+    return 0.2; // 出错时返回低匹配度
+  }
+}
+
+// 检测一只手搓另一只手的动作
+function detectHandOverHand(frames, topHand, bottomHand) {
+  try {
+    // 检查手的上下位置关系
+    let correctPositionCount = 0;
+    let frameCount = 0;
+    
+    frames.forEach(frame => {
+      if (frame[topHand] && frame[topHand][0] && 
+          frame[bottomHand] && frame[bottomHand][0]) {
+        
+        // 获取两只手的Y轴中心位置
+        const topHandY = frame[topHand][0].keypoints.reduce((sum, point) => sum + point.y, 0) / 
+                        frame[topHand][0].keypoints.length;
+        const bottomHandY = frame[bottomHand][0].keypoints.reduce((sum, point) => sum + point.y, 0) / 
+                           frame[bottomHand][0].keypoints.length;
+        
+        // 检查上下位置关系
+        if (topHandY < bottomHandY) {
+          correctPositionCount++;
+        }
+        
+        frameCount++;
+      }
+    });
+    
+    // 计算位置关系正确的帧比例
+    const positionScore = frameCount > 0 ? correctPositionCount / frameCount : 0;
+    
+    // 检测横向摩擦运动
+    const horizontalMotion = detectHorizontalMotion(frames, topHand);
+    
+    // 计算手掌距离 - 手背搓手时手掌应该较近
+    const palmDistance = calculateAverageDistance(frames, 9, 9);
+    const distanceScore = palmDistance < 0.2 ? 1.0 : (palmDistance < 0.4 ? 0.5 : 0.1);
+    
+    // 计算最终匹配度
+    return positionScore * 0.5 + horizontalMotion * 0.3 + distanceScore * 0.2;
+  } catch (error) {
+    console.error(`检测${topHand}手搓${bottomHand}手动作时出错:`, error);
+    return 0.2;
+  }
+}
+
+// 检测指缝相互揉搓
+function detectInterlockingFingers(frames) {
+  try {
+    // 检测指尖之间的距离变化
+    let fingerDistanceChanges = 0;
+    let prevDistances = null;
+    
+    frames.forEach(frame => {
+      if (frame.Left && frame.Left[0] && frame.Right && frame.Right[0]) {
+        // 计算左右手各指尖之间的距离
+        const distances = [];
+        
+        // 指尖关键点索引(除拇指外): 8, 12, 16, 20
+        const fingerTips = [8, 12, 16, 20];
+        
+        fingerTips.forEach(leftTip => {
+          fingerTips.forEach(rightTip => {
+            const leftPoint = frame.Left[0].keypoints[leftTip];
+            const rightPoint = frame.Right[0].keypoints[rightTip];
+            
+            if (leftPoint && rightPoint) {
+              const distance = Math.sqrt(
+                Math.pow(leftPoint.x - rightPoint.x, 2) +
+                Math.pow(leftPoint.y - rightPoint.y, 2) +
+                Math.pow(leftPoint.z - rightPoint.z, 2)
+              );
+              distances.push(distance);
+            }
+          });
+        });
+        
+        // 比较与上一帧的距离变化
+        if (prevDistances) {
+          const changes = distances.map((dist, i) => 
+            Math.abs(dist - (prevDistances[i] || 0))
+          );
+          fingerDistanceChanges += changes.reduce((sum, val) => sum + val, 0) / changes.length;
+        }
+        
+        prevDistances = distances;
+      }
+    });
+    
+    // 计算平均距离变化
+    const avgDistanceChange = fingerDistanceChanges / (frames.length - 1);
+    
+    // 归一化距离变化得分 (适当的变化表示手指在活动)
+    const motionScore = avgDistanceChange > 0.01 && avgDistanceChange < 0.1 ? 
+                        1.0 : (avgDistanceChange < 0.2 ? 0.5 : 0.2);
+    
+    // 检测手指是否有交叉
+    const fingersCrossed = detectFingersCrossing(frames);
+    
+    // 计算最终匹配度
+    return motionScore * 0.6 + fingersCrossed * 0.4;
+  } catch (error) {
+    console.error("检测指缝相互揉搓动作时出错:", error);
+    return 0.2;
+  }
+}
+
+// 检测拇指旋转揉搓
+function detectThumbRotation(frames, targetHand) {
+  try {
+    // 拇指关键点索引: 1-4
+    const thumbPoints = [1, 2, 3, 4];
+    
+    // 提取拇指轨迹
+    const thumbTrajectory = frames.map(frame => {
+      if (frame[targetHand] && frame[targetHand][0]) {
+        return thumbPoints.map(idx => frame[targetHand][0].keypoints[idx]);
+      }
+      return null;
+    }).filter(Boolean);
+    
+    if (thumbTrajectory.length < 5) return 0.3;
+    
+    // 计算拇指尖(4号点)的运动圆度
+    const thumbTipTrajectory = thumbTrajectory.map(points => points[3]);
+    const circularity = calculateCircularity(thumbTipTrajectory);
+    
+    // 检测另一只手是否固定(低运动量)
+    const otherHand = targetHand === "Right" ? "Left" : "Right";
+    const otherHandStability = calculateHandStability(frames, otherHand);
+    
+    // 计算最终匹配度
+    return circularity * 0.7 + otherHandStability * 0.3;
+  } catch (error) {
+    console.error(`检测${targetHand}手拇指旋转动作时出错:`, error);
+    return 0.2;
+  }
+}
+
+// 检测腕部揉搓动作
+function detectWristMotion(frames) {
+  try {
+    // 提取两只手腕关键点(0号点)
+    const wristTrajectories = {
+      Left: frames.map(frame => {
+        if (frame.Left && frame.Left[0]) 
+          return frame.Left[0].keypoints[0];
+        return null;
+      }).filter(Boolean),
+      
+      Right: frames.map(frame => {
+        if (frame.Right && frame.Right[0]) 
+          return frame.Right[0].keypoints[0];
+        return null;
+      }).filter(Boolean)
+    };
+    
+    if (wristTrajectories.Left.length < 5 || wristTrajectories.Right.length < 5) {
+      return 0.3;
+    }
+    
+    // 检测环形运动
+    const leftCircularity = calculateCircularity(wristTrajectories.Left);
+    const rightCircularity = calculateCircularity(wristTrajectories.Right);
+    
+    // 检测手腕接近度
+    const wristDistance = frames.map(frame => {
+      if (frame.Left && frame.Left[0] && frame.Right && frame.Right[0]) {
+        const leftWrist = frame.Left[0].keypoints[0];
+        const rightWrist = frame.Right[0].keypoints[0];
+        return Math.sqrt(
+          Math.pow(leftWrist.x - rightWrist.x, 2) +
+          Math.pow(leftWrist.y - rightWrist.y, 2) +
+          Math.pow(leftWrist.z - rightWrist.z, 2)
+        );
+      }
+      return 1; // 默认较大距离
+    }).reduce((sum, dist) => sum + dist, 0) / frames.length;
+    
+    const distanceScore = wristDistance < 0.2 ? 1.0 : (wristDistance < 0.4 ? 0.5 : 0.1);
+    
+    // 计算最终匹配度
+    return (leftCircularity + rightCircularity) * 0.4 + distanceScore * 0.2;
+  } catch (error) {
+    console.error("检测腕部揉搓动作时出错:", error);
+    return 0.2;
+  }
+}
+
+// 计算轨迹圆形度
+function calculateCircularity(points) {
+  if (!points || points.length < 5) return 0;
+  
+  try {
+    // 计算轨迹的中心点
+    const center = {
+      x: points.reduce((sum, p) => sum + p.x, 0) / points.length,
+      y: points.reduce((sum, p) => sum + p.y, 0) / points.length
+    };
+    
+    // 计算到中心的平均距离
+    const avgRadius = points.reduce((sum, p) => {
+      return sum + Math.sqrt(
+        Math.pow(p.x - center.x, 2) + 
+        Math.pow(p.y - center.y, 2)
+      );
+    }, 0) / points.length;
+    
+    // 计算每个点到中心的距离标准差
+    const radiusVariance = points.reduce((sum, p) => {
+      const distance = Math.sqrt(
+        Math.pow(p.x - center.x, 2) + 
+        Math.pow(p.y - center.y, 2)
+      );
+      return sum + Math.pow(distance - avgRadius, 2);
+    }, 0) / points.length;
+    
+    // 计算圆形度得分 (标准差越小，越接近圆形)
+    const circularityScore = Math.exp(-10 * radiusVariance);
+    
+    return circularityScore;
+  } catch (error) {
+    console.error("计算轨迹圆形度时出错:", error);
+    return 0;
+  }
+}
+
+// 检测水平摩擦运动
+function detectHorizontalMotion(frames, handName) {
+  try {
+    // 提取手掌中心点轨迹
+    const palmTrajectory = frames.map(frame => {
+      if (frame[handName] && frame[handName][0]) 
+        return frame[handName][0].keypoints[9]; // 手掌中心点
+      return null;
+    }).filter(Boolean);
+    
+    if (palmTrajectory.length < 5) return 0.3;
+    
+    // 计算水平方向位移
+    let horizontalDisplacements = [];
+    for (let i = 1; i < palmTrajectory.length; i++) {
+      horizontalDisplacements.push(
+        Math.abs(palmTrajectory[i].x - palmTrajectory[i-1].x)
+      );
+    }
+    
+    // 计算垂直方向位移
+    let verticalDisplacements = [];
+    for (let i = 1; i < palmTrajectory.length; i++) {
+      verticalDisplacements.push(
+        Math.abs(palmTrajectory[i].y - palmTrajectory[i-1].y)
+      );
+    }
+    
+    // 计算水平运动得分 (水平位移应该大于垂直位移)
+    const avgHorizontal = horizontalDisplacements.reduce((sum, val) => sum + val, 0) / 
+                         horizontalDisplacements.length;
+    const avgVertical = verticalDisplacements.reduce((sum, val) => sum + val, 0) / 
+                       verticalDisplacements.length;
+    
+    return avgHorizontal > avgVertical ? 
+           Math.min(avgHorizontal / (avgVertical + 0.001), 1) : 0.2;
+  } catch (error) {
+    console.error("检测水平摩擦运动时出错:", error);
+    return 0.2;
+  }
+}
+
+// 检测手指交叉
+function detectFingersCrossing(frames) {
+  try {
+    // 指尖关键点索引: 8, 12, 16, 20
+    const fingerTips = [8, 12, 16, 20];
+    
+    // 计算交叉状态的帧数
+    let crossedFrames = 0;
+    let totalFrames = 0;
+    
+    frames.forEach(frame => {
+      if (frame.Left && frame.Left[0] && frame.Right && frame.Right[0]) {
+        totalFrames++;
+        
+        // 检查是否有左手指尖在右手指中间的情况
+        let hasCrossing = false;
+        
+        for (let leftTip of fingerTips) {
+          const leftPoint = frame.Left[0].keypoints[leftTip];
+          
+          // 检查这个左手指尖是否在任意两个右手指尖之间
+          for (let i = 0; i < fingerTips.length - 1; i++) {
+            for (let j = i + 1; j < fingerTips.length; j++) {
+              const rightPoint1 = frame.Right[0].keypoints[fingerTips[i]];
+              const rightPoint2 = frame.Right[0].keypoints[fingerTips[j]];
+              
+              // 简化的交叉检测
+              if (isPointBetween(leftPoint, rightPoint1, rightPoint2)) {
+                hasCrossing = true;
+                break;
+              }
+            }
+            if (hasCrossing) break;
+          }
+          if (hasCrossing) break;
+        }
+        
+        // 同样检查右手指尖是否在左手指中间
+        if (!hasCrossing) {
+          for (let rightTip of fingerTips) {
+            const rightPoint = frame.Right[0].keypoints[rightTip];
+            
+            for (let i = 0; i < fingerTips.length - 1; i++) {
+              for (let j = i + 1; j < fingerTips.length; j++) {
+                const leftPoint1 = frame.Left[0].keypoints[fingerTips[i]];
+                const leftPoint2 = frame.Left[0].keypoints[fingerTips[j]];
+                
+                if (isPointBetween(rightPoint, leftPoint1, leftPoint2)) {
+                  hasCrossing = true;
+                  break;
+                }
+              }
+              if (hasCrossing) break;
+            }
+            if (hasCrossing) break;
+          }
+        }
+        
+        if (hasCrossing) {
+          crossedFrames++;
+        }
+      }
+    });
+    
+    // 计算交叉帧比例
+    return totalFrames > 0 ? crossedFrames / totalFrames : 0;
+  } catch (error) {
+    console.error("检测手指交叉时出错:", error);
+    return 0.2;
+  }
+}
+
+// 判断一个点是否在两点之间的区域内
+function isPointBetween(point, point1, point2) {
+  // 简化的检测，基于点的x,y坐标
+  const minX = Math.min(point1.x, point2.x);
+  const maxX = Math.max(point1.x, point2.x);
+  const minY = Math.min(point1.y, point2.y);
+  const maxY = Math.max(point1.y, point2.y);
+  
+  return point.x >= minX && point.x <= maxX && 
+         point.y >= minY && point.y <= maxY;
+}
+
+// 计算指定关键点之间的平均距离
+function calculateAverageDistance(frames, point1Index, point2Index) {
+  try {
+    let totalDistance = 0;
+    let frameCount = 0;
+    
+    frames.forEach(frame => {
+      if (frame.Left && frame.Left[0] && frame.Right && frame.Right[0]) {
+        const leftPoint = frame.Left[0].keypoints[point1Index];
+        const rightPoint = frame.Right[0].keypoints[point2Index];
+        
+        if (leftPoint && rightPoint) {
+          const distance = Math.sqrt(
+            Math.pow(leftPoint.x - rightPoint.x, 2) +
+            Math.pow(leftPoint.y - rightPoint.y, 2) +
+            Math.pow(leftPoint.z - rightPoint.z, 2)
+          );
+          
+          totalDistance += distance;
+          frameCount++;
+        }
+      }
+    });
+    
+    return frameCount > 0 ? totalDistance / frameCount : 1.0;
+  } catch (error) {
+    console.error("计算平均距离时出错:", error);
+    return 1.0; // 错误时返回较大距离
+  }
+}
+
+// 计算手部稳定性（静止程度）
+function calculateHandStability(frames, handName) {
+  try {
+    // 提取手掌中心点轨迹
+    const palmTrajectory = frames.map(frame => {
+      if (frame[handName] && frame[handName][0]) 
+        return frame[handName][0].keypoints[9]; // 手掌中心点
+      return null;
+    }).filter(Boolean);
+    
+    if (palmTrajectory.length < 3) return 0.5; // 数据不足时返回中等稳定性
+    
+    // 计算每帧之间的位移
+    let displacements = [];
+    for (let i = 1; i < palmTrajectory.length; i++) {
+      displacements.push(
+        Math.sqrt(
+          Math.pow(palmTrajectory[i].x - palmTrajectory[i-1].x, 2) +
+          Math.pow(palmTrajectory[i].y - palmTrajectory[i-1].y, 2) +
+          Math.pow(palmTrajectory[i].z - palmTrajectory[i-1].z, 2)
+        )
+      );
+    }
+    
+    // 计算平均位移
+    const avgDisplacement = displacements.reduce((sum, val) => sum + val, 0) / displacements.length;
+    
+    // 位移越小，越稳定
+    return Math.max(0, 1 - (avgDisplacement * 10));
+  } catch (error) {
+    console.error(`计算${handName}手稳定性时出错:`, error);
+    return 0.5; // 错误时返回中等稳定性
+  }
+}
+
+// 辅助函数：从滤波数据中获取手部关键点
+function getHandLandmarks(filteredData, handType) {
+  if (!filteredData || !filteredData[handType] || filteredData[handType].length === 0) {
+    return null;
+  }
+  
+  // 获取该手关键点
+  return filteredData[handType][0].keypoints;
+}
 </script>
 
 <style lang="scss" scoped>
@@ -1290,7 +2190,7 @@ function getNextStepTitle() {
   top: 0;
   left: 0;
   object-fit: cover;
-  transform: scaleY(-1);
+  //transform: scaleY(-1);
   background: transparent;
   border-radius: 12px;
 }
@@ -1619,5 +2519,70 @@ function getNextStepTitle() {
     justify-content: center !important;
     gap: 4rem !important;
   }
+}
+
+/* 卡尔曼滤波切换开关样式 */
+.filter-toggle {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 5px 10px;
+  border-radius: 20px;
+  z-index: 10;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 20px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+  background-color: #2196F3;
+}
+
+input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-label {
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
 }
 </style> 

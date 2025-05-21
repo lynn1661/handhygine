@@ -613,7 +613,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleY(-1);
+  //transform: scaleY(-1);
   background: transparent;
   border-radius: 16px;
   display: block;
