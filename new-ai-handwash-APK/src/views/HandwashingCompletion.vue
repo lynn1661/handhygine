@@ -66,6 +66,89 @@
               </div>
             </el-scrollbar>
           </div>
+          
+          <!-- 性能指标显示区域 -->
+          <div class="performance-metrics-section">
+            <div class="metrics-header">
+              <h3>性能指标</h3>
+              <el-button 
+                size="small" 
+                @click="exportPerformanceData" 
+                :disabled="!hasPerformanceData"
+                class="export-button"
+              >
+                导出数据
+              </el-button>
+            </div>
+            
+            <!-- 没有性能数据时显示提示 -->
+            <div v-if="!hasPerformanceData" class="no-metrics-message">
+              完成所有七个步骤后可查看性能指标数据
+            </div>
+            
+            <!-- 有性能数据时显示指标 -->
+            <div v-else class="metrics-content">
+              <!-- 主要指标卡片 -->
+              <div class="metrics-cards">
+                <div class="metric-card">
+                  <div class="metric-icon stability-icon">
+                    <i class="el-icon-data-line"></i>
+                  </div>
+                  <div class="metric-details">
+                    <div class="metric-title">抖动减少率</div>
+                    <div class="metric-value">{{ performanceMetrics.jitterReduction.toFixed(2) }}%</div>
+                  </div>
+                </div>
+                
+                <div class="metric-card">
+                  <div class="metric-icon occlusion-icon">
+                    <i class="el-icon-view"></i>
+                  </div>
+                  <div class="metric-details">
+                    <div class="metric-title">遮挡预测帧比例</div>
+                    <div class="metric-value">{{ performanceMetrics.occlusionPredictionAccuracy.toFixed(2) }}%</div>
+                  </div>
+                </div>
+                
+                <div class="metric-card">
+                  <div class="metric-icon smoothness-icon">
+                    <i class="el-icon-connection"></i>
+                  </div>
+                  <div class="metric-details">
+                    <div class="metric-title">遮挡平滑度评估</div>
+                    <div class="metric-value">{{ performanceMetrics.occlusionSmoothness.toFixed(2) }}%</div>
+                  </div>
+                </div>
+                
+                <div class="metric-card">
+                  <div class="metric-icon trajectory-icon">
+                    <i class="el-icon-discover"></i>
+                  </div>
+                  <div class="metric-details">
+                    <div class="metric-title">轨迹匹配成功率</div>
+                    <div class="metric-value">{{ performanceMetrics.trajectoryMatchRate.toFixed(2) }}%</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 步骤关键点检测表格 -->
+              <div class="keypoint-detection-table">
+                <h4>各步骤关键点检测统计</h4>
+                <el-table :data="keyPointTableData" size="small" border stripe>
+                  <el-table-column prop="step" label="步骤" width="80" />
+                  <el-table-column prop="raw" label="原始检测数" />
+                  <el-table-column prop="filtered" label="滤波后检测数" />
+                  <el-table-column prop="improvement" label="提升率">
+                    <template #default="scope">
+                      <span :class="{'positive-improvement': scope.row.improvement > 0}">
+                        {{ scope.row.improvement }}%
+                      </span>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+          </div>
 
           <!-- 评分区域 -->
           <div class="rating-section">
@@ -154,7 +237,7 @@ import { useStore } from "vuex";
 import { getTime } from "../utils/formatData";
 import { Filesystem, Directory } from "@capacitor/filesystem";
 import { ElNotification } from "element-plus";
-import { ElScrollbar, ElRate, ElDialog } from 'element-plus'
+import { ElScrollbar, ElRate, ElDialog, ElTable, ElTableColumn } from 'element-plus'
 const store = useStore();
 const router = useRouter();
 const loading = ref(true);
@@ -274,6 +357,110 @@ const getStepRating = (score) => {
   // 限制在0-1范围内
   return Math.max(0, Math.min(1, rating));
 };
+
+// 性能指标相关
+const performanceMetrics = computed(() => {
+  return store.state.user.performanceMetrics || {
+    jitterReduction: 0,
+    occlusionPredictionAccuracy: 0,
+    occlusionSmoothness: 0,
+    trajectoryMatchRate: 0,
+    frameRate: 0,
+    keyPointDetectionCount: {
+      raw: {},
+      filtered: {}
+    }
+  };
+});
+
+// 判断是否有性能数据
+const hasPerformanceData = computed(() => {
+  return performanceMetrics.value.jitterReduction > 0 || 
+         performanceMetrics.value.occlusionPredictionAccuracy > 0 || 
+         performanceMetrics.value.trajectoryMatchRate > 0;
+});
+
+// 格式化关键点检测数据为表格数据
+const keyPointTableData = computed(() => {
+  const tableData = [];
+  
+  // 提取原始和过滤后的关键点数据
+  const rawData = performanceMetrics.value.keyPointDetectionCount.raw || {};
+  const filteredData = performanceMetrics.value.keyPointDetectionCount.filtered || {};
+  
+  // 构建表格数据
+  for (let step = 1; step <= 7; step++) {
+    const raw = rawData[step] || 0;
+    const filtered = filteredData[step] || 0;
+    
+    // 计算提升率
+    let improvement = 0;
+    if (raw > 0) {
+      improvement = ((filtered / raw - 1) * 100).toFixed(1);
+    }
+    
+    tableData.push({
+      step: `步骤${step}`,
+      raw,
+      filtered,
+      improvement
+    });
+  }
+  
+  return tableData;
+});
+
+// 导出性能数据
+const exportPerformanceData = () => {
+  try {
+    const metrics = performanceMetrics.value;
+    
+    let csvContent = "data:text/csv;charset=utf-8,";
+    
+    // 添加表头
+    csvContent += "指标,值\r\n";
+    
+    // 添加数据
+    csvContent += `抖动减少率(%),${metrics.jitterReduction.toFixed(2)}\r\n`;
+    csvContent += `遮挡预测帧比例(%),${metrics.occlusionPredictionAccuracy.toFixed(2)}\r\n`;
+    csvContent += `遮挡平滑度评估(%),${metrics.occlusionSmoothness ? metrics.occlusionSmoothness.toFixed(2) : '0.00'}\r\n`;
+    csvContent += `轨迹匹配成功率(%),${metrics.trajectoryMatchRate.toFixed(2)}\r\n`;
+    csvContent += `平均帧率,${metrics.frameRate}\r\n`;
+    
+    // 添加各步骤检测到的关键点数量对比
+    csvContent += "\r\n步骤,原始关键点数,滤波后关键点数,提升率(%)\r\n";
+    for (const row of keyPointTableData.value) {
+      csvContent += `${row.step},${row.raw},${row.filtered},${row.improvement}\r\n`;
+    }
+    
+    // 创建下载链接
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `wash-performance-data-${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    
+    // 触发下载
+    link.click();
+    
+    // 清理
+    document.body.removeChild(link);
+    
+    ElNotification({
+      title: "导出成功",
+      message: "性能数据已成功导出为CSV文件",
+      type: "success",
+    });
+  } catch (error) {
+    console.error("导出性能数据失败:", error);
+    ElNotification({
+      title: "导出失败",
+      message: "导出性能数据时发生错误",
+      type: "error",
+    });
+  }
+};
+
 onMounted(async () => {
   // Get the download name for the video based on the account's serial number
   downloadName.value = getTime(
@@ -367,18 +554,18 @@ onMounted(async () => {
   min-height: 90vh;
   position: relative;
   padding: 1.5rem;
-  background-color: rgba(255, 255, 255, 0.15);
-  border-radius: 24px;
-  box-shadow: 0 10px 40px rgba(15, 56, 124, 0.15);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  transition: all 0.3s ease;
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  transition: none;
   
   @media (min-width: 768px) {
     &:hover {
-      box-shadow: 0 15px 50px rgba(15, 56, 124, 0.2);
-      transform: translateY(-5px);
+      box-shadow: none;
+      transform: none;
     }
   }
 }
@@ -1139,6 +1326,172 @@ onMounted(async () => {
   .action-button {
     padding: 0.75rem;
     font-size: 1rem;
+  }
+}
+
+/* 性能指标区域 */
+.performance-metrics-section {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.3) 100%);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 20px rgba(15, 56, 124, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(15, 56, 124, 0.12);
+  }
+}
+
+.metrics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(15, 56, 124, 0.1);
+  padding-bottom: 0.75rem;
+  
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #0f387c;
+    margin: 0;
+  }
+  
+  .export-button {
+    background-color: #0f387c;
+    color: white;
+    border: none;
+    
+    &:hover:not(:disabled) {
+      background-color: #1a4da8;
+      transform: translateY(-2px);
+    }
+    
+    &:disabled {
+      background-color: #ccc;
+      color: #999;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.no-metrics-message {
+  text-align: center;
+  padding: 2rem 0;
+  color: #777;
+  font-style: italic;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+}
+
+.metrics-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.metrics-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+  }
+}
+
+.metric-card {
+  flex: 1;
+  min-width: 150px;
+  background: linear-gradient(135deg, #ffffff 0%, #f5f8ff 100%);
+  border-radius: 15px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 5px 15px rgba(15, 56, 124, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(15, 56, 124, 0.1);
+  }
+  
+  .metric-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.25rem;
+    color: white;
+    
+    &.stability-icon {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    &.occlusion-icon {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    
+    &.smoothness-icon {
+      background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+    }
+    
+    &.trajectory-icon {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+  }
+  
+  .metric-details {
+    display: flex;
+    flex-direction: column;
+    
+    .metric-title {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 0.25rem;
+    }
+    
+    .metric-value {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #0f387c;
+    }
+  }
+}
+
+.keypoint-detection-table {
+  h4 {
+    font-size: 1rem;
+    color: #0f387c;
+    margin: 0 0 0.75rem 0;
+  }
+  
+  :deep(.el-table) {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(15, 56, 124, 0.05);
+    
+    th {
+      background-color: #f0f5ff;
+      color: #0f387c;
+    }
+    
+    td {
+      padding: 0.5rem;
+    }
+  }
+  
+  .positive-improvement {
+    color: #2ecc71;
+    font-weight: 600;
   }
 }
 </style>

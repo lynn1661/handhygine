@@ -6,6 +6,18 @@ export default {
     userID: "",
     role: "",
     blobs: [],
+    performanceMetrics: {
+      jitterReduction: 0,
+      occlusionPredictionAccuracy: 0,
+      occlusionSmoothness: 0,
+      trajectoryMatchRate: 0,
+      frameRate: 0,
+      keyPointDetectionCount: {
+        raw: {},
+        filtered: {}
+      },
+      stepAccuracy: {}
+    }
   },
   mutations: {
     updateAccountID(state, payload) {
@@ -20,6 +32,23 @@ export default {
     clearVideoBlob(state) {
       state.blobs = [];
     },
+    setPerformanceMetrics(state, metrics) {
+      state.performanceMetrics = { ...metrics };
+    },
+    resetPerformanceMetrics(state) {
+      state.performanceMetrics = {
+        jitterReduction: 0,
+        occlusionPredictionAccuracy: 0,
+        occlusionSmoothness: 0,
+        trajectoryMatchRate: 0,
+        frameRate: 0,
+        keyPointDetectionCount: {
+          raw: {},
+          filtered: {}
+        },
+        stepAccuracy: {}
+      };
+    }
   },
   actions: {
     async login({ commit }, payload) {
