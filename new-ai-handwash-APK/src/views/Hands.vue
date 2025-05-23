@@ -253,7 +253,7 @@ const transitionFromStep = ref(1);
 
 // 历史轨迹和卡尔曼滤波相关变量
 const handTrackHistory = ref([]);
-const historyLength = 30; // 保存最近30帧的历史数据
+const historyLength = 20; // 保存最近20帧的历史数据（优化：从30帧减少到20帧）
 const kalmanFilters = {}; // 存储每个关键点的卡尔曼滤波器
 const filteredLandmarks = ref([]); // 存储滤波后的关键点
 const trajectoryAnalysisEnabled = ref(true); // 是否启用轨迹分析
@@ -338,6 +338,7 @@ const handOcclusionState = {
 const occlusionThreshold = 5; // 连续多少帧不可见判定为遮挡
 const maxPredictionFrames = 25; // 最多预测多少帧
 let frameCounter = 0; // 全局帧计数器
+let smoothnessCalcCounter = 0; // 用于控制遮挡平滑度评估计算频率
 
 // 媒体设置
 const setupMedia = async () => {
@@ -1702,59 +1703,64 @@ function updatePerformanceMetrics() {
   summary.occlusionPredictionAccuracy = metrics.framesWithPrediction > 0 ? 
     (metrics.framesWithPrediction / metrics.totalFrames * 100) : 0;
     
-  // 计算遮挡前后手部位置的平滑度
-  let totalSmoothnessScore = 0;
-  let transitionCount = 0;
-  
-  // 对左右手分别计算
-  for (const hand of ['Left', 'Right']) {
-    const transitions = occlusionTransitions[hand];
+  // 计算遮挡前后手部位置的平滑度（优化：降低计算频率，每5帧计算一次）
+  smoothnessCalcCounter++;
+  if (smoothnessCalcCounter >= 5) {
+    smoothnessCalcCounter = 0;
     
-    // 只有当有足够的数据时才计算
-    if (transitions.preOcclusionPositions.length > 0 && 
-        transitions.postOcclusionPositions.length > 0) {
+    let totalSmoothnessScore = 0;
+    let transitionCount = 0;
+    
+    // 对左右手分别计算
+    for (const hand of ['Left', 'Right']) {
+      const transitions = occlusionTransitions[hand];
       
-      // 遍历所有可能的前后对比组合
-      for (const preLandmarks of transitions.preOcclusionPositions) {
-        for (const postLandmarks of transitions.postOcclusionPositions) {
-          // 计算关键点位置差异
-          let totalDistance = 0;
-          const pointsToCompare = Math.min(preLandmarks.length, postLandmarks.length);
-          
-          for (let i = 0; i < pointsToCompare; i++) {
-            const pre = preLandmarks[i];
-            const post = postLandmarks[i];
+      // 只有当有足够的数据时才计算
+      if (transitions.preOcclusionPositions.length > 0 && 
+          transitions.postOcclusionPositions.length > 0) {
+        
+        // 遍历所有可能的前后对比组合
+        for (const preLandmarks of transitions.preOcclusionPositions) {
+          for (const postLandmarks of transitions.postOcclusionPositions) {
+            // 计算关键点位置差异
+            let totalDistance = 0;
+            const pointsToCompare = Math.min(preLandmarks.length, postLandmarks.length);
             
-            // 计算3D欧氏距离
-            const distance = Math.sqrt(
-              Math.pow(post.x - pre.x, 2) + 
-              Math.pow(post.y - pre.y, 2) + 
-              Math.pow(post.z - pre.z, 2)
-            );
+            for (let i = 0; i < pointsToCompare; i++) {
+              const pre = preLandmarks[i];
+              const post = postLandmarks[i];
+              
+              // 计算3D欧氏距离
+              const distance = Math.sqrt(
+                Math.pow(post.x - pre.x, 2) + 
+                Math.pow(post.y - pre.y, 2) + 
+                Math.pow(post.z - pre.z, 2)
+              );
+              
+              totalDistance += distance;
+            }
             
-            totalDistance += distance;
+            // 计算平均距离
+            const avgDistance = totalDistance / pointsToCompare;
+            
+            // 转换为平滑度分数 (0-1，0表示完全不同，1表示完全相同)
+            // 使用一个阈值作为最大可接受距离
+            const maxAcceptableDistance = 0.2; // 可调整的阈值
+            const smoothnessScore = Math.max(0, 1 - (avgDistance / maxAcceptableDistance));
+            
+            totalSmoothnessScore += smoothnessScore;
+            transitionCount++;
           }
-          
-          // 计算平均距离
-          const avgDistance = totalDistance / pointsToCompare;
-          
-          // 转换为平滑度分数 (0-1，0表示完全不同，1表示完全相同)
-          // 使用一个阈值作为最大可接受距离
-          const maxAcceptableDistance = 0.2; // 可调整的阈值
-          const smoothnessScore = Math.max(0, 1 - (avgDistance / maxAcceptableDistance));
-          
-          totalSmoothnessScore += smoothnessScore;
-          transitionCount++;
         }
       }
     }
-  }
-  
-  // 计算最终平滑度评分 (0-100%)
-  if (transitionCount > 0) {
-    summary.occlusionSmoothness = (totalSmoothnessScore / transitionCount) * 100;
-  } else {
-    summary.occlusionSmoothness = 0;
+    
+    // 计算最终平滑度评分 (0-100%)
+    if (transitionCount > 0) {
+      summary.occlusionSmoothness = (totalSmoothnessScore / transitionCount) * 100;
+    } else {
+      summary.occlusionSmoothness = 0;
+    }
   }
   
   // 计算轨迹匹配率
