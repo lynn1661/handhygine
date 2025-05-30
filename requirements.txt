@@ -1,0 +1,42 @@
+# Python 3.9 环境依赖
+# 后端框架
+flask==3.1.1
+flask-cors==4.0.0
+requests==2.32.3
+sqlalchemy==2.0.41
+
+# AI/ML 核心
+torch==1.11.0
+torchvision==0.12.0
+torchaudio==0.11.0
+PyYAML==6.0.2
+scipy==1.13.1
+matplotlib==3.9.4
+
+# 计算机视觉
+opencv-python==4.11.0.86
+opencv-contrib-python==4.11.0.86
+mediapipe==0.10.21
+
+# 前端界面
+streamlit==1.45.1
+pillow==11.2.1
+pandas==2.2.3
+plotly==6.1.2
+
+# 数据处理
+numpy==1.26.4
+protobuf==4.25.8
+
+# 其他依赖
+altair==5.5.0
+attrs==25.3.0
+blinker==1.9.0
+cachetools==5.5.2
+click==8.1.8
+gitpython==3.1.44
+packaging==24.2
+pyarrow==20.0.0
+tenacity==9.1.2
+toml==0.10.2
+tornado==6.5.1 
