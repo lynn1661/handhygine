@@ -1,154 +1,190 @@
-const microServer = require("micro-server");
-const { utils } = microServer.helper;
-const { datap } = require('../../database/db-helper');  // 使用新的数据库帮助器
+const RealmService = require('../database/realm-service');
+
+// 获取Realm数据库实例
+let realmService = null;
+
+// 初始化Realm服务
+const initRealmService = async () => {
+  if (!realmService) {
+    // 使用全局配置或默认配置
+    const config = global.serverConfig || {
+      db: {
+        type: "realm",
+        path: "./data/handwash.realm",
+      },
+      edge: {
+        dataRetentionDays: 30,
+        maxStorageSize: "100MB",
+        syncInterval: 3600000,
+        offlineMode: true
+      }
+    };
+    realmService = new RealmService(config);
+    await realmService.initialize();
+  }
+  return realmService;
+};
 
 const rating = async ({ data }) => {
-  // 验证必须字段
-  if (!data.id || data.rating === undefined || data.rating === null) {
-    const err = new Error("Missing field. Required fields: id and rating.");
-    err.code = 400;
-    throw err;
-  }
-
-  // 根据传入的 id 查找用户记录
-  const res = await datap.sqlite.readid2("user_info", data.id);
-  if (!res) {
-    const err = new Error("Record not found");
-    err.code = 404;
-    throw err;
-  }
-  
-  var update_res = res;
-  update_res.id = update_res._id;
-  delete update_res._id;
-  if (
-    !(
-      update_res?.lastModified === undefined ||
-      update_res?.lastModified === null
-    )
-  ) {
-    delete update_res.lastModified;
-  }
-
-  // 更新用户信息
-  update_res.rating = data.rating;
-  if (data.points) {
-    update_res.points = data.points;
-  }
-  if (data.step_video_file) {
-    update_res.step_video_file = data.step_video_file;
-  }
-
-  // 保存评分记录
-  const ratingRecord = {
-    userId: data.id,
-    rating: data.rating,
-    points: data.points || 0,
-    step_video_file: data.step_video_file || null
-  };
-
-  const rating_result = await datap.sqlite.create("rating", ratingRecord);
-  
-  // 更新用户最佳得分
-  if (data.points && (!res.bestScore || data.points > res.bestScore)) {
-    await datap.sqlite.update("user_info", { accountSerialNumber: data.id }, { bestScore: data.points });
-  }
-
-  return {
-    message: "Rating saved successfully",
-    ratingId: rating_result._id,
-    points: data.points || 0
-  };
-};
-
-const get = async ({ data }) => {
-  // 验证必须字段
-  if (!data.id) {
-    const err = new Error("Missing field. Required field: id.");
-    err.code = 400;
-    throw err;
-  }
-
-  // 获取用户的所有评分记录
-  const ratings = await datap.sqlite.read("rating", { userId: data.id });
-  
-  return {
-    message: "Ratings retrieved successfully",
-    ratings: ratings,
-    total: ratings.length
-  };
-};
-
-const getTop = async ({ data }) => {
-  const limit = data?.limit || 10;
-  
   try {
-    // 获取排行榜数据
-    const topUsers = await datap.sqlite.getRankings("user_info", limit);
-    
-    return {
-      message: "Top ratings retrieved successfully",
-      rankings: topUsers.map((user, index) => ({
-        rank: index + 1,
-        accountSerialNumber: user.accountSerialNumber,
-        name: user.name || '未知用户',
-        bestScore: user.bestScore || 0
-      }))
-    };
-  } catch (error) {
-    const err = new Error("Failed to retrieve rankings");
-    err.code = 500;
-    throw err;
-  }
-};
+    // 验证必须字段
+    if (!data.id || data.rating === undefined || data.rating === null) {
+      const err = new Error("Missing field. Required fields: id and rating.");
+      err.code = 400;
+      throw err;
+    }
 
-// 获取用户统计信息
-const getStats = async ({ data }) => {
-  if (!data.id) {
-    const err = new Error("Missing field. Required field: id.");
-    err.code = 400;
-    throw err;
-  }
+    // 初始化Realm服务
+    const db = await initRealmService();
 
-  try {
-    // 获取用户基本信息
-    const user = await datap.sqlite.readid2("user_info", data.id);
+    // 查找用户记录
+    const user = await db.findUser(data.id);
     if (!user) {
-      const err = new Error("User not found");
+      const err = new Error("Record not found");
       err.code = 404;
       throw err;
     }
 
-    // 获取评分记录统计
-    const ratings = await datap.sqlite.read("rating", { userId: data.id });
-    const records = await datap.sqlite.read("record", { userId: data.id });
+    // 计算评分点数
+    let points = 0;
+    let ratingText = '';
+    
+    switch (data.rating.toLowerCase()) {
+      case 'perfect':
+        points = 100;
+        ratingText = 'PERFECT';
+        break;
+      case 'good':
+        points = 80;
+        ratingText = 'GOOD';
+        break;
+      case 'need improvement':
+      case 'improvement':
+        points = 60;
+        ratingText = 'Need Improvement';
+        break;
+      default:
+        points = parseFloat(data.rating) || 0;
+        ratingText = data.rating.toString();
+    }
 
-    // 计算平均分
-    const avgScore = ratings.length > 0 
-      ? ratings.reduce((sum, r) => sum + (r.points || 0), 0) / ratings.length 
-      : 0;
+    // 创建评分记录
+    const ratingRecord = await db.createRating({
+      userId: data.id,
+      rating: ratingText,
+      points: points,
+      step: data.step || null,
+      stepVideoFile: data.stepVideoFile || null,
+      sessionId: data.sessionId || null,
+      detectionAccuracy: data.detectionAccuracy || null,
+      completionTime: data.completionTime || null
+    });
 
-    return {
-      message: "User statistics retrieved successfully",
-      stats: {
-        totalSessions: records.length,
-        totalRatings: ratings.length,
-        bestScore: user.bestScore || 0,
-        averageScore: Math.round(avgScore * 100) / 100,
-        name: user.name,
-        accountSerialNumber: user.accountSerialNumber
+    // 更新用户统计信息
+    const currentSessions = user.totalSessions + 1;
+    const currentBestScore = Math.max(user.bestScore || 0, points);
+    
+    await db.updateUser(data.id, {
+      totalSessions: currentSessions,
+      bestScore: currentBestScore
+    });
+
+    // 记录操作日志
+    await db.createLog('info', `用户 ${data.id} 获得评分: ${ratingText} (${points}分)`, {
+      userId: data.id,
+      rating: ratingText,
+      points: points,
+      sessionId: data.sessionId
+    });
+
+    // 返回结果
+    const result = {
+      success: true,
+      data: {
+        id: ratingRecord._id.toString(),
+        userId: ratingRecord.userId,
+        rating: ratingRecord.rating,
+        points: ratingRecord.points,
+        step: ratingRecord.step,
+        sessionId: ratingRecord.sessionId,
+        createdAt: ratingRecord.createdAt,
+        userStats: {
+          totalSessions: currentSessions,
+          bestScore: currentBestScore
+        }
       }
     };
+
+    return result;
+
   } catch (error) {
-    const err = new Error("Failed to retrieve user statistics");
-    err.code = 500;
-    throw err;
+    console.error('评分服务错误:', error);
+    
+    // 记录错误日志
+    if (realmService) {
+      try {
+        await realmService.createLog('error', `评分服务错误: ${error.message}`, {
+          userId: data.id,
+          error: error.stack
+        });
+      } catch (logError) {
+        console.error('记录错误日志失败:', logError);
+      }
+    }
+
+    throw error;
+  }
+};
+
+// 获取用户评分历史
+const getUserRatings = async ({ data }) => {
+  try {
+    if (!data.userId) {
+      const err = new Error("Missing userId");
+      err.code = 400;
+      throw err;
+    }
+
+    const db = await initRealmService();
+    const ratings = await db.getRatingsByUser(data.userId, data.limit || 10);
+    
+    return {
+      success: true,
+      data: ratings.map(rating => ({
+        id: rating._id.toString(),
+        rating: rating.rating,
+        points: rating.points,
+        step: rating.step,
+        sessionId: rating.sessionId,
+        createdAt: rating.createdAt
+      }))
+    };
+
+  } catch (error) {
+    console.error('获取用户评分历史错误:', error);
+    throw error;
+  }
+};
+
+// 获取统计信息
+const getStats = async () => {
+  try {
+    const db = await initRealmService();
+    const stats = db.getStats();
+    
+    return {
+      success: true,
+      data: stats
+    };
+
+  } catch (error) {
+    console.error('获取统计信息错误:', error);
+    throw error;
   }
 };
 
 module.exports = {
   rating,
-  get,
-  getTop,
+  getUserRatings,
   getStats
 };

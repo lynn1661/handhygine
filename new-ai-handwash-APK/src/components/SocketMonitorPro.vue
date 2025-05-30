@@ -197,13 +197,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n'; // 导入i18n
-import { 
-  getSocketPerformanceReport, 
-  resetSocketPerformanceStats,
-  initializeSocket, 
-  createConnect,
-  createConnectWithRetryWrapper
-} from '../services/socketAdapter';
+import { createConnect, createConnectWithRetryWrapper } from "../services/apiAdapter";
 
 const props = defineProps({
   show: {

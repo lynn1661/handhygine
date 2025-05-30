@@ -157,7 +157,7 @@ import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import * as controls from "@mediapipe/control_utils";
 import * as mpHands from "@mediapipe/hands";
 import * as drawingUtils from "@mediapipe/drawing_utils";
-import { createConnect, disconnect, sendLog } from "../services/socket";
+import { createConnect, disconnect, sendLog } from "../services/apiAdapter";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { useI18n } from "vue-i18n";

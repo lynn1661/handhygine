@@ -48,19 +48,30 @@ export default defineConfig({
     host: "0.0.0.0",
     // https: true,
     proxy: {
-      // API请求代理 - 指向远程EC2服务器
-      '/api/backend': {
-        target: 'https://trainingtest.polyuhandhygiene.com',
+      // Flask API代理 - 代理到本地Flask服务器
+      '/api': {
+        target: 'http://localhost:8000',
         changeOrigin: true,
-        secure: true
+        secure: false
       },
-      // Socket.io连接代理 - 指向远程EC2服务器
-      '/socket.io': {
-        target: 'https://trainingtest.polyuhandhygiene.com',
+      // 用户服务代理
+      '/services': {
+        target: 'http://localhost:8000',
         changeOrigin: true,
-        secure: true, // 对于HTTPS必需
-        ws: true, // 支持WebSocket
-      }
+        secure: false
+      },
+      // 健康检查代理
+      '/health': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false
+      },
+      // 备用：如果需要连接到远程服务器，可以切换注释
+      // '/api': {
+      //   target: 'https://trainingtest.polyuhandhygiene.com',
+      //   changeOrigin: true,
+      //   secure: true
+      // }
     },
   },
   optimizeDeps: {
