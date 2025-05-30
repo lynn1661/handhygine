@@ -39,7 +39,7 @@ const controlsElement = document.getElementsByClassName("control-panel")[0];
 const canvasCtx = canvasElement.getContext("2d");
 const config = {
   locateFile: (file) => {
-    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@${mpHands.VERSION}/${file}`;
+    return `/mediapipe/${file}`;
   },
 };
 // We'll add this to our control panel later, but we'll save it here so we can

@@ -121,12 +121,18 @@ export function initializeSocket() {
     console.log('初始化Socket连接，配置:', SOCKET_CONFIG);
     console.log('当前环境:', process.env.NODE_ENV);
     
-    // 所有环境都使用同一个远程服务器
-    // 因为实际服务运行在EC2上，本地只是开发UI
-    const socketUrl = "https://trainingtest.polyuhandhygiene.com";
+    // 根据环境选择不同的Socket URL
+    let socketUrl;
     
-    // 使用相对路径方式，通过当前域名+路径
-    // const socketUrl = window.location.origin;
+    // 开发环境使用本地服务器
+    if (process.env.NODE_ENV === 'development' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      socketUrl = "http://localhost:3000";
+      console.log('使用本地开发服务器');
+    } else {
+      // 生产环境使用远程服务器
+      socketUrl = "https://trainingtest.polyuhandhygiene.com";
+      console.log('使用远程生产服务器');
+    }
     
     console.log('Socket连接URL:', socketUrl);
     

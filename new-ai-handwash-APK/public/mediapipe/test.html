@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单测试</title>
+</head>
+<body>
+    <h1>MediaPipe 文件测试</h1>
+    <div id="results"></div>
+    
+    <script>
+        const resultsDiv = document.getElementById('results');
+        
+        // 简单的测试函数
+        async function testFile(filename) {
+            try {
+                const response = await fetch(filename);
+                const text = response.ok ? '✅ 成功' : `❌ 失败 (${response.status})`;
+                resultsDiv.innerHTML += `<p>${filename}: ${text}</p>`;
+                console.log(`${filename}: ${response.status}`);
+            } catch (error) {
+                resultsDiv.innerHTML += `<p>${filename}: ❌ 错误 - ${error.message}</p>`;
+                console.error(`${filename}:`, error);
+            }
+        }
+        
+        // 测试基本文件
+        setTimeout(async () => {
+            resultsDiv.innerHTML = '<p>开始测试...</p>';
+            await testFile('hands.js');
+            await testFile('hands.binarypb');
+        }, 1000);
+    </script>
+</body>
+</html> 

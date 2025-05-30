@@ -1,164 +1,193 @@
 const microServer = require("micro-server");
-const { datap, utils } = microServer.helper;
-const { ObjectId } = require("mongodb");
+const { utils } = microServer.helper;
+const { datap } = require('../../database/db-helper');  // 使用新的数据库帮助器
 
-/* 
-{
-    id
-    rating
-    points
-}
-*/
-const append_rating = async ({ data }) => {
-  console.log("/data/record/append_rating: ", data);
-  if (Object.keys(data).indexOf("id") < 0) {
-    const err = new Error("missing field. required field: id");
+const record = async ({ data }) => {
+  // 验证必须字段
+  if (!data.userId) {
+    const err = new Error("Missing field. Required field: userId.");
     err.code = 400;
     throw err;
   }
-  const res = await datap.mongo.readid2("user_info", data.id);
-  // just assume it is exist
-  var update_res = res;
-  update_res.id = update_res._id;
-  delete update_res._id;
-  if (
-    !(
-      update_res?.lastModified === undefined ||
-      update_res?.lastModified === null
-    )
-  ) {
-    delete update_res.lastModified;
-  }
-  utils.logger.debug(update_res);
-  if(update_res?.step_video_file===undefined || update_res?.step_video_file===null){
-    update_res.step_video_file=[];
-  }
-  if (
-    update_res?.step_correctness === undefined ||
-    update_res?.step_correctness === null
-  ) {
-    update_res.step_correctness = [];
-  }
-  if (
-    update_res?.step_points === undefined ||
-    update_res?.step_points === null
-  ) {
-    update_res.step_points = [];
-  }
-  if(update_res?.total===undefined || update_res?.total===null){
-    update_res.total= 0;
-  }
-  if (
-    update_res?.record_time === undefined ||
-    update_res?.record_time === null
-  ) {
-    update_res.record_time = [];
-  }
-  if(!(data?.step_video_file===undefined || data?.step_video_file===null || data.step_video_file==='')){
-    update_res.step_video_file.push(data.step_video_file);
-  }
-  update_res.record_time.push({
-    timestamp: Date.now(),
-    datestring: new Date().toLocaleString("zh-HK", {
-      timeZone: "Asia/Hong_Kong",
-    }),
-  });
-  const obj1 = { Step: data.rating };
-  utils.logger.debug(obj1);
-  update_res.step_correctness.push(obj1);
-  const obj2 = { Step: data.points };
-  utils.logger.debug(obj2);
-  update_res.step_points.push(obj2);
-  update_res.total = update_res.step_points.reduce((prev, cur) => {
-    return prev + Number(cur.Step);
-  }, 0);
-  await datap.mongo.update("user_info", update_res);
-  return {
-    message: "successfully updated",
+
+  // 创建洗手记录
+  const recordData = {
+    userId: data.userId,
+    sessionData: typeof data.sessionData === 'object' ? JSON.stringify(data.sessionData) : data.sessionData,
+    score: data.score || 0,
+    duration: data.duration || 0,
+    steps: typeof data.steps === 'object' ? JSON.stringify(data.steps) : data.steps
   };
+
+  try {
+    const result = await datap.sqlite.create("record", recordData);
+    
+    // 更新用户的总会话数
+    const user = await datap.sqlite.readid2("user_info", data.userId);
+    if (user) {
+      const newTotalSessions = (user.totalSessions || 0) + 1;
+      await datap.sqlite.update("user_info", 
+        { accountSerialNumber: data.userId }, 
+        { totalSessions: newTotalSessions }
+      );
+    }
+
+    return {
+      message: "Record saved successfully",
+      recordId: result._id,
+      score: data.score || 0
+    };
+  } catch (error) {
+    const err = new Error("Failed to save record");
+    err.code = 500;
+    throw err;
+  }
 };
 
-const get_rank = async ({ data }) => {
-  // Ensure the request contains the 'id' field; throw an error if missing.
-  if (!data.id) {
-    const err = new Error("Missing field: id is required");
+const get = async ({ data }) => {
+  // 验证必须字段
+  if (!data.userId) {
+    const err = new Error("Missing field. Required field: userId.");
     err.code = 400;
     throw err;
   }
 
-  // Retrieve the current user's total score from the database using their ID.
-  const res = await datap.mongo.readid2("user_info", data.id);
+  try {
+    // 获取用户的所有记录
+    const records = await datap.sqlite.read("record", { userId: data.userId });
+    
+    // 解析JSON字段
+    const formattedRecords = records.map(record => ({
+      ...record,
+      sessionData: record.sessionData ? JSON.parse(record.sessionData) : null,
+      steps: record.steps ? JSON.parse(record.steps) : null
+    }));
 
-  if (!res) {
-    const err = new Error("User data not found");
+    return {
+      message: "Records retrieved successfully",
+      records: formattedRecords,
+      total: formattedRecords.length
+    };
+  } catch (error) {
+    const err = new Error("Failed to retrieve records");
     err.code = 500;
     throw err;
   }
-  const userScore = res.total || 0;
-  const step_correctness = res.step_correctness || [];
-  const step_points = res.step_points || [];
-  const step_video_files = res.step_video_file || [];
-  /*
-  // Default the total and step_correctness fields if not present
-  const userScore = res.total && res.total.length > 0 ? res.total[res.total.length - 1] : 0;
-  const step_correctness = res.step_correctness && res.step_correctness.length >= 7 ? res.step_correctness.slice(-7) : [];
-  const step_video_files = res.step_video_file && res.step_video_file.length >= 7 ? res.step_video_file.slice(-7) : [];
-  */
+};
 
-  // Fetch all users from the database.
-  const allUsers = await datap.mongo.read("user_info", {});
-   // 把所有用户的 `total` 数组展开成一个大数组
-  const allScores = allUsers.flatMap(user => {
-    if (Array.isArray(user.total)) {
-      return user.total.map(score => 
-        score !== undefined && score !== null 
-          ? parseFloat((score * (100 / 7)).toFixed(2)) 
-          : 0
-      );
+const getRecent = async ({ data }) => {
+  const limit = data?.limit || 10;
+  const userId = data?.userId;
+
+  try {
+    let records;
+    if (userId) {
+      records = await datap.sqlite.read("record", { userId: userId });
     } else {
-      return user.total !== undefined && user.total !== null 
-        ? [parseFloat((user.total).toFixed(2))] 
-        : [0];
+      records = await datap.sqlite.read("record");
     }
-  }).filter(score => score !== undefined && score !== null);
-  if (!allScores || allScores.length === 0) {
-    const err = new Error("No user data found");
+
+    // 按创建时间排序并限制数量
+    const sortedRecords = records
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, limit);
+
+    // 解析JSON字段
+    const formattedRecords = sortedRecords.map(record => ({
+      ...record,
+      sessionData: record.sessionData ? JSON.parse(record.sessionData) : null,
+      steps: record.steps ? JSON.parse(record.steps) : null
+    }));
+
+    return {
+      message: "Recent records retrieved successfully",
+      records: formattedRecords,
+      total: formattedRecords.length
+    };
+  } catch (error) {
+    const err = new Error("Failed to retrieve recent records");
     err.code = 500;
     throw err;
   }
+};
 
-  // Calculate how many users the current user has outperformed.
-  const totalTests = allScores.length;
-  const beatenScores = allScores.filter(score => score <= userScore).length;
-  // Percentage of users the current user has beaten.
-  let rankPercentage = (beatenScores / totalTests) * 100; 
-  if (userScore >= 100) {rankPercentage = 100;}
-  if (userScore <= 0) {rankPercentage = 0;} 
-
-  // Maintain the original logic for determining user rank based on score.
-  let rankLevel = "Novice";
-  if (userScore > 80) {
-    rankLevel = "Master";
-  } else if (userScore > 60) {
-    rankLevel = "Pro";
+const deleteRecord = async ({ data }) => {
+  if (!data.recordId) {
+    const err = new Error("Missing field. Required field: recordId.");
+    err.code = 400;
+    throw err;
   }
-  console.log("当前用户的分数 userScore:", userScore);
-  console.log("所有用户的分数 allScores:", allScores);
 
-  // Return both the user rank level and percentage of users beaten.
-  return {
-    userScore,
-    totalTests,
-    beatenScores,
-    rankLevel,
-    rankPercentage,
-    step_points,
-    step_correctness,
-    step_video_files
-  };
+  try {
+    const result = await datap.sqlite.delete("record", { id: data.recordId });
+    
+    if (result.deletedCount === 0) {
+      const err = new Error("Record not found");
+      err.code = 404;
+      throw err;
+    }
+
+    return {
+      message: "Record deleted successfully",
+      deletedCount: result.deletedCount
+    };
+  } catch (error) {
+    const err = new Error("Failed to delete record");
+    err.code = 500;
+    throw err;
+  }
+};
+
+// 获取用户记录统计
+const getStats = async ({ data }) => {
+  if (!data.userId) {
+    const err = new Error("Missing field. Required field: userId.");
+    err.code = 400;
+    throw err;
+  }
+
+  try {
+    const records = await datap.sqlite.read("record", { userId: data.userId });
+    
+    if (records.length === 0) {
+      return {
+        message: "No records found for user",
+        stats: {
+          totalRecords: 0,
+          averageScore: 0,
+          bestScore: 0,
+          totalDuration: 0,
+          averageDuration: 0
+        }
+      };
+    }
+
+    const scores = records.map(r => r.score || 0);
+    const durations = records.map(r => r.duration || 0);
+
+    const stats = {
+      totalRecords: records.length,
+      averageScore: Math.round((scores.reduce((sum, score) => sum + score, 0) / scores.length) * 100) / 100,
+      bestScore: Math.max(...scores),
+      totalDuration: durations.reduce((sum, duration) => sum + duration, 0),
+      averageDuration: Math.round((durations.reduce((sum, duration) => sum + duration, 0) / durations.length) * 100) / 100
+    };
+
+    return {
+      message: "Record statistics retrieved successfully",
+      stats: stats
+    };
+  } catch (error) {
+    const err = new Error("Failed to retrieve record statistics");
+    err.code = 500;
+    throw err;
+  }
 };
 
 module.exports = {
-  append_rating,
-  get_rank,
+  record,
+  get,
+  getRecent,
+  deleteRecord,
+  getStats
 };

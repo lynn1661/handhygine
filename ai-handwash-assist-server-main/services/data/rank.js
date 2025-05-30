@@ -1,203 +1,223 @@
 const microServer = require("micro-server");
-const { datap, utils } = microServer.helper;
+const { utils } = microServer.helper;
+const { datap } = require('../../database/db-helper');  // 使用新的数据库帮助器
 
-// 辅助函数：将 YYYY-MM-DD 格式转换为日期对象
-const parseDate = (dateStr) => {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  return new Date(year, month - 1, day);
-};
+const getRank = async ({ data }) => {
+  // 验证必须字段
+  if (!data.id) {
+    const err = new Error("Missing field: id is required");
+    err.code = 400;
+    throw err;
+  }
 
-// 辅助函数：格式化日期为查询模式
-const formatDateForQuery = (date) => {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  // 返回日期部分，不包含时间
-  return `${day}/${month}/${year}`;
-};
-
-const getRankList = async ({ data }) => {
-  console.log("接收到的完整请求数据:", JSON.stringify(data, null, 2));
-  console.log("Received role:", data.role);
-  const role = data.role || "Doctor";
-  
-  let filter = {
-    accountID: data.accountID,
-    role: role,
-    total: { $exists: true }
-  };
-
-  // 改进日期过滤逻辑，处理 start_time 字段
-  if (data.dateRange && data.dateRange.start && data.dateRange.end) {
-    console.log(`查询日期范围: ${data.dateRange.start} 到 ${data.dateRange.end}`);
-    
-    // 解析日期范围
-    const startDate = parseDate(data.dateRange.start);
-    const endDate = parseDate(data.dateRange.end);
-    endDate.setHours(23, 59, 59); // 设置结束日期为当天的最后一刻
-    
-    // 生成日期范围内的所有日期
-    const datePatterns = [];
-    const currentDate = new Date(startDate);
-    
-    while (currentDate <= endDate) {
-      datePatterns.push(formatDateForQuery(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
+  try {
+    // 获取当前用户信息
+    const user = await datap.sqlite.readid2("user_info", data.id);
+    if (!user) {
+      const err = new Error("User not found");
+      err.code = 404;
+      throw err;
     }
-    
-    // 构建正则表达式模式，匹配 "DD/M/YYYY 上午" 或 "DD/M/YYYY 下午" 格式
-    const regexPattern = datePatterns.map(date => `^${date}`).join('|');
-    console.log("正则表达式模式:", regexPattern);
-    
-    filter.start_time = {
-      $regex: regexPattern
-    };
-    
-    console.log("日期匹配模式:", datePatterns);
-  } else {
-    // 如果没有指定日期范围，默认筛选当天的记录
-    const today = new Date();
-    const todayPattern = formatDateForQuery(today);
-    
-    filter.start_time = {
-      $regex: `^${todayPattern}`
-    };
-  }
-  
-  console.log("最终的查询条件:", JSON.stringify(filter, null, 2));
-  
-  // 构造排序条件：total 从高到低
-  const sort = { total: -1 };
 
-  // 先查询所有记录，用于调试
-  const allRecords = await datap.mongo.read("user_info", {
-    accountID: data.accountID,
-    role: role,
-    total: { $exists: true }
-  }, 0, 0, sort);
-  console.log(`总共找到 ${allRecords.length} 条记录`);
-  if (allRecords.length > 0) {
-    console.log("所有记录的前5条 start_time:", allRecords.slice(0, 5).map(r => r.start_time));
-  }
+    const userScore = user.bestScore || 0;
 
-  // 查询满足条件的记录
-  const records = await datap.mongo.read("user_info", filter, 0, 0, sort);
-  console.log(`筛选后找到 ${records.length} 条记录`);
-  if (records.length > 0) {
-    console.log("筛选后记录的前5条 start_time:", records.slice(0, 5).map(r => r.start_time));
-  }
+    // 获取所有用户的最佳分数
+    const allUsers = await datap.sqlite.read("user_info");
+    const allScores = allUsers.map(u => u.bestScore || 0).filter(score => score >= 0);
 
-  return {
-    message: "Successfully retrieved rank list",
-    records,
-  };
-};
-
-const getAllRank = async ({ data }) => {
-  console.log("Received accountID:", data.accountID);
-  console.log("接收到的完整请求数据:", JSON.stringify(data, null, 2));
-
-  let filter = {
-    accountID: data.accountID,
-    total: { $exists: true }
-  };
-
-  // 改进日期过滤逻辑，处理 start_time 字段
-  if (data.dateRange && data.dateRange.start && data.dateRange.end) {
-    console.log(`查询日期范围: ${data.dateRange.start} 到 ${data.dateRange.end}`);
-    
-    // 解析日期范围
-    const startDate = parseDate(data.dateRange.start);
-    const endDate = parseDate(data.dateRange.end);
-    endDate.setHours(23, 59, 59); // 设置结束日期为当天的最后一刻
-    
-    // 生成日期范围内的所有日期
-    const datePatterns = [];
-    const currentDate = new Date(startDate);
-    
-    while (currentDate <= endDate) {
-      datePatterns.push(formatDateForQuery(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-    
-    // 构建正则表达式模式，匹配日期部分
-    const regexPattern = datePatterns.map(date => `^${date}`).join('|');
-    console.log("正则表达式模式:", regexPattern);
-    
-    filter.start_time = {
-      $regex: regexPattern
-    };
-    
-    console.log("日期匹配模式:", datePatterns);
-  } else {
-    // 如果没有指定日期范围，默认筛选当天的记录
-    const today = new Date();
-    const todayPattern = formatDateForQuery(today);
-    
-    filter.start_time = {
-      $regex: `^${todayPattern}`
-    };
-  }
-  
-  console.log("最终的查询条件:", JSON.stringify(filter, null, 2));
-  
-  // 构造排序条件：按照 total 字段降序排列
-  const sort = { total: -1 };
-
-  // 先查询所有记录，用于调试
-  const allRecords = await datap.mongo.read("user_info", {
-    accountID: data.accountID,
-    total: { $exists: true }
-  }, 0, 0, sort);
-  console.log(`总共找到 ${allRecords.length} 条记录`);
-  if (allRecords.length > 0) {
-    console.log("所有记录的前5条 start_time:", allRecords.slice(0, 5).map(r => r.start_time));
-  }
-
-  // 查询满足条件的记录
-  const records = await datap.mongo.read("user_info", filter, 0, 0, sort);
-  console.log(`筛选后找到 ${records.length} 条记录`);
-  if (records.length > 0) {
-    console.log("筛选后记录的前5条 start_time:", records.slice(0, 5).map(r => r.start_time));
-  }
-  
-  // 将结果按 role 分组并添加统计信息
-  const grouped = records.reduce((acc, record) => {
-    const role = record.role || "Unknown";
-    if (!acc[role]) {
-      acc[role] = {
-        records: [],
-        scores: []
+    if (allScores.length === 0) {
+      return {
+        userScore: userScore,
+        rankLevel: "Novice",
+        rankPercentage: 0,
+        totalUsers: 0,
+        rank: 1
       };
     }
-    acc[role].records.push(record);
-    acc[role].scores.push(record.total);
-    return acc;
-  }, {});
 
-  // 计算每个角色的统计信息
-  const stats = {};
-  for (const [role, data] of Object.entries(grouped)) {
-    const scores = data.scores;
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    const max = Math.max(...scores);
-    const min = Math.min(...scores);
-    stats[role] = {
-      records: data.records,
-      scores: scores,
-      stats: {
-        count: scores.length,
-        average: Math.round(avg * 100) / 100,
-        max,
-        min
-      }
+    // 计算用户排名
+    const sortedScores = allScores.sort((a, b) => b - a);
+    const userRank = sortedScores.findIndex(score => score <= userScore) + 1;
+    const beatenCount = allScores.filter(score => score < userScore).length;
+    const rankPercentage = Math.round((beatenCount / allScores.length) * 100);
+
+    // 根据分数确定等级
+    let rankLevel = "Novice";
+    if (userScore >= 90) {
+      rankLevel = "Master";
+    } else if (userScore >= 70) {
+      rankLevel = "Expert";
+    } else if (userScore >= 50) {
+      rankLevel = "Pro";
+    } else if (userScore >= 30) {
+      rankLevel = "Intermediate";
+    }
+
+    // 获取用户的训练记录
+    const userRecords = await datap.sqlite.read("record", { userId: data.id });
+    const userRatings = await datap.sqlite.read("rating", { userId: data.id });
+
+    return {
+      userScore: userScore,
+      rankLevel: rankLevel,
+      rankPercentage: rankPercentage,
+      rank: userRank,
+      totalUsers: allScores.length,
+      totalSessions: userRecords.length,
+      totalRatings: userRatings.length,
+      averageScore: userRecords.length > 0 
+        ? Math.round((userRecords.reduce((sum, r) => sum + (r.score || 0), 0) / userRecords.length) * 100) / 100
+        : 0
     };
+  } catch (error) {
+    console.error('获取排名失败:', error);
+    const err = new Error("Failed to get user rank");
+    err.code = 500;
+    throw err;
   }
-
-  return {
-    message: "Successfully retrieved all rank lists",
-    records: stats
-  };
 };
 
-module.exports = { getRankList, getAllRank };
+const getLeaderboard = async ({ data }) => {
+  const limit = data?.limit || 10;
+  const page = data?.page || 1;
+  const offset = (page - 1) * limit;
+
+  try {
+    // 获取所有用户并按最佳分数排序
+    const allUsers = await datap.sqlite.read("user_info");
+    const sortedUsers = allUsers
+      .filter(user => (user.bestScore || 0) > 0)
+      .sort((a, b) => (b.bestScore || 0) - (a.bestScore || 0))
+      .slice(offset, offset + limit);
+
+    const leaderboard = sortedUsers.map((user, index) => ({
+      rank: offset + index + 1,
+      accountSerialNumber: user.accountSerialNumber,
+      name: user.name || '未知用户',
+      bestScore: user.bestScore || 0,
+      totalSessions: user.totalSessions || 0
+    }));
+
+    return {
+      message: "Leaderboard retrieved successfully",
+      leaderboard: leaderboard,
+      page: page,
+      limit: limit,
+      total: allUsers.filter(user => (user.bestScore || 0) > 0).length
+    };
+  } catch (error) {
+    console.error('获取排行榜失败:', error);
+    const err = new Error("Failed to get leaderboard");
+    err.code = 500;
+    throw err;
+  }
+};
+
+const getGlobalStats = async ({ data }) => {
+  try {
+    // 获取全局统计数据
+    const allUsers = await datap.sqlite.read("user_info");
+    const allRecords = await datap.sqlite.read("record");
+    const allRatings = await datap.sqlite.read("rating");
+
+    const totalUsers = allUsers.length;
+    const totalSessions = allRecords.length;
+    const totalRatings = allRatings.length;
+
+    // 计算平均分
+    const scoresWithRecords = allUsers.filter(user => (user.bestScore || 0) > 0);
+    const averageScore = scoresWithRecords.length > 0
+      ? Math.round((scoresWithRecords.reduce((sum, user) => sum + (user.bestScore || 0), 0) / scoresWithRecords.length) * 100) / 100
+      : 0;
+
+    // 最高分
+    const highestScore = allUsers.reduce((max, user) => Math.max(max, user.bestScore || 0), 0);
+
+    // 按等级分布统计
+    const levelDistribution = {
+      Master: allUsers.filter(user => (user.bestScore || 0) >= 90).length,
+      Expert: allUsers.filter(user => (user.bestScore || 0) >= 70 && (user.bestScore || 0) < 90).length,
+      Pro: allUsers.filter(user => (user.bestScore || 0) >= 50 && (user.bestScore || 0) < 70).length,
+      Intermediate: allUsers.filter(user => (user.bestScore || 0) >= 30 && (user.bestScore || 0) < 50).length,
+      Novice: allUsers.filter(user => (user.bestScore || 0) < 30).length
+    };
+
+    return {
+      message: "Global statistics retrieved successfully",
+      stats: {
+        totalUsers: totalUsers,
+        totalSessions: totalSessions,
+        totalRatings: totalRatings,
+        averageScore: averageScore,
+        highestScore: highestScore,
+        levelDistribution: levelDistribution,
+        activeUsers: scoresWithRecords.length
+      }
+    };
+  } catch (error) {
+    console.error('获取全局统计失败:', error);
+    const err = new Error("Failed to get global statistics");
+    err.code = 500;
+    throw err;
+  }
+};
+
+const updateScore = async ({ data }) => {
+  // 验证必须字段
+  if (!data.userId || data.score === undefined) {
+    const err = new Error("Missing fields. Required fields: userId, score");
+    err.code = 400;
+    throw err;
+  }
+
+  try {
+    // 获取用户当前信息
+    const user = await datap.sqlite.readid2("user_info", data.userId);
+    if (!user) {
+      const err = new Error("User not found");
+      err.code = 404;
+      throw err;
+    }
+
+    // 只有当新分数更高时才更新最佳分数
+    const currentBestScore = user.bestScore || 0;
+    const newScore = data.score;
+
+    if (newScore > currentBestScore) {
+      await datap.sqlite.update("user_info", 
+        { accountSerialNumber: data.userId }, 
+        { bestScore: newScore }
+      );
+
+      return {
+        message: "Best score updated successfully",
+        oldBestScore: currentBestScore,
+        newBestScore: newScore,
+        improved: true
+      };
+    } else {
+      return {
+        message: "Score recorded, but best score not updated",
+        currentBestScore: currentBestScore,
+        submittedScore: newScore,
+        improved: false
+      };
+    }
+  } catch (error) {
+    console.error('更新分数失败:', error);
+    const err = new Error("Failed to update score");
+    err.code = 500;
+    throw err;
+  }
+};
+
+// 为了向后兼容，保持原有的函数名
+const getRankList = getLeaderboard;
+
+module.exports = {
+  getRank,
+  getRankList,
+  getLeaderboard,
+  getGlobalStats,
+  updateScore
+};

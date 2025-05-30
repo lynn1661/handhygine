@@ -778,7 +778,8 @@ function initializeMediaPipe() {
   
   const config = {
     locateFile: (file) => {
-      return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@${mpHands.VERSION}/${file}`;
+      // 使用本地MediaPipe资源，而不是CDN
+      return `/mediapipe/${file}`;
     },
   };
   

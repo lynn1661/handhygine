@@ -193,7 +193,8 @@ function initializeMediaPipe() {
   // 配置 MediaPipe 手部模型
   const config = {
     locateFile: (file) => {
-      return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@${mpHands.VERSION}/${file}`;
+      // 使用本地MediaPipe资源，而不是CDN
+      return `/mediapipe/${file}`;
     },
   };
   console.log("📹 5: 配置文件路径已设置");

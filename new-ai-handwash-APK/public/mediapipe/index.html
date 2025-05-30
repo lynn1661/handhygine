@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediaPipe 文件验证</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .file-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; }
+        .file-item { padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .file-name { font-weight: bold; color: #0066cc; }
+        .file-size { color: #666; font-size: 0.9em; }
+        .success { background-color: #e7f5e7; border-color: #4caf50; }
+        .error { background-color: #ffeaea; border-color: #f44336; }
+        .checking { background-color: #fff3cd; border-color: #ffc107; }
+        .debug-info { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; font-family: monospace; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>MediaPipe 文件验证页面</h1>
+    <p>此页面用于验证 MediaPipe 文件是否正确加载</p>
+    
+    <div class="file-list">
+        <div class="file-item checking" id="hands-js">
+            <div class="file-name">hands.js</div>
+            <div class="file-size">核心库文件 (~45KB)</div>
+            <div class="status">检查中...</div>
+        </div>
+        
+        <div class="file-item checking" id="hands-wasm">
+            <div class="file-name">hands.wasm</div>
+            <div class="file-size">WebAssembly 模块 (~5.6MB)</div>
+            <div class="status">检查中...</div>
+        </div>
+        
+        <div class="file-item checking" id="hands-binarypb">
+            <div class="file-name">hands.binarypb</div>
+            <div class="file-size">配置文件 (~550B)</div>
+            <div class="status">检查中...</div>
+        </div>
+        
+        <div class="file-item checking" id="hands-solution-packed-assets-binarypb">
+            <div class="file-name">hands_solution_packed_assets.binarypb</div>
+            <div class="file-size">打包资源配置 (~550B)</div>
+            <div class="status">检查中...</div>
+        </div>
+    </div>
+    
+    <div class="debug-info" id="debug-info">
+        <strong>调试信息:</strong><br>
+        当前URL: <span id="current-url"></span><br>
+        检查状态: <span id="check-status">准备开始检查...</span><br>
+        <div id="error-details"></div>
+    </div>
+    
+    <script>
+        // 更新调试信息
+        document.getElementById('current-url').textContent = window.location.href;
+        
+        // 检查文件是否存在
+        async function checkFile(filename, elementId) {
+            const element = document.getElementById(elementId);
+            const statusElement = element.querySelector('.status');
+            const debugInfo = document.getElementById('error-details');
+            
+            try {
+                document.getElementById('check-status').textContent = `正在检查 ${filename}...`;
+                
+                // 使用相对路径
+                const response = await fetch(filename, {
+                    method: 'HEAD',  // 只获取头部信息，不下载整个文件
+                    cache: 'no-cache'
+                });
+                
+                if (response.ok) {
+                    element.className = 'file-item success';
+                    statusElement.textContent = `✓ 文件可用 (${response.headers.get('content-length')} 字节)`;
+                    console.log(`✓ ${filename} 检查成功`);
+                } else {
+                    element.className = 'file-item error';
+                    statusElement.textContent = `✗ HTTP ${response.status}: ${response.statusText}`;
+                    debugInfo.innerHTML += `<br>❌ ${filename}: HTTP ${response.status} - ${response.statusText}`;
+                    console.error(`❌ ${filename} 检查失败: ${response.status}`);
+                }
+            } catch (error) {
+                element.className = 'file-item error';
+                statusElement.textContent = `✗ 网络错误: ${error.message}`;
+                debugInfo.innerHTML += `<br>❌ ${filename}: ${error.message}`;
+                console.error(`❌ ${filename} 检查出错:`, error);
+            }
+        }
+        
+        // 等待页面完全加载后再开始检查
+        window.addEventListener('load', async () => {
+            document.getElementById('check-status').textContent = '开始检查文件...';
+            
+            // 逐个检查文件，添加小延迟避免并发问题
+            const files = [
+                { name: 'hands.js', id: 'hands-js' },
+                { name: 'hands.wasm', id: 'hands-wasm' },
+                { name: 'hands.binarypb', id: 'hands-binarypb' },
+                { name: 'hands_solution_packed_assets.binarypb', id: 'hands-solution-packed-assets-binarypb' }
+            ];
+            
+            for (const file of files) {
+                await checkFile(file.name, file.id);
+                await new Promise(resolve => setTimeout(resolve, 100)); // 100ms延迟
+            }
+            
+            document.getElementById('check-status').textContent = '文件检查完成';
+        });
+        
+        // 手动重新检查按钮
+        function recheckFiles() {
+            document.getElementById('error-details').innerHTML = '';
+            window.location.reload();
+        }
+        
+        // 添加重新检查按钮
+        const button = document.createElement('button');
+        button.textContent = '重新检查文件';
+        button.onclick = recheckFiles;
+        button.style.cssText = 'margin: 10px 0; padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;';
+        document.querySelector('.debug-info').appendChild(button);
+    </script>
+</body>
+</html> 
