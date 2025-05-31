@@ -6,7 +6,7 @@ echo "=================================="
 # 检查虚拟环境
 if [ ! -d "venv39" ]; then
     echo "❌ 错误: 找不到 venv39 虚拟环境"
-    echo "请先运行: $HOME/.pyenv/versions/3.9.18/bin/python -m venv venv39"
+    echo "请先运行: python3.9 -m venv venv39"
     exit 1
 fi
 
@@ -37,8 +37,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# 检查Flask后端是否已经运行
-if curl -s http://localhost:5000/api/health > /dev/null 2>&1; then
+# 检查Flask后端是否已经运行 (macOS兼容版本)
+if python -c "import requests; requests.get('http://localhost:5000/api/health', timeout=2)" 2>/dev/null; then
     echo "✅ Flask后端已在运行"
 else
     echo "🔄 启动Flask后端..."
@@ -49,7 +49,7 @@ else
     # 等待Flask启动
     echo "⏳ 等待Flask后端启动..."
     for i in {1..10}; do
-        if curl -s http://localhost:5000/api/health > /dev/null 2>&1; then
+        if python -c "import requests; requests.get('http://localhost:5000/api/health', timeout=2)" 2>/dev/null; then
             echo "✅ Flask后端启动成功"
             break
         fi

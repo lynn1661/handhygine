@@ -1,0 +1,18 @@
+🚀 启动洗手检测服务器 (Flask版本)
+🗄️ 初始化SQLite数据库...
+✅ 数据库初始化完成
+✅ 服务器启动成功！
+📊 数据库：SQLite (本地存储)
+🌐 服务器地址：http://localhost:8000
+📱 模式：完全离线
+===============================
+ * Serving Flask app 'app'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://175.159.198.86:8000
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 568-269-237

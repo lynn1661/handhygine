@@ -27,6 +27,9 @@ with st.sidebar:
     st.write(f"MediaPipe版本: {mp.__version__}")
     st.write(f"Streamlit版本: {st.__version__}")
 
+# 配置设置
+API_BASE_URL = "http://localhost:8000"  # 后端API基础URL
+
 # 初始化MediaPipe
 @st.cache_resource
 def init_mediapipe():
@@ -45,7 +48,7 @@ hands, mp_drawing, mp_hands = init_mediapipe()
 # 测试Flask后端连接
 def test_backend():
     try:
-        response = requests.get("http://localhost:5000/api/health", timeout=5)
+        response = requests.get(f"{API_BASE_URL}/health", timeout=5)
         return response.status_code == 200
     except:
         return False
@@ -110,9 +113,9 @@ with col1:
                     
                     # 发送到后端
                     response = requests.post(
-                        "http://localhost:5000/api/analyze",
+                        f"{API_BASE_URL}/api/analyze",
                         json=data,
-                        timeout=10
+                        timeout=15
                     )
                     
                     if response.status_code == 200:
