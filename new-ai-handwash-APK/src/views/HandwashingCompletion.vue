@@ -280,7 +280,7 @@ const mapScore = (score) => {
   // 这样映射：0->0, 20->45, 40->63, 60->77, 80->89, 100->100
   // 低分段提升更显著，让用户更有成就感
   const normalizedScore = score / 100;
-  const mappedScore = 100 * Math.pow(normalizedScore, 0.5);
+  const mappedScore = 100 * Math.pow(normalizedScore, 0.4);
   
   return Math.round(mappedScore);
 };
