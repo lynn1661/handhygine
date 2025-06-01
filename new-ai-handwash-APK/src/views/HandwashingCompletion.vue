@@ -295,7 +295,7 @@ const mapRankPercentage = (percentage) => {
   // 这样映射：0->0, 10->21, 30->49, 50->69, 70->84, 90->95, 100->100
   // 低排名有显著提升，但仍保持差距和单调性
   const normalizedPercentage = percentage / 100;
-  const mappedPercentage = 100 * Math.pow(normalizedPercentage, 0.65);
+  const mappedPercentage = 100 * Math.pow(normalizedPercentage, 0.5);
   
   return Math.round(mappedPercentage);
 };
