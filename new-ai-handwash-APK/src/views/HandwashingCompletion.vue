@@ -270,25 +270,34 @@ const getStepRating = (score) => {
   return Math.max(0, Math.min(1, rating));
 };
 
-// 分数映射函数 - 非线性调整分数
+// 分数映射函数 - 使用幂函数实现低分提升但保持差距
 const mapScore = (score) => {
-  if (score >= 0 && score < 20) {
-    return 30 + ((score - 0) / 20) * (40 - 30);
-  } else if (score >= 20 && score < 40) {
-    return 40 + ((score - 20) / 20) * (60 - 40);
-  } else if (score >= 40 && score < 60) {
-    return 60 + ((score - 40) / 20) * (70 - 60);
-  } else if (score >= 60 && score < 70) {
-    return 70 + ((score - 60) / 10) * (80 - 70);
-  } else if (score >= 70 && score < 80) {
-    return 80 + ((score - 70) / 10) * (90 - 80);
-  } else if (score >= 80 && score < 90) {
-    return 90 + ((score - 80) / 10) * (95 - 90);
-  } else if (score >= 90 && score <= 100) {
-    return 95 + ((score - 90) / 10) * (100 - 95);
-  } else {
-    return 0; // 处理超出范围的值
-  }
+  // 确保输入在0-100范围内
+  if (score < 0) return 0;
+  if (score > 100) return 100;
+  
+  // 使用幂函数 y = 100 * (x/100)^0.5 (平方根函数)
+  // 这样映射：0->0, 20->45, 40->63, 60->77, 80->89, 100->100
+  // 低分段提升更显著，让用户更有成就感
+  const normalizedScore = score / 100;
+  const mappedScore = 100 * Math.pow(normalizedScore, 0.5);
+  
+  return Math.round(mappedScore);
+};
+
+// 排名百分比映射函数 - 让低排名用户也能看到更好的排名显示
+const mapRankPercentage = (percentage) => {
+  // 确保输入在0-100范围内
+  if (percentage < 0) return 0;
+  if (percentage > 100) return 100;
+  
+  // 使用类似的幂函数 y = 100 * (x/100)^0.65
+  // 这样映射：0->0, 10->21, 30->49, 50->69, 70->84, 90->95, 100->100
+  // 低排名有显著提升，但仍保持差距和单调性
+  const normalizedPercentage = percentage / 100;
+  const mappedPercentage = 100 * Math.pow(normalizedPercentage, 0.65);
+  
+  return Math.round(mappedPercentage);
 };
 
 onMounted(async () => {
@@ -318,8 +327,8 @@ onMounted(async () => {
 
   // If a rank percentage is available, display a message showing the percentage
   if (rankPercentage !== undefined) {
-    rankMessage.value = Math.floor(rankPercentage);
-  }
+  rankMessage.value = Math.floor(mapRankPercentage(rankPercentage));
+}
   console.log(rankMessage.value); // Debug rankMessage value
 
   // Set the step correctness data from the backend response
