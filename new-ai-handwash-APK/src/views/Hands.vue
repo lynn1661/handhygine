@@ -340,6 +340,9 @@ const maxPredictionFrames = 25; // 最多预测多少帧
 let frameCounter = 0; // 全局帧计数器
 let smoothnessCalcCounter = 0; // 用于控制遮挡平滑度评估计算频率
 
+// 添加组件卸载状态标记
+const isComponentUnmounted = ref(false);
+
 // 媒体设置
 const setupMedia = async () => {
   try {
@@ -711,6 +714,9 @@ onMounted(() => {
   // 初始化转场步骤值
   transitionFromStep.value = currentStep.value;
   
+  // 重置组件卸载标记
+  isComponentUnmounted.value = false;
+  
   downloadName.value = getTime(
     sessionStorage.getItem("accountSerialNumber") || localStorage.getItem("accountSerialNumber")
   );
@@ -731,9 +737,21 @@ onMounted(() => {
   // 使用setTimeout延迟初始化MediaPipe，确保DOM已完全渲染
   setTimeout(async () => {
     try {
+      // 再次检查组件是否仍然挂载
+      if (isComponentUnmounted.value) {
+        console.log("组件在初始化过程中被卸载，取消初始化");
+        return;
+      }
+      
       // 等待本地 MediaPipe 脚本加载完成
       await waitForMediaPipeLoaded();
       console.log("📹 本地 MediaPipe 脚本已加载完成");
+      
+      // 再次检查组件是否仍然挂载
+      if (isComponentUnmounted.value) {
+        console.log("组件在脚本加载过程中被卸载，取消初始化");
+        return;
+      }
       
       await initializeMediaPipe();
     } catch (error) {
@@ -793,8 +811,10 @@ function waitForMediaPipeLoaded() {
       const interval = setInterval(() => {
         // 检查所有必要的全局变量是否已加载
         if (typeof window.Hands !== 'undefined' && 
-            typeof window.ControlUtils !== 'undefined' && 
-            typeof window.drawingUtils !== 'undefined') {
+            typeof window.ControlPanel !== 'undefined' && 
+            typeof window.drawLandmarks !== 'undefined' &&
+            typeof window.drawConnectors !== 'undefined' &&
+            typeof window.HAND_CONNECTIONS !== 'undefined') {
           clearInterval(interval);
           clearTimeout(timeout);
           console.log("所有 MediaPipe 组件已加载完成");
@@ -814,9 +834,21 @@ async function initializeMediaPipe() {
   // 初始化卡尔曼滤波器
   initializeKalmanFilters();
   
-  // 使用全局变量
-  const controls = window.ControlUtils;
-  const drawingUtils = window.drawingUtils;
+  // 使用正确的全局变量名称
+  const controls = {
+    ControlPanel: window.ControlPanel,
+    FPS: window.FPS,
+    Toggle: window.Toggle,
+    SourcePicker: window.SourcePicker,
+    Slider: window.Slider,
+    StaticText: window.StaticText
+  };
+  
+  const drawingUtils = {
+    drawConnectors: window.drawConnectors,
+    drawLandmarks: window.drawLandmarks,
+    lerp: window.lerp
+  };
   
   // 媒体设置
   const videoElement = document.getElementsByClassName("input_video")[0];
@@ -870,7 +902,7 @@ async function initializeMediaPipe() {
   
   // 使用全局的 Hands 类和常量
   const hands = new window.Hands(config);
-  const mpHands = window; // HAND_CONNECTIONS 等常量在全局作用域
+  const HAND_CONNECTIONS = window.HAND_CONNECTIONS;
   
   // 保存hands实例到全局变量，以便在组件卸载时释放
   window.handsInstance = hands;
@@ -886,9 +918,21 @@ async function initializeMediaPipe() {
   async function onResults(results) {
     loading.value = false;
     
+    // 安全检查 - 如果组件已卸载，立即返回
+    if (isComponentUnmounted.value) {
+      console.warn("组件已卸载，跳过处理结果");
+      return;
+    }
+    
     // 安全检查 - 如果组件已卸载或Canvas上下文不可用，则不处理结果
     if (!canvasCtx || !canvasElement) {
       console.warn("Canvas元素或上下文不可用，跳过处理结果");
+      return;
+    }
+    
+    // 检查 MediaPipe 实例是否仍然有效
+    if (!window.handsInstance || window.handsInstance !== hands) {
+      console.warn("MediaPipe 实例已失效，跳过处理结果");
       return;
     }
     
@@ -979,7 +1023,7 @@ async function initializeMediaPipe() {
             drawingUtils.drawConnectors(
               canvasCtx,
               landmarks,
-              mpHands.HAND_CONNECTIONS,
+              HAND_CONNECTIONS,
               { color: connectionColor }
             );
             
@@ -1098,7 +1142,7 @@ async function initializeMediaPipe() {
               drawingUtils.drawConnectors(
                 canvasCtx,
                 landmarks,
-                mpHands.HAND_CONNECTIONS,
+                HAND_CONNECTIONS,
                 { color: isCurrentRightHand ? "rgba(0, 255, 0, 0.5)" : "rgba(255, 0, 0, 0.5)" }
               );
               
@@ -1194,9 +1238,9 @@ async function initializeMediaPipe() {
           new controls.Toggle({ title: "Selfie Mode", field: "selfieMode" }),
           new controls.SourcePicker({
             onFrame: async (input, size) => {
-              // 安全检查 - 确保组件还在挂载状态
-              if (!canvasElement || !hands) {
-                console.warn("Canvas元素或Hands实例不可用，跳过帧处理");
+              // 安全检查 - 确保组件还在挂载状态且 MediaPipe 实例有效
+              if (isComponentUnmounted.value || !canvasElement || !hands || !window.handsInstance || window.handsInstance !== hands) {
+                console.warn("组件已卸载或MediaPipe实例无效，跳过帧处理");
                 return;
               }
               
@@ -1212,9 +1256,18 @@ async function initializeMediaPipe() {
                 }
                 canvasElement.width = width;
                 canvasElement.height = height;
-                await hands.send({ image: input });
+                
+                // 再次检查实例有效性，因为上面的操作可能是异步的
+                if (!isComponentUnmounted.value && hands && window.handsInstance === hands) {
+                  await hands.send({ image: input });
+                }
               } catch (error) {
-                console.error("处理视频帧时出错:", error);
+                // 如果是 BindingError 且组件已卸载，忽略错误
+                if (error.name === 'BindingError' && isComponentUnmounted.value) {
+                  console.warn("MediaPipe实例已被清理，忽略此错误");
+                } else {
+                  console.error("处理视频帧时出错:", error);
+                }
               }
             },
           }),
@@ -1333,8 +1386,13 @@ const backHome = () => {
 onUnmounted(() => {
   console.log(`正在清理Hands(步骤${currentStep.value})组件资源...`);
   
-  // 标记资源正在清理中，避免新的处理
-  const isCleaningUp = true;
+  // 首先设置卸载标记，阻止所有异步操作
+  isComponentUnmounted.value = true;
+  
+  // 立即将全局引用设为null，防止新的操作继续使用
+  const handsInstance = window.handsInstance;
+  window.handsInstance = null;
+  window.videoElement = null;
   
   // 0. 先清除计时器和其他非MediaPipe资源
   if (timer) {
@@ -1413,20 +1471,14 @@ onUnmounted(() => {
   
   // 6. 最后清理MediaPipe hands实例
   try {
-    const handsInstance = window.handsInstance;
-    
-    // 立即将全局引用设为null，防止其他地方继续使用
-    window.handsInstance = null;
-    window.videoElement = null;
-    
     if (handsInstance) {
       console.log("正在关闭MediaPipe实例...");
       
       // 尝试安全地关闭实例
       try {
-        handsInstance.close()
-          .then(() => console.log("MediaPipe Hands实例已成功关闭"))
-          .catch(err => console.warn("关闭MediaPipe实例时出现可忽略的错误:", err));
+        // 直接调用close而不等待Promise，避免组件已卸载时的Promise问题
+        handsInstance.close();
+        console.log("MediaPipe Hands实例关闭指令已发送");
       } catch (error) {
         console.warn("关闭MediaPipe实例时出现异常:", error);
       }
