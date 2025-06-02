@@ -56,9 +56,15 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, reactive } from "vue";
-import * as controls from "@mediapipe/control_utils";
-import * as mpHands from "@mediapipe/hands";
-import * as drawingUtils from "@mediapipe/drawing_utils";
+// 修改 MediaPipe 导入，使用本地文件
+// import * as controls from "@mediapipe/control_utils";
+// import * as mpHands from "@mediapipe/hands";
+// import * as drawingUtils from "@mediapipe/drawing_utils";
+
+// 使用本地 MediaPipe 文件
+import * as controls from "/mediapipe/control_utils.js";
+import * as drawingUtils from "/mediapipe/drawing_utils.js";
+
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -129,14 +135,66 @@ function addControlPanel() {
   return controlPanel;
 }
 
+// 等待本地 MediaPipe 脚本加载完成
+function waitForMediaPipeLoaded() {
+  return new Promise((resolve, reject) => {
+    // 如果已经加载完成，立即resolve
+    if (typeof window.Hands !== 'undefined') {
+      resolve();
+      return;
+    }
+    
+    // 检查是否已经有脚本标签
+    if (!document.querySelector('script[src="/mediapipe/hands/hands.js"]')) {
+      console.log("动态加载 MediaPipe 脚本...");
+      const script = document.createElement('script');
+      script.src = '/mediapipe/hands/hands.js';
+      script.async = true;
+      
+      script.onload = () => {
+        console.log("MediaPipe 脚本加载成功");
+        resolve();
+      };
+      
+      script.onerror = () => {
+        reject(new Error('MediaPipe 脚本加载失败'));
+      };
+      
+      document.head.appendChild(script);
+      
+      // 设置超时，避免无限等待
+      setTimeout(() => {
+        reject(new Error('MediaPipe 脚本加载超时'));
+      }, 10000);
+    } else {
+      // 脚本已存在，等待加载完成
+      const timeout = setTimeout(() => {
+        reject(new Error('MediaPipe 脚本加载超时'));
+      }, 10000);
+      
+      const interval = setInterval(() => {
+        if (typeof window.Hands !== 'undefined') {
+          clearInterval(interval);
+          clearTimeout(timeout);
+          resolve();
+        }
+      }, 100);
+    }
+  });
+}
+
 onMounted(() => {
   console.log("📹 初始化视频流...");
   isInitializing.value = true;
   
   // 使用setTimeout延迟初始化MediaPipe，确保DOM已完全渲染
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
-      initializeMediaPipe();
+      // 等待本地 MediaPipe 脚本加载完成
+      await waitForMediaPipeLoaded();
+      console.log("📹 本地 MediaPipe 脚本已加载完成");
+      
+      await initializeMediaPipe();
     } catch (error) {
       console.error("MediaPipe初始化失败:", error);
       hasError.value = true;
@@ -147,7 +205,7 @@ onMounted(() => {
 });
 
 // 将MediaPipe初始化提取为独立函数
-function initializeMediaPipe() {
+async function initializeMediaPipe() {
   // 获取视频元素并检查是否存在
   const videoElement = document.querySelector(".input_video");
   if (!videoElement) {
@@ -190,13 +248,14 @@ function initializeMediaPipe() {
     }
   }
 
-  // 配置 MediaPipe 手部模型
+  // 配置 MediaPipe 手部模型 - 修改为使用本地文件
   const config = {
     locateFile: (file) => {
-      return `https://cdn.jsdelivr.net/npm/@mediapipe/hands@${mpHands.VERSION}/${file}`;
+      // 使用本地 MediaPipe 文件路径
+      return `/mediapipe/hands/${file}`;
     },
   };
-  console.log("📹 5: 配置文件路径已设置");
+  console.log("📹 5: 配置文件路径已设置为本地路径");
 
   // 控制帧率
   const fpsControl = new controls.FPS();
@@ -213,9 +272,18 @@ function initializeMediaPipe() {
   }
 
   try {
-    // 初始化并配置 MediaPipe Hands
+    // 等待本地 Hands 脚本加载完成
     console.log("📹 9: 正在创建 MediaPipe Hands 实例...");
-    const hands = new mpHands.Hands(config);
+    
+    // 检查全局 Hands 类是否可用
+    if (typeof window.Hands === 'undefined') {
+      throw new Error("本地 MediaPipe Hands 类未加载，请检查脚本引用");
+    }
+    
+    // 使用全局的 Hands 类和常量
+    const hands = new window.Hands(config);
+    const mpHands = window; // HAND_CONNECTIONS 等常量在全局作用域
+    
     console.log("📹 9: MediaPipe Hands 实例已创建");
 
     // 保存hands实例到全局变量，以便在组件卸载时释放
