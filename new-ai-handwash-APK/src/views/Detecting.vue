@@ -56,14 +56,8 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch, reactive } from "vue";
-// 修改 MediaPipe 导入，使用本地文件
-// import * as controls from "@mediapipe/control_utils";
-// import * as mpHands from "@mediapipe/hands";
-// import * as drawingUtils from "@mediapipe/drawing_utils";
-
-// 使用本地 MediaPipe 文件
-import * as controls from "/mediapipe/control_utils.js";
-import * as drawingUtils from "/mediapipe/drawing_utils.js";
+// 移除 ES 模块导入，因为本地 MediaPipe 文件不是 ES 模块格式
+// 改为动态加载脚本后使用全局变量
 
 import { useRouter } from "vue-router";
 
@@ -135,50 +129,66 @@ function addControlPanel() {
   return controlPanel;
 }
 
-// 等待本地 MediaPipe 脚本加载完成
-function waitForMediaPipeLoaded() {
-  return new Promise((resolve, reject) => {
-    // 如果已经加载完成，立即resolve
-    if (typeof window.Hands !== 'undefined') {
-      resolve();
-      return;
-    }
-    
-    // 检查是否已经有脚本标签
-    if (!document.querySelector('script[src="/mediapipe/hands/hands.js"]')) {
-      console.log("动态加载 MediaPipe 脚本...");
+// 动态加载多个 MediaPipe 脚本
+function loadMediaPipeScripts() {
+  const scripts = [
+    '/mediapipe/control_utils.js',
+    '/mediapipe/drawing_utils.js',
+    '/mediapipe/hands/hands.js'
+  ];
+  
+  return Promise.all(scripts.map(src => {
+    return new Promise((resolve, reject) => {
+      // 检查脚本是否已经加载
+      if (document.querySelector(`script[src="${src}"]`)) {
+        resolve();
+        return;
+      }
+      
+      console.log(`动态加载脚本: ${src}`);
       const script = document.createElement('script');
-      script.src = '/mediapipe/hands/hands.js';
+      script.src = src;
       script.async = true;
       
       script.onload = () => {
-        console.log("MediaPipe 脚本加载成功");
+        console.log(`脚本加载成功: ${src}`);
         resolve();
       };
       
       script.onerror = () => {
-        reject(new Error('MediaPipe 脚本加载失败'));
+        reject(new Error(`脚本加载失败: ${src}`));
       };
       
       document.head.appendChild(script);
+    });
+  }));
+}
+
+// 等待本地 MediaPipe 脚本加载完成
+function waitForMediaPipeLoaded() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // 首先加载所有必要的脚本
+      await loadMediaPipeScripts();
       
-      // 设置超时，避免无限等待
-      setTimeout(() => {
-        reject(new Error('MediaPipe 脚本加载超时'));
-      }, 10000);
-    } else {
-      // 脚本已存在，等待加载完成
+      // 然后等待全局变量可用
       const timeout = setTimeout(() => {
-        reject(new Error('MediaPipe 脚本加载超时'));
+        reject(new Error('MediaPipe 全局变量加载超时'));
       }, 10000);
       
       const interval = setInterval(() => {
-        if (typeof window.Hands !== 'undefined') {
+        // 检查所有必要的全局变量是否已加载
+        if (typeof window.Hands !== 'undefined' && 
+            typeof window.ControlUtils !== 'undefined' && 
+            typeof window.drawingUtils !== 'undefined') {
           clearInterval(interval);
           clearTimeout(timeout);
+          console.log("所有 MediaPipe 组件已加载完成");
           resolve();
         }
       }, 100);
+    } catch (error) {
+      reject(error);
     }
   });
 }
@@ -256,6 +266,10 @@ async function initializeMediaPipe() {
     },
   };
   console.log("📹 5: 配置文件路径已设置为本地路径");
+
+  // 使用全局变量
+  const controls = window.ControlUtils;
+  const drawingUtils = window.drawingUtils;
 
   // 控制帧率
   const fpsControl = new controls.FPS();
