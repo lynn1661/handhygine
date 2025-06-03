@@ -90,7 +90,7 @@ class Demo(IO):
         if not os.path.exists(output_result_dir):
             os.makedirs(output_result_dir)
         writer = skvideo.io.FFmpegWriter(output_result_path,
-                                        outputdict={'-b': '300000000'})
+                                        outputdict={'-b': '300100000'})
         for img in images:
             writer.writeFrame(img)
         writer.close()

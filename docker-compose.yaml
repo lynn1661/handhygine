@@ -4,7 +4,7 @@ services:
     build: 
       context: new-ai-handwash-APK
     ports:
-      - "8080:80"
+      - "8081:81"
     restart: always
     networks:
       - app-network
@@ -16,50 +16,32 @@ services:
     build: 
       context: ai-handwash-assist-server-main
     ports:
-      - "3000:3000"
+      - "3001:3001"
     restart: always
     networks:
       - app-network
+    volumes:
+      # 挂载SQLite数据库文件到宿主机，确保数据持久化
+      - ./data:/app/data
+      # 或者使用命名volume（推荐）
+      # - sqlite_data:/app/data
+    environment:
+      - NODE_ENV=production
+      - DB_PATH=/app/data/data.db
 
   ai:
     build: 
       context: new-ai-handwash-server
     ports:
-      - "9500:9500"
+      - "9501:9501"
     restart: always
     networks:
       - app-network
 
-  # --- 服务组2  ---
-  frontend1:
-    build:
-      context: new-ai-handwash-APK
-    ports:
-      - "8081:80"
-    restart: always
-    networks:
-      - app-network
-    depends_on:
-      - backend1
-      - ai1
-
-  backend1:
-    build:
-      context: ai-handwash-assist-server-main
-    ports:
-      - "3001:3000"
-    restart: always
-    networks:
-      - app-network
-
-  ai1:
-    build:
-      context: new-ai-handwash-server
-    ports:
-      - "9501:9500"
-    restart: always
-    networks:
-      - app-network
+# 如果使用命名volume，取消下面的注释
+# volumes:
+#   sqlite_data:
+#     driver: local
 
 networks:
   app-network:

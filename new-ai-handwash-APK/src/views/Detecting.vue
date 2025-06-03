@@ -16,7 +16,6 @@
       <div class="main-section">
         <div class="instruction-section">
           <h1 class="detecting-title">{{ $t("HandHygiene.positionYourHands") }}</h1>
-          <p class="detecting-subtitle">{{ $t("HandHygiene.detectingWordDescription") }}</p>
         </div>
 
         <!-- 相机预览区域 -->
@@ -48,6 +47,11 @@
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- 将副标题移动到视频下方 -->
+        <div class="subtitle-section">
+          <p class="detecting-subtitle">{{ $t("HandHygiene.detectingWordDescription") }}</p>
         </div>
       </div>
     </div>
@@ -456,14 +460,14 @@ async function initializeMediaPipe() {
                   
                   // 再次检查实例有效性
                   if (!isComponentUnmounted.value && hands && window.handsInstance === hands) {
-                    await hands.send({ image: input });
+                  await hands.send({ image: input });
                   }
                 } catch (error) {
                   // 如果是 BindingError 且组件已卸载，忽略错误
                   if (error.name === 'BindingError' && isComponentUnmounted.value) {
                     console.warn("MediaPipe实例已被清理，忽略此错误");
                   } else {
-                    console.error("处理视频帧时出错:", error);
+                  console.error("处理视频帧时出错:", error);
                   }
                 }
               },
@@ -700,12 +704,21 @@ onUnmounted(() => {
   font-weight: 700;
   font-size: 1.75rem;
   color: #0f387c;
-  margin: 0 0 0.75rem 0;
+  margin: 0;
   
   @media (max-width: 480px) {
     font-size: 1.5rem;
-    margin-bottom: 0.5rem;
   }
+}
+
+/* 副标题区域 - 移动到视频下方 */
+.subtitle-section {
+  text-align: center;
+  margin-top: 1rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
 }
 
 .detecting-subtitle {

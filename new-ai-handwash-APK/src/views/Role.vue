@@ -18,7 +18,7 @@
         <div class="user-input-section">
           <el-input
             v-model="userID"
-            :placeholder="$t('HandHygiene.userID')"
+            :placeholder="$t('HandHygiene.userID') "
             class="user-input"
           />
         </div>
@@ -152,7 +152,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
-  margin-bottom: 2rem;
+  margin-bottom: -1rem;
   width: 100%;
   margin-top: 1.5rem;
 }
@@ -209,10 +209,10 @@ onUnmounted(() => {
   width: 100%;
   box-sizing: border-box;
   flex: 1;
-  gap: 5rem;
-  justify-content: center;
+  gap: 3rem;
+  justify-content: flex-start;
   align-items: center;
-  //margin-top: 15rem;
+  margin-top: 0.5rem;
   padding-bottom: 4rem;
 }
 
@@ -260,15 +260,15 @@ onUnmounted(() => {
 }
 
 .role-buttons {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
   width: 100%;
 }
 
 .role-button {
   width: 100%;
-  height: 95px;
+  height: 85px;
   background-size: cover;
   background-position: center;
   border-radius: 20px;
@@ -276,7 +276,7 @@ onUnmounted(() => {
   color: white;
   font-family: "Helvetica85", sans-serif;
   font-weight: 700;
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   transition: all 0.3s;
   position: relative;
@@ -324,6 +324,16 @@ onUnmounted(() => {
 
 /* 响应式布局调整 */
 @media (max-width: 768px) {
+  .role-buttons {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .role-button {
+    height: 75px;
+    font-size: 1.2rem;
+  }
+  
   .user-input {
     :deep(.el-input__wrapper) {
       height: 60px;
@@ -335,13 +345,20 @@ onUnmounted(() => {
     }
   }
   
-  .role-button {
-    height: 85px;
-    font-size: 1.4rem;
-  }
-  
   .main-section {
     gap: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .role-buttons {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .role-button {
+    height: 70px;
+    font-size: 1.1rem;
   }
 }
 

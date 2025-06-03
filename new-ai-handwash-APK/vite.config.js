@@ -10,7 +10,6 @@ export default defineConfig({
       "vue-i18n": "vue-i18n/dist/vue-i18n.cjs.js",
     },
   },
-  publicPath: "./",
   base: "./",
   plugins: [
     vue(),
@@ -48,13 +47,14 @@ export default defineConfig({
     host: "0.0.0.0",
     // https: true,
     proxy: {
-      // API请求代理 - 指向远程EC2服务器
+      // API请求代理 - 指向本地SQLite服务器
       '/api/backend': {
-        target: 'https://trainingtest.polyuhandhygiene.com',
+        target: 'http://localhost:3001',  // 指向本地SQLite服务器
         changeOrigin: true,
-        secure: true
+        secure: false,  // 本地服务器使用HTTP
+        rewrite: (path) => path.replace(/^\/api\/backend/, '')  // 移除 /api/backend 前缀
       },
-      // Socket.io连接代理 - 指向远程EC2服务器
+      // Socket.io连接代理 - 如果需要可以保留远程或也改为本地
       '/socket.io': {
         target: 'https://trainingtest.polyuhandhygiene.com',
         changeOrigin: true,
@@ -64,11 +64,16 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    disabled: false,
+    include: ['dayjs'],
   },
   build: {
-    commonjsOptions: {
-      include: [],
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js'
+      }
     },
+    assetsDir: 'assets'
   },
 });

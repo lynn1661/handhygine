@@ -1,7 +1,7 @@
 // mongodb://srv-captain--ai-handwash-db/mydatabase?authSource=admin
 module.exports = () => {
     return {
-        port: 3000,
+        port: 3001,
         sio: {
             enabled: true,
         },

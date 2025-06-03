@@ -1,16 +1,31 @@
 {
   "name": "handwash-assis-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Hand Hygiene Assist Server with SQLite database",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test-sqlite.js",
+    "test:api": "node test-api.js",
+    "test:frontend": "node test-frontend-compatibility.js",
+    "test:register": "node test-register.js",
+    "create:account": "node create-test-account.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "micro-server": "https://github.com/xerosumio/micro-server"
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "axios": "^1.6.2"
   },
-  "keywords": [],
+  "keywords": [
+    "hand-hygiene",
+    "sqlite",
+    "express",
+    "api"
+  ],
   "author": "",
   "license": "ISC"
 }

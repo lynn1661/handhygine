@@ -121,12 +121,8 @@ export function initializeSocket() {
     console.log('初始化Socket连接，配置:', SOCKET_CONFIG);
     console.log('当前环境:', process.env.NODE_ENV);
     
-    // 所有环境都使用同一个远程服务器
-    // 因为实际服务运行在EC2上，本地只是开发UI
-    const socketUrl = "https://trainingtest.polyuhandhygiene.com";
-    
-    // 使用相对路径方式，通过当前域名+路径
-    // const socketUrl = window.location.origin;
+    // 连接到本地端口9501的AI模型服务器
+    const socketUrl = "http://localhost:9501";
     
     console.log('Socket连接URL:', socketUrl);
     

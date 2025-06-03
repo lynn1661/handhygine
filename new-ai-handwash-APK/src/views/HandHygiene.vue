@@ -41,6 +41,9 @@
             <el-button @click="started" class="login-button">
               {{ $t("HandHygiene.btn") }}
             </el-button>
+            <el-button @click="register" class="register-button">
+              {{ $t("HandHygiene.register") }}
+            </el-button>
           </div>
         </div>
       </div>
@@ -87,6 +90,72 @@ async function started() {
     });
     accountID.value = "";
     password.value = "";
+  }
+}
+
+async function register() {
+  // 验证输入
+  if (!accountID.value.trim()) {
+    ElNotification({
+      title: "Error",
+      message: "Please enter Account ID",
+      type: "error"
+    });
+    return;
+  }
+  
+  if (!password.value.trim()) {
+    ElNotification({
+      title: "Error", 
+      message: "Please enter Password",
+      type: "error"
+    });
+    return;
+  }
+  
+  if (password.value.length < 6) {
+    ElNotification({
+      title: "Error",
+      message: "Password must be at least 6 characters",
+      type: "error"
+    });
+    return;
+  }
+  
+  try {
+    const res = await store.dispatch("user/register", {
+      accountID: accountID.value,
+      password: password.value
+    });
+    
+    ElNotification({
+      title: "Success",
+      message: res.message,
+      type: "success"
+    });
+    
+    // 注册成功后清空表单
+    accountID.value = "";
+    password.value = "";
+    
+  } catch (e) {
+    console.log(e);
+    let errorMessage = "Registration failed";
+    
+    // 根据错误类型显示不同消息
+    if (e.message.includes("already exists")) {
+      errorMessage = "Account ID already exists";
+    } else if (e.message.includes("6 characters")) {
+      errorMessage = "Password must be at least 6 characters";
+    } else if (e.message.includes("empty")) {
+      errorMessage = "Please fill in all fields";
+    }
+    
+    ElNotification({
+      title: "Registration Error",
+      message: errorMessage,
+      type: "error"
+    });
   }
 }
 </script>
@@ -161,9 +230,41 @@ async function started() {
   border-radius: 10px;
   border: none;
   transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
   
   &:hover {
     transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  :deep(.el-select) {
+    .el-input__wrapper {
+      background: rgba(245, 248, 253, 0.9);
+      border: 1px solid rgba(90, 144, 220, 0.3);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      
+      &:hover {
+        border-color: #5a90dc;
+        box-shadow: 0 4px 12px rgba(90, 144, 220, 0.2);
+      }
+    }
+    
+    .el-input__inner {
+      color: #0f387c;
+      font-weight: 600;
+    }
+    
+    .el-input__suffix-inner {
+      background-color: rgba(90, 144, 220, 0.1);
+      border-radius: 4px;
+      
+      &:hover {
+        background-color: rgba(90, 144, 220, 0.2);
+      }
+    }
   }
 }
 
@@ -259,20 +360,24 @@ async function started() {
 .button-group {
   margin-top: 2rem;
   display: flex;
+  gap: 1rem;
   justify-content: center;
   
   @media (max-width: 480px) {
     margin-top: 1.5rem;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 }
 
 .login-button {
-  width: 100%;
-  padding: 1rem 1.5rem; /* 从0.75rem增加到1rem，增加高度 */
+  flex: 1;
+  max-width: 160px;
+  padding: 0.9rem 1.25rem;
   height: auto;
   font-family: "Helvetica85", sans-serif;
   font-weight: 700;
-  font-size: 1.3rem; /* 略微增大字体 */
+  font-size: 1rem;
   color: #ffffff;
   background-image: url("../assets/button.png");
   background-size: cover;
@@ -288,13 +393,48 @@ async function started() {
   }
   
   @media (max-width: 768px) {
-    font-size: 1.2rem; /* 增加字体大小 */
-    padding: 0.85rem 1.25rem; /* 增加高度 */
+    font-size: 1rem;
+    padding: 0.8rem 1rem;
   }
   
   @media (max-width: 480px) {
-    font-size: 1.1rem; /* 增加字体大小 */
-    padding: 0.7rem 1rem; /* 增加高度 */
+    max-width: none;
+    font-size: 1rem;
+    padding: 0.7rem 0.8rem;
+  }
+}
+
+.register-button {
+  flex: 1;
+  max-width: 160px;
+  padding: 0.9rem 1.25rem;
+  height: auto;
+  font-family: "Helvetica85", sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #ffffff;
+  background-image: url("../assets/button.png");
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s, box-shadow 0.3s;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 0.8rem 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    max-width: none;
+    font-size: 1rem;
+    padding: 0.7rem 0.8rem;
   }
 }
 
@@ -329,9 +469,10 @@ async function started() {
     margin-top: 1rem;
   }
   
-  .login-button {
-    font-size: 0.9rem;
-    padding: 0.4rem 0.8rem;
+  .login-button,
+  .register-button {
+    font-size: 1rem;
+    padding: 0.5rem 0.7rem;
   }
 }
 </style>

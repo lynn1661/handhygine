@@ -1,0 +1,47 @@
+# Git相关
+.git
+.gitignore
+
+# Python相关
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# 日志文件
+*.log
+log.txt
+
+# 临时文件
+*.tmp
+*.temp
+
+# IDE相关
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 环境配置文件（已替换为requirements.txt）
+environment.yml
+
+# 操作系统相关
+.DS_Store
+Thumbs.db
+
+# Docker相关
+Dockerfile
+.dockerignore
+
+# 文档
+README*.md 

@@ -67,88 +67,7 @@
             </el-scrollbar>
           </div>
           
-          <!-- 性能指标显示区域 -->
-          <div class="performance-metrics-section">
-            <div class="metrics-header">
-              <h3>性能指标</h3>
-              <el-button 
-                size="small" 
-                @click="exportPerformanceData" 
-                :disabled="!hasPerformanceData"
-                class="export-button"
-              >
-                导出数据
-              </el-button>
-            </div>
-            
-            <!-- 没有性能数据时显示提示 -->
-            <div v-if="!hasPerformanceData" class="no-metrics-message">
-              完成所有七个步骤后可查看性能指标数据
-            </div>
-            
-            <!-- 有性能数据时显示指标 -->
-            <div v-else class="metrics-content">
-              <!-- 主要指标卡片 -->
-              <div class="metrics-cards">
-                <div class="metric-card">
-                  <div class="metric-icon stability-icon">
-                    <i class="el-icon-data-line"></i>
-                  </div>
-                  <div class="metric-details">
-                    <div class="metric-title">抖动减少率</div>
-                    <div class="metric-value">{{ performanceMetrics.jitterReduction.toFixed(2) }}%</div>
-                  </div>
-                </div>
-                
-                <div class="metric-card">
-                  <div class="metric-icon occlusion-icon">
-                    <i class="el-icon-view"></i>
-                  </div>
-                  <div class="metric-details">
-                    <div class="metric-title">遮挡预测帧比例</div>
-                    <div class="metric-value">{{ performanceMetrics.occlusionPredictionAccuracy.toFixed(2) }}%</div>
-                  </div>
-                </div>
-                
-                <div class="metric-card">
-                  <div class="metric-icon smoothness-icon">
-                    <i class="el-icon-connection"></i>
-                  </div>
-                  <div class="metric-details">
-                    <div class="metric-title">遮挡平滑度评估</div>
-                    <div class="metric-value">{{ performanceMetrics.occlusionSmoothness.toFixed(2) }}%</div>
-                  </div>
-                </div>
-                
-                <div class="metric-card">
-                  <div class="metric-icon trajectory-icon">
-                    <i class="el-icon-discover"></i>
-                  </div>
-                  <div class="metric-details">
-                    <div class="metric-title">轨迹匹配成功率</div>
-                    <div class="metric-value">{{ performanceMetrics.trajectoryMatchRate.toFixed(2) }}%</div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- 步骤关键点检测表格 -->
-              <div class="keypoint-detection-table">
-                <h4>各步骤关键点检测统计</h4>
-                <el-table :data="keyPointTableData" size="small" border stripe>
-                  <el-table-column prop="step" label="步骤" width="80" />
-                  <el-table-column prop="raw" label="原始检测数" />
-                  <el-table-column prop="filtered" label="滤波后检测数" />
-                  <el-table-column prop="improvement" label="提升率">
-                    <template #default="scope">
-                      <span :class="{'positive-improvement': scope.row.improvement > 0}">
-                        {{ scope.row.improvement }}%
-                      </span>
-                    </template>
-                  </el-table-column>
-                </el-table>
-              </div>
-            </div>
-          </div>
+          
 
           <!-- 评分区域 -->
           <div class="rating-section">
@@ -237,7 +156,7 @@ import { useStore } from "vuex";
 import { getTime } from "../utils/formatData";
 import { Filesystem, Directory } from "@capacitor/filesystem";
 import { ElNotification } from "element-plus";
-import { ElScrollbar, ElRate, ElDialog, ElTable, ElTableColumn } from 'element-plus'
+import { ElScrollbar, ElRate, ElDialog, ElTable, ElTableColumn, ElSwitch } from 'element-plus'
 const store = useStore();
 const router = useRouter();
 const loading = ref(true);
@@ -461,6 +380,38 @@ const exportPerformanceData = () => {
   }
 };
 
+// 分数映射函数 - 使用幂函数实现低分提升但保持差距
+const mapScore = (score) => {
+  // 确保输入在0-100范围内
+  if (score < 0) return 0;
+  if (score > 100) return 100;
+  
+  // 使用幂函数 y = 100 * (x/100)^0.5 (平方根函数)
+  // 这样映射：0->0, 20->45, 40->63, 60->77, 80->89, 100->100
+  // 低分段提升更显著，让用户更有成就感
+  const normalizedScore = score / 100;
+  const mappedScore = 100 * Math.pow(normalizedScore, 0.4);
+  
+  return Math.round(mappedScore);
+};
+
+// 排名百分比映射函数 - 让低排名用户也能看到更好的排名显示
+const mapRankPercentage = (percentage) => {
+  // 确保输入在0-100范围内
+  if (percentage < 0) return 0;
+  if (percentage > 100) return 100;
+  
+  // 使用类似的幂函数 y = 100 * (x/100)^0.65
+  // 这样映射：0->0, 10->21, 30->49, 50->69, 70->84, 90->95, 100->100
+  // 低排名有显著提升，但仍保持差距和单调性
+  const normalizedPercentage = percentage / 100;
+  const mappedPercentage = 100 * Math.pow(normalizedPercentage, 0.5);
+  
+  return Math.round(mappedPercentage);
+};
+
+const showPerformanceMetrics = ref(false);
+
 onMounted(async () => {
   // Get the download name for the video based on the account's serial number
   downloadName.value = getTime(
@@ -488,7 +439,7 @@ onMounted(async () => {
 
   // If a rank percentage is available, display a message showing the percentage
   if (rankPercentage !== undefined) {
-    rankMessage.value = Math.floor(rankPercentage);
+    rankMessage.value = Math.floor(mapRankPercentage(rankPercentage));
   }
   console.log(rankMessage.value); // Debug rankMessage value
 
@@ -496,7 +447,7 @@ onMounted(async () => {
   list.value = res?.step_points;
   
   // 设置用户总成绩，强制取整
-  total.value = Math.floor(res?.userScore || 0);
+  total.value = Math.floor(mapScore(res?.userScore || 0));
   
   // Set the video file names for download from the backend response
   downloadVideoName.value = res?.step_video_files;
@@ -639,6 +590,7 @@ onMounted(async () => {
   gap: 1.5rem;
   justify-content: flex-start;
   margin-bottom: 1.5rem;
+  align-items: flex-start;
   
   /* 桌面端左右分栏布局 */
   @media (min-width: 768px) {
@@ -706,7 +658,7 @@ onMounted(async () => {
   @media (min-width: 768px) {
     padding: 2.5rem;
     height: 100%;
-    justify-content: center;
+    justify-content: flex-start;
   }
 }
 
@@ -1359,21 +1311,37 @@ onMounted(async () => {
     margin: 0;
   }
   
-  .export-button {
-    background-color: #0f387c;
-    color: white;
-    border: none;
-    
-    &:hover:not(:disabled) {
-      background-color: #1a4da8;
-      transform: translateY(-2px);
-    }
-    
-    &:disabled {
-      background-color: #ccc;
-      color: #999;
-      cursor: not-allowed;
-    }
+  .metrics-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+.metrics-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.metrics-toggle {
+  margin-right: 0.5rem;
+}
+
+.export-button {
+  background-color: #0f387c;
+  color: white;
+  border: none;
+  
+  &:hover:not(:disabled) {
+    background-color: #1a4da8;
+    transform: translateY(-2px);
+  }
+  
+  &:disabled {
+    background-color: #ccc;
+    color: #999;
+    cursor: not-allowed;
   }
 }
 
@@ -1493,6 +1461,15 @@ onMounted(async () => {
     color: #2ecc71;
     font-weight: 600;
   }
+}
+
+.metrics-hidden-message {
+  text-align: center;
+  padding: 2rem 0;
+  color: #777;
+  font-style: italic;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
 }
 </style>
 

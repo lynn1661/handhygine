@@ -25,7 +25,7 @@
         <!-- 指导图片区域 -->
         <div class="guide-section">
           <div class="guide-image-container">
-            <img class="guide-image" :src="getStepGif()" alt="洗手指导" />
+            <img class="guide-image" :src="getStepGif()" :key="`step-${currentStep}`" alt="洗手指导" />
             <div class="countdown-timer">
               <div class="timer-circle">
                 <span>{{ countdownDisplay }}s</span>
@@ -480,6 +480,10 @@ async function isOverlapping(landmarksList) {
 watch(() => route.params.step, (newStep, oldStep) => {
   if (newStep !== oldStep) {
     console.log(`检测到步骤从 ${oldStep} 变为 ${newStep}，准备重置状态`);
+    
+    // 立即更新图片显示
+    console.log(`更新指导图片到步骤${newStep}`);
+    
     // 重置状态
     isEvaluating.value = false;
     isFinished.value = false;
@@ -500,6 +504,8 @@ watch(() => route.params.step, (newStep, oldStep) => {
     startNumber = 0;
     endNumber = 25;
     firstType = true;
+    
+    console.log(`步骤${newStep}状态重置完成，图片已更新`);
   }
 }, { immediate: true });
 
@@ -716,6 +722,9 @@ onMounted(() => {
   
   // 重置组件卸载标记
   isComponentUnmounted.value = false;
+  
+  // 确保图片显示正确的步骤
+  console.log(`组件挂载，当前步骤: ${currentStep.value}，应显示图片: ${getStepGif()}`);
   
   downloadName.value = getTime(
     sessionStorage.getItem("accountSerialNumber") || localStorage.getItem("accountSerialNumber")
@@ -1259,14 +1268,14 @@ async function initializeMediaPipe() {
                 
                 // 再次检查实例有效性，因为上面的操作可能是异步的
                 if (!isComponentUnmounted.value && hands && window.handsInstance === hands) {
-                  await hands.send({ image: input });
+                await hands.send({ image: input });
                 }
               } catch (error) {
                 // 如果是 BindingError 且组件已卸载，忽略错误
                 if (error.name === 'BindingError' && isComponentUnmounted.value) {
                   console.warn("MediaPipe实例已被清理，忽略此错误");
                 } else {
-                  console.error("处理视频帧时出错:", error);
+                console.error("处理视频帧时出错:", error);
                 }
               }
             },

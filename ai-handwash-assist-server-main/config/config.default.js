@@ -1,6 +1,6 @@
 module.exports = () => {
     return {
-        port: 3000,
+        port: 3001,
         sio: {
             enabled: true,
         },
