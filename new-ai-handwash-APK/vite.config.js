@@ -56,9 +56,9 @@ export default defineConfig({
       },
       // Socket.io连接代理 - 如果需要可以保留远程或也改为本地
       '/socket.io': {
-        target: 'https://trainingtest.polyuhandhygiene.com',
+        target: 'http://localhost:9501',  // 改为本地AI服务器
         changeOrigin: true,
-        secure: true, // 对于HTTPS必需
+        secure: false,  // 本地服务器使用HTTP
         ws: true, // 支持WebSocket
       }
     },

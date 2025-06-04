@@ -14,7 +14,7 @@ const getBaseURL = () => {
   
   // 在测试环境中（如果有）
   if (process.env.NODE_ENV === 'test') {
-    return "https://trainingtest.polyuhandhygiene.com/api/backend";
+    return "/api/backend"; // 改为本地服务器
   }
   
   // 在生产环境中使用相对路径
