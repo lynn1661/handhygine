@@ -55,10 +55,10 @@
                   <div class="comment-section">
                     <div class="comment-content">
                       <span class="comment-title">
-                        {{ $t(`HandHygiene.step${index + 1}Title`) }}
+                        {{ $t("HandHygiene.step" + (index + 1) + "Title") }}
                       </span>
                       <span class="comment-text">
-                        {{ $t(`HandHygiene.step${index + 1}Content`) }}
+                        {{ $t("HandHygiene.step" + (index + 1) + "Content") }}
                       </span>
                     </div>
                   </div>
@@ -72,14 +72,14 @@
           <!-- 评分区域 -->
           <div class="rating-section">
             <div class="rating-content">
-              {{ $t(`HandHygiene.rating`) }}
+              {{ $t("HandHygiene.rating") }}
               <el-button 
                 type="primary" 
                 size="large" 
                 @click="openDialog" 
                 round
               >
-                {{ $t(`HandHygiene.ratingbtn`) }}
+                {{ $t("HandHygiene.ratingbtn") }}
               </el-button>
             </div>
             
@@ -89,6 +89,12 @@
               v-model="dialogVisible"
               width="400px"
               :before-close="handleClose"
+              :modal="true"
+              :close-on-click-modal="false"
+              :close-on-press-escape="true"
+              :show-close="true"
+              append-to-body
+              class="rating-dialog"
             >
               <!-- 评分行1：App UI -->
               <div class="rating-row">
@@ -122,8 +128,8 @@
               </div>
               <!-- 对话框底部操作按钮 -->
               <template #footer>
-                <el-button @click="dialogVisible = false">{{ $t(`HandHygiene.ratingcancel`) }}</el-button>
-                <el-button type="primary" @click="submitRating" :disabled="disabledRating">{{ $t(`HandHygiene.ratingsubmit`) }}</el-button>
+                <el-button @click="dialogVisible = false">{{ $t("HandHygiene.ratingcancel") }}</el-button>
+                <el-button type="primary" @click="submitRating" :disabled="disabledRating">{{ $t("HandHygiene.ratingsubmit") }}</el-button>
               </template>
             </el-dialog>
           </div>
@@ -156,7 +162,7 @@ import { useStore } from "vuex";
 import { getTime } from "../utils/formatData";
 import { Filesystem, Directory } from "@capacitor/filesystem";
 import { ElNotification } from "element-plus";
-import { ElScrollbar, ElRate, ElDialog, ElTable, ElTableColumn, ElSwitch } from 'element-plus'
+import { ElScrollbar, ElRate, ElDialog, ElTable, ElTableColumn, ElSwitch, ElButton } from 'element-plus'
 const store = useStore();
 const router = useRouter();
 const loading = ref(true);
@@ -181,13 +187,50 @@ const tryAgain = () => {
 };
 
 const value = ref(0); // 评分值，初始为 0
-let dialogVisible = ref(false);
-let disabledRating = ref(false); // 提交评分后禁用评分组件
+const dialogVisible = ref(false);
+const disabledRating = ref(false); // 提交评分后禁用评分组件
 
 // 打开评分对话框
 const openDialog = () => {
   console.log("打开评分对话框");
+  console.log("当前dialogVisible状态:", dialogVisible.value);
+  
+  // 检查Element Plus是否正确加载
+  const dialogElements = document.querySelectorAll('.el-dialog');
+  console.log("当前页面上的对话框元素数量:", dialogElements.length);
+  
   dialogVisible.value = true;
+  console.log("设置后dialogVisible状态:", dialogVisible.value);
+  
+  // 确保DOM更新
+  setTimeout(() => {
+    console.log("延迟检查dialogVisible状态:", dialogVisible.value);
+    
+    // 检查对话框是否真的出现在DOM中
+    const newDialogElements = document.querySelectorAll('.el-dialog');
+    console.log("设置后页面上的对话框元素数量:", newDialogElements.length);
+    
+    // 如果对话框存在但不可见，强制显示
+    newDialogElements.forEach((dialog, index) => {
+      console.log(`对话框${index + 1}的样式:`, getComputedStyle(dialog).display);
+      if (getComputedStyle(dialog).display === 'none') {
+        console.log(`强制显示对话框${index + 1}`);
+        dialog.style.display = 'block';
+        dialog.style.zIndex = '9999';
+      }
+    });
+    
+    // 检查对话框包装器
+    const wrappers = document.querySelectorAll('.el-dialog__wrapper');
+    wrappers.forEach((wrapper, index) => {
+      console.log(`对话框包装器${index + 1}的样式:`, getComputedStyle(wrapper).display);
+      if (getComputedStyle(wrapper).display === 'none') {
+        console.log(`强制显示对话框包装器${index + 1}`);
+        wrapper.style.display = 'flex';
+        wrapper.style.zIndex = '9999';
+      }
+    });
+  }, 100);
 };
 const uiRating = ref(0);
 const trainingRating = ref(0);
@@ -1470,6 +1513,45 @@ onMounted(async () => {
   font-style: italic;
   background-color: rgba(255, 255, 255, 0.5);
   border-radius: 10px;
+}
+
+/* 评分对话框样式 */
+.rating-dialog {
+  z-index: 9999 !important;
+}
+
+/* 确保Element Plus对话框正确显示 */
+:deep(.el-dialog) {
+  z-index: 9999 !important;
+  background-color: white !important;
+  border-radius: 15px !important;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3) !important;
+}
+
+:deep(.el-dialog__wrapper) {
+  z-index: 9999 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+:deep(.el-dialog__header) {
+  background-color: #f8f9fa !important;
+  border-radius: 15px 15px 0 0 !important;
+  padding: 1.5rem !important;
+}
+
+:deep(.el-dialog__title) {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  color: #0f387c !important;
+}
+
+:deep(.el-dialog__body) {
+  padding: 1.5rem !important;
+}
+
+:deep(.el-dialog__footer) {
+  padding: 1rem 1.5rem 1.5rem !important;
+  text-align: center !important;
 }
 </style>
 
