@@ -1,8 +1,8 @@
 // record.js
 // 改写说明：
 //   1) append_rating({ data }): 根据 data.id 先 SELECT 一行 user_info，
-//      然后把 JSON 字段 parse 出来，push 新的 step_video_file / step_correctness / step_points / record_time，计算新的 total，最后 UPDATE 回去
-//   2) get_rank({ data }): 根据 data.id SELECT 一行，读取 total、step_correctness、step_points、step_video_file，然后再去读取全部用户的 total，计算该用户的排名百分比和等级
+//      然后把 JSON 字段 parse 出来，push 新的 step_correctness / step_points / record_time，计算新的 total，最后 UPDATE 回去
+//   2) get_rank({ data }): 根据 data.id SELECT 一行，读取 total、step_correctness、step_points，然后再去读取全部用户的 total，计算该用户的排名百分比和等级
 
 const { getDb } = require('../../sqliteHelper');
 
@@ -26,17 +26,11 @@ const append_rating = async ({ data }) => {
   }
 
   // 2) 把需要更新的字段 parse 出来
-  let step_video_file = [];
   let step_correctness = [];
   let step_points = [];
   let record_time = [];
   let total = 0;
 
-  try {
-    step_video_file = JSON.parse(row.step_video_file || '[]');
-  } catch {
-    step_video_file = [];
-  }
   try {
     step_correctness = JSON.parse(row.step_correctness || '[]');
   } catch {
@@ -54,14 +48,7 @@ const append_rating = async ({ data }) => {
   }
   total = typeof row.total === 'number' ? row.total : 0;
 
-  // 3) 根据 data.step_video_file、data.rating（这里命名为 step correctness）、data.points 更新数组
-  if (
-    data.step_video_file !== undefined &&
-    data.step_video_file !== null &&
-    data.step_video_file !== ''
-  ) {
-    step_video_file.push(data.step_video_file);
-  }
+  // 3) 根据 data.rating（这里命名为 step correctness）、data.points 更新数组
   // record_time 追加 { timestamp, datestring }
   record_time.push({
     timestamp: Date.now(),
@@ -80,13 +67,11 @@ const append_rating = async ({ data }) => {
   // 4) 写回数据库
   const result = await db.run(
     `UPDATE user_info
-     SET step_video_file = ?,
-         step_correctness = ?,
+     SET step_correctness = ?,
          step_points = ?,
          record_time = ?,
          total = ?
      WHERE id = ?;`,
-    JSON.stringify(step_video_file),
     JSON.stringify(step_correctness),
     JSON.stringify(step_points),
     JSON.stringify(record_time),
@@ -103,7 +88,7 @@ const append_rating = async ({ data }) => {
   return { message: 'Successfully updated' };
 };
 
-// get_rank: 取出单个用户的 total、step_correctness、step_points、step_video_file，然后与所有用户的 total 做比较，算出排名百分比、等级
+// get_rank: 取出单个用户的 total、step_correctness、step_points，然后与所有用户的 total 做比较，算出排名百分比、等级
 const get_rank = async ({ data }) => {
   if (!data.id) {
     const err = new Error('Missing field: id is required');
@@ -125,7 +110,6 @@ const get_rank = async ({ data }) => {
   const userScore = typeof row.total === 'number' ? row.total : 0;
   let step_correctness = [];
   let step_points = [];
-  let step_video_files = [];
 
   try {
     step_correctness = JSON.parse(row.step_correctness || '[]');
@@ -136,11 +120,6 @@ const get_rank = async ({ data }) => {
     step_points = JSON.parse(row.step_points || '[]');
   } catch {
     step_points = [];
-  }
-  try {
-    step_video_files = JSON.parse(row.step_video_file || '[]');
-  } catch {
-    step_video_files = [];
   }
 
   // 3) 读取 allUsers（只要 total 值用于排名），不附带 JSON 字段
@@ -177,7 +156,6 @@ const get_rank = async ({ data }) => {
     rankPercentage,
     step_points: step_points,
     step_correctness: step_correctness,
-    step_video_files: step_video_files,
   };
 };
 

@@ -46,7 +46,6 @@ async function testAPI() {
     console.log('5️⃣ 测试添加评分记录...');
     const appendRatingResponse = await axios.post(`${BASE_URL}/data/record/append_rating`, {
       id: newUserId,
-      step_video_file: 'test_video_001.mp4',
       rating: 85,
       points: 42.5
     });
@@ -61,27 +60,8 @@ async function testAPI() {
     console.log('✅ 获取排名成功:', getRankResponse.data);
     console.log('');
 
-    // 7. 测试提交评分
-    console.log('7️⃣ 测试提交评分...');
-    const ratingResponse = await axios.post(`${BASE_URL}/data/rate/rating`, {
-      id: newUserId,
-      rating: {
-        ui: 4,
-        training: 5,
-        recommend: 4
-      }
-    });
-    console.log('✅ 评分提交成功:', ratingResponse.data);
-    console.log('');
-
-    // 8. 测试获取评分统计
-    console.log('8️⃣ 测试获取评分统计...');
-    const getRatingsResponse = await axios.post(`${BASE_URL}/data/rate/get_ratings`, {});
-    console.log('✅ 评分统计获取成功:', getRatingsResponse.data);
-    console.log('');
-
-    // 9. 测试获取排行列表
-    console.log('9️⃣ 测试获取排行列表...');
+    // 7. 测试获取排行列表
+    console.log('7️⃣ 测试获取排行列表...');
     const getRankListResponse = await axios.post(`${BASE_URL}/data/rank/getRankList`, {
       accountID: 'testuser123',
       role: 'teacher'
@@ -89,8 +69,8 @@ async function testAPI() {
     console.log('✅ 排行列表获取成功:', getRankListResponse.data);
     console.log('');
 
-    // 10. 测试获取所有排名
-    console.log('🔟 测试获取所有排名...');
+    // 8. 测试获取所有排名
+    console.log('8️⃣ 测试获取所有排名...');
     const getAllRankResponse = await axios.post(`${BASE_URL}/data/rank/getAllRank`, {
       accountID: 'testuser123'
     });
@@ -105,8 +85,6 @@ async function testAPI() {
     console.log('  ✅ 用户信息填写 - 通过');
     console.log('  ✅ 评分记录添加 - 通过');
     console.log('  ✅ 用户排名获取 - 通过');
-    console.log('  ✅ 评分提交 - 通过');
-    console.log('  ✅ 评分统计获取 - 通过');
     console.log('  ✅ 排行列表获取 - 通过');
     console.log('  ✅ 所有排名获取 - 通过');
     console.log('');

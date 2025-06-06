@@ -1,4 +1,4 @@
-import { userLogin, userRegister, updateRole, append_rating, get_rank, getRankList, getAllRank, submitRating, getAllRatings } from "@/services/HandHygiene.js";
+import { userLogin, userRegister, updateRole, append_rating, get_rank, getRankList, getAllRank } from "@/services/HandHygiene.js";
 
 export default {
   namespaced: true,
@@ -110,25 +110,6 @@ export default {
         return data;
       } catch (error) {
         console.log(error);
-      }
-    },
-    async submitRating({ commit }, payload) {
-      try {
-        console.log("Payload", payload);
-        const { data } = await submitRating(payload);
-        return data;
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    async getAllRatings({ commit }, payload) {
-      try {
-        console.log("Payload in getAllRatings action:", payload);
-        const { data } = await getAllRatings(payload);
-        return data;
-      } catch (error) {
-        console.log(error);
-        throw error;
       }
     },
   },

@@ -38,12 +38,10 @@ npm start
 - `userID` (TEXT) - 用户ID
 - `role` (TEXT) - 用户角色
 - `start_time` (TEXT) - 开始时间
-- `step_video_file` (TEXT) - 步骤视频文件（JSON数组）
 - `step_correctness` (TEXT) - 步骤正确性（JSON数组）
 - `step_points` (TEXT) - 步骤得分（JSON数组）
 - `total` (REAL) - 总分
 - `record_time` (TEXT) - 记录时间（JSON数组）
-- `rating` (TEXT) - 评分（JSON对象）
 
 ## 🔌 API 端点
 
@@ -59,8 +57,6 @@ npm start
 ### 数据相关
 - `POST /data/record/append_rating` - 添加评分记录
 - `POST /data/record/get_rank` - 获取用户排名
-- `POST /data/rate/rating` - 提交评分
-- `POST /data/rate/get_ratings` - 获取评分统计
 - `POST /data/rank/getRankList` - 获取排行列表
 - `POST /data/rank/getAllRank` - 获取所有排名
 
@@ -84,7 +80,7 @@ curl -X POST http://localhost:3001/user/info/fill \
 ```bash
 curl -X POST http://localhost:3001/data/record/append_rating \
   -H "Content-Type: application/json" \
-  -d '{"id":1,"step_video_file":"video.mp4","rating":85,"points":42.5}'
+  -d '{"id":1,"rating":85,"points":42.5}'
 ```
 
 ## 🧪 测试
@@ -157,7 +153,6 @@ ai-handwash-assist-server-main/
     │   └── hash.js       # 密码哈希服务
     └── data/
         ├── record.js     # 记录服务
-        ├── rate.js       # 评分服务
         └── rank.js       # 排名服务
 ```
 

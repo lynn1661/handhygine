@@ -49,12 +49,10 @@ async function initDb() {
       userID           TEXT NOT NULL,
       role             TEXT NOT NULL,
       start_time       TEXT NOT NULL,           -- e.g. "DD/M/YYYY 上午/下午 hh:mm:ss"
-      step_video_file  TEXT,                    -- JSON 数组文本
       step_correctness TEXT,                    -- JSON 数组文本
       step_points      TEXT,                    -- JSON 数组文本
       total            REAL DEFAULT 0,          -- 数值
-      record_time      TEXT,                    -- JSON 数组文本 [{ timestamp:..., datestring: ...}, ...]
-      rating           TEXT                     -- JSON 对象文本 { ui:0, training:0, recommend:0 }
+      record_time      TEXT                     -- JSON 数组文本 [{ timestamp:..., datestring: ...}, ...]
     );
   `);
 

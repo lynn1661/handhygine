@@ -5,7 +5,6 @@ const cors = require('cors');
 const userInfo = require('./services/user/info');
 const userHash = require('./services/user/hash');
 const dataRecord = require('./services/data/record');
-const dataRate = require('./services/data/rate');
 const dataRank = require('./services/data/rank');
 
 const app = express();
@@ -85,16 +84,6 @@ app.post('/data/record/get_rank', extractData, handleAsync(async (req, res) => {
   sendResponse(res, true, result);
 }));
 
-app.post('/data/rate/rating', extractData, handleAsync(async (req, res) => {
-  const result = await dataRate.rating({ data: req.body });
-  sendResponse(res, true, result);
-}));
-
-app.post('/data/rate/get_ratings', extractData, handleAsync(async (req, res) => {
-  const result = await dataRate.get_ratings({ data: req.body });
-  sendResponse(res, true, result);
-}));
-
 app.post('/data/rank/getRankList', extractData, handleAsync(async (req, res) => {
   const result = await dataRank.getRankList({ data: req.body });
   sendResponse(res, true, result);
@@ -135,8 +124,6 @@ app.listen(PORT, () => {
   console.log('  POST /user/hash - 密码哈希');
   console.log('  POST /data/record/append_rating - 添加评分记录');
   console.log('  POST /data/record/get_rank - 获取用户排名');
-  console.log('  POST /data/rate/rating - 提交评分');
-  console.log('  POST /data/rate/get_ratings - 获取评分统计');
   console.log('  POST /data/rank/getRankList - 获取排行列表');
   console.log('  POST /data/rank/getAllRank - 获取所有排名');
   console.log('  🔧 支持前端数据格式兼容');

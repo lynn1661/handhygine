@@ -121,18 +121,16 @@ async function fill({ data }) {
   const userIdValue = data.userID || '';
 
   const result = await db.run(
-    `INSERT INTO user_info (accountID, userID, role, start_time, step_video_file, step_correctness, step_points, total, record_time, rating)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+    `INSERT INTO user_info (accountID, userID, role, start_time, step_correctness, step_points, total, record_time)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
     data.accountID,
     userIdValue,
     data.role,
     nowStr,
-    JSON.stringify([]), // step_video_file
     JSON.stringify([]), // step_correctness
     JSON.stringify([]), // step_points
     0,                  // total 初始为 0
-    JSON.stringify([]), // record_time
-    JSON.stringify({ ui: 0, training: 0, recommend: 0 }) // rating
+    JSON.stringify([])  // record_time
   );
 
   if (result.stmt.changes === 0) {

@@ -1,12 +1,26 @@
 <template>
   <div v-loading="loading" class="home">
     <div class="content-wrapper">
-      <!-- 顶部区域：恢复原始风格 -->
+      <!-- 顶部区域：左侧logo，中间按钮，右侧语言选择器 -->
       <div class="home-top">
+        <!-- 左侧：logo -->
         <div class="logo">
           <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
           <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
         </div>
+        
+        <!-- 中间：操作按钮 -->
+        <div class="top-buttons">
+          <el-button @click="tryAgain" class="top-action-button try-again">
+            {{ $t("HandHygiene.tryagain") }}
+          </el-button>
+          <el-button @click="back" class="top-action-button home-button">
+            <img src="../assets/homeIcon.png" class="home-icon" />
+            {{ $t("HandHygiene.homepage") }}
+          </el-button>
+        </div>
+        
+        <!-- 右侧：语言选择器 -->
         <div class="locale-selector">
           <select-locale :changeStyle="shouldChangeStyle"></select-locale>
         </div>
@@ -33,13 +47,13 @@
           </div>
         </div>
 
-        <!-- 右侧：步骤评分列表和评分区域 -->
+        <!-- 右侧：步骤评分列表 -->
         <div class="right-column">
           <!-- 步骤评分列表 -->
           <div class="steps-review-section">
             <el-scrollbar height="380px" always>
               <div class="step-rating-container">
-                <div class="step-row" v-for="(item, index) in list" :key="index">
+                <div class="step-row" v-for="(item, index) in list.slice(0, 7)" :key="index">
                   <div class="star-section">
                     <div class="step-star">
                       <el-rate
@@ -66,86 +80,6 @@
               </div>
             </el-scrollbar>
           </div>
-          
-          
-
-          <!-- 评分区域 -->
-          <div class="rating-section">
-            <div class="rating-content">
-              {{ $t("HandHygiene.rating") }}
-              <el-button 
-                type="primary" 
-                size="large" 
-                @click="openDialog" 
-                round
-              >
-                {{ $t("HandHygiene.ratingbtn") }}
-              </el-button>
-            </div>
-            
-            <!-- 评分对话框 -->
-            <el-dialog
-              :title="$t('HandHygiene.ratingtitle')"
-              v-model="dialogVisible"
-              width="400px"
-              :before-close="handleClose"
-              :modal="true"
-              :close-on-click-modal="false"
-              :close-on-press-escape="true"
-              :show-close="true"
-              append-to-body
-              class="rating-dialog"
-            >
-              <!-- 评分行1：App UI -->
-              <div class="rating-row">
-                <div class="rating-description">{{ $t('HandHygiene.ratingui') }}</div>
-                <el-rate
-                  class="custom-rate"
-                  v-model="uiRating"
-                  size="large"
-                  @change="handleRatingChange('ui', $event)"
-                />
-              </div>
-              <!-- 评分行2：洗手培训功能 -->
-              <div class="rating-row">
-                <div class="rating-description">{{ $t('HandHygiene.ratingtraining') }}</div>
-                <el-rate
-                  class="custom-rate"
-                  v-model="trainingRating"
-                  size="large"
-                  @change="handleRatingChange('training', $event)"
-                />
-              </div>
-              <!-- 评分行3：推荐给他人使用 -->
-              <div class="rating-row">
-                <div class="rating-description">{{ $t('HandHygiene.ratingrecommend') }}</div>
-                <el-rate
-                  class="custom-rate"
-                  v-model="recommendRating"
-                  size="large"
-                  @change="handleRatingChange('recommend', $event)"
-                />
-              </div>
-              <!-- 对话框底部操作按钮 -->
-              <template #footer>
-                <el-button @click="dialogVisible = false">{{ $t("HandHygiene.ratingcancel") }}</el-button>
-                <el-button type="primary" @click="submitRating" :disabled="disabledRating">{{ $t("HandHygiene.ratingsubmit") }}</el-button>
-              </template>
-            </el-dialog>
-          </div>
-        </div>
-      </div>
-
-      <!-- 按钮区域 - 在所有视图中保持底部 -->
-      <div class="buttons-section">
-        <div class="action-buttons">
-          <el-button @click="tryAgain" class="action-button try-again">
-            {{ $t("HandHygiene.tryagain") }}
-          </el-button>
-          <el-button @click="back" class="action-button home-button">
-            <img src="../assets/homeIcon.png" class="home-icon" />
-            {{ $t("HandHygiene.homepage") }}
-          </el-button>
         </div>
       </div>
     </div>
@@ -186,104 +120,6 @@ const tryAgain = () => {
   });
 };
 
-const value = ref(0); // 评分值，初始为 0
-const dialogVisible = ref(false);
-const disabledRating = ref(false); // 提交评分后禁用评分组件
-
-// 打开评分对话框
-const openDialog = () => {
-  console.log("打开评分对话框");
-  console.log("当前dialogVisible状态:", dialogVisible.value);
-  
-  // 检查Element Plus是否正确加载
-  const dialogElements = document.querySelectorAll('.el-dialog');
-  console.log("当前页面上的对话框元素数量:", dialogElements.length);
-  
-  dialogVisible.value = true;
-  console.log("设置后dialogVisible状态:", dialogVisible.value);
-  
-  // 确保DOM更新
-  setTimeout(() => {
-    console.log("延迟检查dialogVisible状态:", dialogVisible.value);
-    
-    // 检查对话框是否真的出现在DOM中
-    const newDialogElements = document.querySelectorAll('.el-dialog');
-    console.log("设置后页面上的对话框元素数量:", newDialogElements.length);
-    
-    // 如果对话框存在但不可见，强制显示
-    newDialogElements.forEach((dialog, index) => {
-      console.log(`对话框${index + 1}的样式:`, getComputedStyle(dialog).display);
-      if (getComputedStyle(dialog).display === 'none') {
-        console.log(`强制显示对话框${index + 1}`);
-        dialog.style.display = 'block';
-        dialog.style.zIndex = '9999';
-      }
-    });
-    
-    // 检查对话框包装器
-    const wrappers = document.querySelectorAll('.el-dialog__wrapper');
-    wrappers.forEach((wrapper, index) => {
-      console.log(`对话框包装器${index + 1}的样式:`, getComputedStyle(wrapper).display);
-      if (getComputedStyle(wrapper).display === 'none') {
-        console.log(`强制显示对话框包装器${index + 1}`);
-        wrapper.style.display = 'flex';
-        wrapper.style.zIndex = '9999';
-      }
-    });
-  }, 100);
-};
-const uiRating = ref(0);
-const trainingRating = ref(0);
-const recommendRating = ref(0);
-// 评分发生变化时触发（也可在提交按钮中统一处理）
-const handleRatingChange = async (ratingType, newValue) => {
-  console.log(`${ratingType} rating changed:`, newValue);
-  // 根据 ratingType 更新对应的响应式变量（假设你已经定义了 uiRating, trainingRating, recommendRating）
-  if (ratingType === 'ui') {
-    uiRating.value = newValue;
-  } else if (ratingType === 'training') {
-    trainingRating.value = newValue;
-  } else if (ratingType === 'recommend') {
-    recommendRating.value = newValue;
-  }
-  // 可选：这里可以直接调用接口提交该评分
-};
-
-// 提交评分并保存到后端
-const submitRating = async () => {
-  try {
-    console.log("提交评分:", value.value);
-    const rank_id = sessionStorage.getItem("accountSerialNumber") || localStorage.getItem("accountSerialNumber");
-    //console.log("提交评分rankid:", rank_id);
-    //const rank_id = '67dd09578fc9261ce50ab805';
-    // 调用 Vuex action 或直接调用后端 API 存储评分结果
-    await store.dispatch("user/submitRating", {
-      id: rank_id,
-      rating: {
-        ui: uiRating.value,
-        training: trainingRating.value,
-        recommend: recommendRating.value
-      }
-    });
-ElNotification({
-      title: "Thanks for Rating",
-      type: "success",
-    });
-    dialogVisible.value = false;
-  } catch (error) {
-    console.error("评分提交失败:", error);
-    ElNotification({
-      title: "Rating Failed",
-      type: "error",
-    });
-  }
-};
-
-// 对话框关闭前的处理（如需要确认或动画处理）
-const handleClose = (done) => {
-  // 如果需要处理确认逻辑可以在这里加，最终调用 done() 关闭对话框
-  done();
-};
 const blobs = computed(() => {
   return store.state.user.blobs;
 });
@@ -492,8 +328,8 @@ onMounted(async () => {
   // 设置用户总成绩，强制取整
   total.value = Math.floor(mapScore(res?.userScore || 0));
   
-  // Set the video file names for download from the backend response
-  downloadVideoName.value = res?.step_video_files;
+  // 后端不再提供step_video_files字段
+  downloadVideoName.value = [];
 
   // Count the number of steps marked as "true" and adjust the rank image
   const trueCount = Array.isArray(list.value)
@@ -569,20 +405,133 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0 1.5rem;
+  padding: 0.5rem 0 1rem; /* 减小padding */
   margin-bottom: 1rem;
   border-bottom: 1px solid rgba(15, 56, 124, 0.1);
+  width: 100%;
+  flex-wrap: wrap; /* 允许换行 */
+  gap: 0.75rem;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0.5rem 0;
+  }
+}
+
+.top-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  justify-content: center; /* 居中对齐 */
+  
+  @media (max-width: 480px) {
+    width: 100%;
+    justify-content: center;
+    order: 3; /* 在小屏幕上移到底部 */
+  }
+  
+  @media (min-width: 481px) and (max-width: 767px) {
+    gap: 1rem;
+  }
+  
+  @media (min-width: 768px) {
+    gap: 1.5rem;
+  }
+}
+
+.top-action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1rem;
+  height: auto;
+  background-color: #1a56db;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  min-width: 100px;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(45deg);
+    opacity: 0;
+    transition: opacity 0.6s;
+    z-index: 0;
+  }
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+    
+    &::before {
+      opacity: 1;
+      animation: shine 1.5s;
+    }
+  }
+  
+  .home-icon {
+    width: 1.2rem;
+    height: 1.2rem;
+    margin-right: 0.4rem;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+    padding: 0.6rem 0.8rem;
+    flex: 1;
+  }
+  
+  @media (min-width: 768px) {
+    font-size: 1.1rem;
+    padding: 0.8rem 1.5rem;
+    
+    .home-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+      margin-right: 0.5rem;
+    }
+  }
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 0.75rem;
+  justify-content: flex-start; /* 左对齐 */
+  flex: 1;
+  
+  @media (max-width: 480px) {
+    order: 1; /* 在小屏幕上保持在顶部 */
+    justify-content: center; /* 小屏幕居中 */
+    gap: 0.5rem;
+  }
+  
+  @media (min-width: 481px) {
+    gap: 1rem;
+  }
 }
 
 .logo-image {
   width: auto;
-  height: 3rem;
+  height: 2.5rem; /* 减小基础高度 */
   transition: transform 0.3s ease;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
   
@@ -592,18 +541,18 @@ onMounted(async () => {
   }
   
   @media (max-width: 480px) {
-    height: 2.25rem;
+    height: 2rem; /* 小屏幕上更小 */
   }
   
   @media (min-width: 768px) {
-    height: 4rem;
+    height: 3.5rem; /* 桌面端适中 */
   }
 }
 
 .locale-selector {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-end; /* 右对齐 */
   cursor: pointer;
   flex-shrink: 0;
   margin-top: 0;
@@ -618,6 +567,8 @@ onMounted(async () => {
   }
   
   @media (max-width: 480px) {
+    justify-content: center;
+    order: 2; /* 在小屏幕上放中间 */
     width: auto;
     height: auto;
   }
@@ -670,7 +621,7 @@ onMounted(async () => {
 .achievement-section {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.3) 100%);
   border-radius: 20px;
-  padding: 2rem;
+  padding: 1.25rem; /* 进一步减小内边距 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -699,7 +650,7 @@ onMounted(async () => {
   }
   
   @media (min-width: 768px) {
-    padding: 2.5rem;
+    padding: 1.75rem !important; /* 桌面端也进一步减小 */
     height: 100%;
     justify-content: flex-start;
   }
@@ -708,7 +659,7 @@ onMounted(async () => {
 .achievement-image {
   display: flex;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: 0.75rem; /* 进一步减小margin */
   position: relative;
   z-index: 1;
   
@@ -716,34 +667,43 @@ onMounted(async () => {
     content: '';
     position: absolute;
     width: 140%;
-    height: 30px;
+    height: 20px; /* 减小阴影高度 */
     background: radial-gradient(ellipse at center, rgba(15, 56, 124, 0.1) 0%, rgba(15, 56, 124, 0) 70%);
-    bottom: -30px;
+    bottom: -20px;
     border-radius: 50%;
     left: -20%;
     z-index: -1;
   }
   
   img {
-    width: 140px;
-    height: 140px;
+    width: 65px; /* 进一步减小 */
+    height: 65px; /* 进一步减小 */
     border-radius: 50%;
-    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
-    border: 4px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.9);
     position: relative;
     z-index: 2;
     transition: transform 0.5s ease, box-shadow 0.5s ease;
     
     &:hover {
       transform: scale(1.05) rotate(5deg);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
     }
     
     @media (min-width: 768px) {
-      width: 200px;
-      height: 200px;
-      border-width: 5px;
+      width: 130px !important; /* 桌面端进一步减小 */
+      height: 130px !important; /* 桌面端进一步减小 */
+      border-width: 3px !important;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+      
+      &:hover {
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.14) !important;
+      }
     }
+  }
+  
+  @media (min-width: 768px) {
+    margin-bottom: 1.25rem !important;
   }
 }
 
@@ -752,23 +712,28 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  gap: 0.3rem; /* 进一步减小间距 */
+  margin-bottom: 0.75rem; /* 进一步减小底部间距 */
   position: relative;
   z-index: 1;
   width: 100%;
   text-align: center;
+  
+  @media (min-width: 768px) {
+    gap: 0.4rem !important;
+    margin-bottom: 1.25rem !important;
+  }
 }
 
 .achievement-total {
   font-family: "Helvetica85", sans-serif;
   font-weight: 700;
-  font-size: 1.8rem;
+  font-size: 1rem; /* 进一步减小 */
   color: #0f387c;
   text-align: center;
   line-height: 1.4;
   position: relative;
-  padding-bottom: 1rem;
+  padding-bottom: 0.5rem; /* 进一步减小 */
   
   &::after {
     content: '';
@@ -776,26 +741,33 @@ onMounted(async () => {
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 60px;
-    height: 3px;
+    width: 35px; /* 进一步减小 */
+    height: 2px;
     background: linear-gradient(90deg, #ffcc00, #ff9900);
     border-radius: 2px;
   }
   
   .total-number {
     color: #ff9900;
-    font-size: 2.5rem;
+    font-size: 1.4rem; /* 进一步减小 */
     font-weight: 800;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     display: inline-block;
-    margin: 0 0.3rem;
+    margin: 0 0.2rem; /* 减小间距 */
   }
   
   @media (min-width: 768px) {
-    font-size: 2.2rem;
+    font-size: 1.5rem !important; /* 桌面端进一步减小 */
+    padding-bottom: 0.7rem !important;
+    
+    &::after {
+      width: 45px !important;
+      height: 3px !important;
+    }
     
     .total-number {
-      font-size: 3rem;
+      font-size: 2rem !important; /* 桌面端进一步减小 */
+      margin: 0 0.3rem !important;
     }
   }
 }
@@ -803,26 +775,28 @@ onMounted(async () => {
 .achievement-rank {
   font-family: "Helvetica85", sans-serif;
   font-weight: 600;
-  font-size: 1.8rem;
+  font-size: 1rem; /* 进一步减小 */
   color: #0f387c;
   text-align: center;
   line-height: 1.3;
-  margin-top: 0.5rem;
+  margin-top: 0.4rem; /* 减小间距 */
   
   .rank-number {
     color: #ff9900;
-    font-size: 2.2rem;
+    font-size: 1.3rem; /* 进一步减小 */
     font-weight: 800;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     display: inline-block;
-    margin: 0 0.3rem;
+    margin: 0 0.2rem; /* 减小间距 */
   }
   
   @media (min-width: 768px) {
-    font-size: 2.2rem;
+    font-size: 1.5rem !important; /* 桌面端进一步减小 */
+    margin-top: 0.5rem !important;
     
     .rank-number {
-      font-size: 2.6rem;
+      font-size: 1.8rem !important; /* 桌面端进一步减小 */
+      margin: 0 0.3rem !important;
     }
   }
 }
@@ -1081,97 +1055,6 @@ onMounted(async () => {
   
   @media (min-width: 768px) {
     transform: scale(1.3);
-  }
-}
-
-/* 按钮区域 */
-.buttons-section {
-  margin-top: 1rem;
-  width: 100%;
-  position: relative;
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  
-  @media (min-width: 768px) {
-    max-width: 700px;
-    margin: 0 auto;
-  }
-}
-
-.action-button {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem 1rem;
-  height: auto;
-  background-image: url("../assets/button.png");
-  background-size: cover;
-  background-position: center;
-  border-radius: 16px;
-  border: none;
-  color: white;
-  font-weight: 700;
-  font-size: 1.1rem;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
-  transition: all 0.3s ease;
-  max-width: 220px;
-  position: relative;
-  overflow: hidden;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: rgba(255, 255, 255, 0.1);
-    transform: rotate(45deg);
-    opacity: 0;
-    transition: opacity 0.6s;
-    z-index: 0;
-  }
-  
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-    
-    &::before {
-      opacity: 1;
-      animation: shine 1.5s;
-    }
-  }
-  
-  &.try-again {
-    background-color: #2563eb;
-  }
-  
-  &.home-button {
-    background-color: #1a56db;
-  }
-  
-  .home-icon {
-    width: 1.5rem;
-    height: 1.5rem;
-    margin-right: 0.5rem;
-    position: relative;
-    z-index: 1;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
-  }
-  
-  @media (min-width: 768px) {
-    font-size: 1.2rem;
-    padding: 1.25rem 1.5rem;
-    
-    .home-icon {
-      width: 1.75rem;
-      height: 1.75rem;
-    }
   }
 }
 

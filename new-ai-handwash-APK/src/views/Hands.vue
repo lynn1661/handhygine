@@ -552,7 +552,6 @@ async function stopCountdown() {
         id: sessionStorage.getItem("accountSerialNumber") || localStorage.getItem("accountSerialNumber"),
         rating: text.value,
         points: parseFloat((trueRatio / 7).toFixed(3)),
-        step_video_file: `${downloadName.value}-step${currentStep.value}`,
       });
       console.log("成功保存评分数据");
       
@@ -2552,10 +2551,11 @@ function detectWristArmWash(frames) {
   flex-direction: column;
   box-sizing: border-box;
   flex: 1;
-  justify-content: space-between; /* 改为space-between让元素更紧凑 */
+  justify-content: flex-start; /* 改为flex-start让内容靠上 */
+  gap: 0; /* 完全移除gap */
   min-height: 90vh;
   position: relative;
-  padding: 0.5rem;
+  padding: 0.25rem; /* 进一步减小内边距 */
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   box-shadow: 0 8px 32px rgba(15, 56, 124, 0.1);
@@ -2565,15 +2565,17 @@ function detectWristArmWash(frames) {
 
 /* 顶部区域样式 - 进一步减小间距 */
 .header {
-  padding: 0.25rem 0; /* 减小内边距 */
+  padding: 0.1rem 0; /* 进一步减小内边距 */
   width: 100%;
-  margin-bottom: 0.5rem; /* 进一步减小底部间距 */
+  margin-bottom: 0; /* 完全移除底部间距 */
   position: relative;
-  margin-top: 0.25rem;
+  margin-top: 0; /* 移除顶部间距 */
+  flex-shrink: 0; /* 防止header被压缩 */
   
   @media (min-width: 768px) {
-    padding: 0.5rem 0 !important;
-    margin-bottom: 1rem !important;
+    padding: 0.2rem 0 !important;
+    margin-bottom: 0 !important; /* 桌面端也移除底部间距 */
+    margin-top: 0 !important;
   }
 }
 
@@ -2581,26 +2583,31 @@ function detectWristArmWash(frames) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.5rem; /* 减小间距 */
   width: 100%;
   
   @media (min-width: 768px) {
     max-width: 1400px;
     margin: 0 auto;
+    gap: 0.75rem !important;
   }
 }
 
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem; /* 减小logo间距 */
   justify-content: center;
   flex: 1;
   order: 2;
+  
+  @media (min-width: 768px) {
+    gap: 0.75rem !important;
+  }
 }
 
 .logo-image {
-  height: 2.25rem;
+  height: 1.75rem; /* 减小logo高度 */
   width: auto;
   transition: transform 0.3s ease;
   
@@ -2609,18 +2616,18 @@ function detectWristArmWash(frames) {
   }
   
   @media (max-width: 480px) {
-    height: 1.75rem;
+    height: 1.5rem; /* 小屏幕上更小 */
   }
   
   @media (min-width: 768px) {
-    height: 3rem !important;
+    height: 2.5rem !important; /* 桌面端适中 */
   }
 }
 
 .step-title {
   font-family: "Helvetica85", sans-serif;
   font-weight: 700;
-  font-size: 1.75rem;
+  font-size: 1.4rem; /* 减小标题字体 */
   color: #0f387c;
   margin: 0;
   animation: fadeIn 0.5s ease;
@@ -2633,13 +2640,17 @@ function detectWristArmWash(frames) {
   text-overflow: ellipsis;
   
   @media (max-width: 480px) {
-    font-size: 1.25rem;
+    font-size: 1.1rem; /* 小屏幕上更小 */
+  }
+  
+  @media (min-width: 768px) {
+    font-size: 1.75rem !important; /* 桌面端适中 */
   }
 }
 
 .back-btn {
-  width: 3rem;
-  height: 3rem;
+  width: 2.5rem; /* 减小按钮尺寸 */
+  height: 2.5rem; /* 减小按钮尺寸 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2658,13 +2669,13 @@ function detectWristArmWash(frames) {
   }
   
   @media (max-width: 480px) {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2rem; /* 小屏幕上更小 */
+    height: 2rem; /* 小屏幕上更小 */
   }
   
   @media (min-width: 768px) {
-    width: 4rem !important;
-    height: 4rem !important;
+    width: 3.5rem !important; /* 桌面端适中 */
+    height: 3.5rem !important; /* 桌面端适中 */
   }
 }
 
@@ -2675,14 +2686,22 @@ function detectWristArmWash(frames) {
   width: 100%;
   box-sizing: border-box;
   flex: 1;
-  gap: 0.75rem; /* 减小主要内容间的间距 */
-  justify-content: center;
+  gap: 0.2rem; /* 进一步减小内容间距 */
+  justify-content: flex-start; /* 改为flex-start，让内容靠上 */
+  margin-top: 0; /* 移除负margin */
+  padding-top: 0; /* 确保没有顶部padding */
+  position: relative; /* 添加相对定位 */
+  top: -1.25rem !important; /* 减小桌面端往上移动距离 */
   
   /* 在桌面屏幕上使用水平布局 - 降低阈值确保更广泛兼容 */
   @media (min-width: 768px) {
     flex-direction: row !important;
-    align-items: center !important;
-    gap: 1.5rem !important;
+    align-items: flex-start !important; /* 改为flex-start */
+    gap: 0.75rem !important;
+    justify-content: flex-start !important; /* 让内容靠上 */
+    margin-top: 0 !important; /* 移除负margin */
+    padding-top: 0 !important; /* 确保没有顶部padding */
+    top: -1rem !important; /* 桌面端大幅往上移动 */
   }
 }
 
@@ -2691,7 +2710,7 @@ function detectWristArmWash(frames) {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.1rem; /* 进一步减小 */
   
   @media (min-width: 768px) {
     width: 48% !important; /* 在桌面端占用接近一半宽度 */

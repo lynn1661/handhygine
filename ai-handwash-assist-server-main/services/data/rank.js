@@ -89,12 +89,10 @@ const getRankList = async ({ data }) => {
       userID: row.userID,
       role: row.role,
       start_time: row.start_time,
-      step_video_file: JSON.parse(row.step_video_file || '[]'),
       step_correctness: JSON.parse(row.step_correctness || '[]'),
       step_points: JSON.parse(row.step_points || '[]'),
       total: row.total,
       record_time: JSON.parse(row.record_time || '[]'),
-      rating: JSON.parse(row.rating || '{}'),
     };
   });
 
@@ -155,12 +153,10 @@ const getAllRank = async ({ data }) => {
       userID: row.userID,
       role: row.role,
       start_time: row.start_time,
-      step_video_file: JSON.parse(row.step_video_file || '[]'),
       step_correctness: JSON.parse(row.step_correctness || '[]'),
       step_points: JSON.parse(row.step_points || '[]'),
       total: row.total,
       record_time: JSON.parse(row.record_time || '[]'),
-      rating: JSON.parse(row.rating || '{}'),
     };
 
     if (!grouped[row.role]) {
