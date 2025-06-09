@@ -7,8 +7,13 @@
           <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
           <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
         </div>
-        <div class="back-home">
-          <img src="../assets/home.png" alt="Home" @click="backHome" class="home-icon" />
+        <div class="top-actions">
+          <el-button @click="switchToAuditingMode" class="auditing-mode-button">
+            Switch to Auditing Mode
+          </el-button>
+          <div class="back-home" v-if="!HandHygiene">
+            <img src="../assets/home.png" alt="" @click="backHome" />
+          </div>
         </div>
       </div>
       
@@ -87,6 +92,10 @@ const backHome = () => {
   });
 };
 
+const switchToAuditingMode = () => {
+  window.open("http://localhost:8080", "_blank");
+};
+
 // 跳转到用户反馈页面
 const goToFeedback = () => {
   router.push({
@@ -157,6 +166,35 @@ const goToFeedback = () => {
   
   @media (max-width: 480px) {
     height: 2.5rem;
+  }
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.auditing-mode-button {
+  height: 40px;
+  font-family: Helvetica85;
+  font-weight: 800;
+  font-size: 18px;
+  color: #ffffff;
+  line-height: 16px;
+  font-style: normal;
+  text-transform: none;
+  border-radius: 26px;
+  background-image: url(../assets/button.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   }
 }
 

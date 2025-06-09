@@ -18,6 +18,9 @@
             <img src="../assets/homeIcon.png" class="home-icon" />
             {{ $t("HandHygiene.homepage") }}
           </el-button>
+          <el-button @click="switchToAuditingMode" class="top-action-button auditing-mode-button">
+            Switch to Auditing Mode
+          </el-button>
         </div>
         
         <!-- 右侧：语言选择器 -->
@@ -118,6 +121,10 @@ const tryAgain = () => {
   router.push({
     path: "/role",
   });
+};
+
+const switchToAuditingMode = () => {
+  window.open("http://localhost:8080", "_blank");
 };
 
 const blobs = computed(() => {

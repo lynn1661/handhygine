@@ -1,5 +1,5 @@
-# 忽略AR版本
-new-ai-handwash-AR
+
 nginx-update.conf
 ai-handwash-assist-server-main/venv39
 docker-exports
+data

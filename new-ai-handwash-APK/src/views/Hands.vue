@@ -2520,6 +2520,8 @@ function detectWristArmWash(frames) {
   
   return Math.min(1, matchScore);
 }
+
+
 </script>
 
 <style lang="scss" scoped>
@@ -3325,4 +3327,6 @@ input:checked + .toggle-slider:before {
     background-color: rgba(255, 255, 255, 0.05);
   }
 }
+
+
 </style> 

@@ -7,8 +7,13 @@
           <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
           <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
         </div>
-        <div class="back-btn" @click="backHome">
-          <img src="../assets/home.png" alt="返回首页" />
+        <div class="top-actions">
+          <el-button @click="switchToAuditingMode" class="auditing-mode-button">
+            Switch to Auditing Mode
+          </el-button>
+          <div class="back-btn" @click="backHome">
+            <img src="../assets/home.png" alt="返回首页" />
+          </div>
         </div>
       </div>
 
@@ -81,6 +86,10 @@ const backHome = () => {
   router.push({
     path: "/",
   });
+};
+
+const switchToAuditingMode = () => {
+  window.open("http://localhost:8080", "_blank");
 };
 
 let inactivityTimer = null;
@@ -174,6 +183,26 @@ onUnmounted(() => {
   
   @media (max-width: 480px) {
     height: 2.5rem;
+  }
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.auditing-mode-button {
+  background-color: #409EFF;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #66B1FF;
   }
 }
 

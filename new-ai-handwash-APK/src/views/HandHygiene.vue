@@ -7,8 +7,13 @@
           <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
           <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
         </div>
-        <div class="locale-selector">
-          <select-locale :changeStyle="shouldChangeStyle"></select-locale>
+        <div class="top-actions">
+          <el-button @click="switchToAuditingMode" class="auditing-mode-button">
+            Switch to Auditing Mode
+          </el-button>
+          <div class="locale-selector">
+            <select-locale :changeStyle="shouldChangeStyle"></select-locale>
+          </div>
         </div>
       </div>
       
@@ -158,6 +163,10 @@ async function register() {
     });
   }
 }
+
+const switchToAuditingMode = () => {
+  window.open("http://localhost:8080", "_blank");
+};
 </script>
 <style lang="scss" scoped>
 @import "@/styles/main.scss";
@@ -217,6 +226,27 @@ async function register() {
   
   @media (max-width: 480px) {
     height: 2.25rem;
+  }
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.auditing-mode-button {
+  padding: 0.5rem 1rem;
+  background-color: #409EFF;
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font-family: "Helvetica85", sans-serif;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: #66B1FF;
   }
 }
 

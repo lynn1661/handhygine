@@ -8,6 +8,9 @@
           <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
         </div>
         <div class="top-right">
+          <el-button @click="switchToAuditingMode" class="auditing-mode-button">
+            Switch to Auditing Mode
+          </el-button>
           <div class="back-home" v-if="!HandHygiene">
             <img src="../assets/home.png" alt="" @click="backHome" />
           </div>
@@ -90,6 +93,10 @@ async function started() {
     password.value = "";
   }
 }
+
+const switchToAuditingMode = () => {
+  window.open("http://localhost:8080", "_blank");
+};
 </script>
 <style lang="scss" scoped>
 @import "@/styles/main.scss";
@@ -156,6 +163,38 @@ async function started() {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.auditing-mode-button {
+  width: auto;
+  padding: 0.75rem 1.5rem;
+  height: auto;
+  font-family: "Helvetica85", sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: #ffffff;
+  background-image: url("../assets/button.png");
+  background-size: cover;
+  background-position: center;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s, box-shadow 0.3s;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+    padding: 0.85rem 1.25rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+    padding: 0.7rem 1rem;
+  }
 }
 
 .back-home {

@@ -18,7 +18,10 @@
           <img src="../assets/polyu-logo.png" alt="Logo 1" class="logo-image" />
           <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
         </div>
-        <div class="right-section">
+        <div class="top-actions">
+          <el-button @click="switchToAuditingMode" class="auditing-mode-button">
+            Switch to Auditing Mode
+          </el-button>
           <div class="back-home">
             <img src="../assets/home.png" alt="Home" @click="backHome" class="home-icon" />
           </div>
@@ -120,6 +123,10 @@ const backHome = () => {
   router.push({
     path: "/admin",
   });
+};
+
+const switchToAuditingMode = () => {
+  window.open("http://localhost:8080", "_blank");
 };
 const goBack = () => {
   router.push({
@@ -293,6 +300,34 @@ watch(value, async (newVal, oldVal) => {
 
 .left-section {
   justify-content: flex-start;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.auditing-mode-button {
+  height: 40px;
+  font-family: Helvetica85;
+  font-weight: 800;
+  font-size: 18px;
+  color: #ffffff;
+  line-height: 16px;
+  font-style: normal;
+  text-transform: none;
+  border-radius: 26px;
+  background-image: url(../assets/button.png);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
 }
 
 .right-section {

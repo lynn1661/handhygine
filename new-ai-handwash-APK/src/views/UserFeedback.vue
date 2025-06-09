@@ -18,6 +18,9 @@
           <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
         </div>
         <div class="right-section">
+          <el-button @click="switchToAuditingMode" class="auditing-mode-button">
+            Switch to Auditing Mode
+          </el-button>
           <div class="back-home">
             <img src="../assets/home.png" alt="Home" @click="backHome" class="home-icon" />
           </div>
@@ -201,6 +204,10 @@ const backHome = () => {
   localStorage.removeItem("accountID");
   sessionStorage.removeItem("accountID");
   router.push("/admin");
+};
+
+const switchToAuditingMode = () => {
+  window.open("http://localhost:8080", "_blank");
 };
 
 // 获取评分数据
@@ -514,6 +521,23 @@ onMounted(async () => {
   border: none;
   font-weight: 600;
   transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: #66b1ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.auditing-mode-button {
+  background-color: #409EFF;
+  color: white;
+  border: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  margin-right: 1rem;
   
   &:hover {
     background-color: #66b1ff;
