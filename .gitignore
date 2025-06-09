@@ -1,5 +1,6 @@
 
 nginx-update.conf
 ai-handwash-assist-server-main/venv39
-docker-exports
+handhygiene
 data
+install docker.sh
