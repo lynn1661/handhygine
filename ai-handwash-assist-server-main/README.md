@@ -38,9 +38,10 @@ npm start
 - `userID` (TEXT) - 用户ID
 - `role` (TEXT) - 用户角色
 - `start_time` (TEXT) - 开始时间
-- `step_correctness` (TEXT) - 步骤正确性（JSON数组）
+
 - `step_points` (TEXT) - 步骤得分（JSON数组）
-- `total` (REAL) - 总分
+- `total` (REAL) - 原始总分
+- `mapped_total` (REAL) - 映射后的总分
 - `record_time` (TEXT) - 记录时间（JSON数组）
 
 ## 🔌 API 端点

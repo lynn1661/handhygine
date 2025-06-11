@@ -325,15 +325,16 @@ onMounted(async () => {
 
   // If a rank percentage is available, display a message showing the percentage
   if (rankPercentage !== undefined) {
-    rankMessage.value = Math.floor(mapRankPercentage(rankPercentage));
+    // 优先使用后端返回的映射后的排名百分比，如果没有则使用本地映射
+    rankMessage.value = Math.floor(res?.mappedRankPercentage || mapRankPercentage(rankPercentage));
   }
   console.log(rankMessage.value); // Debug rankMessage value
 
   // Set the step correctness data from the backend response
   list.value = res?.step_points;
   
-  // 设置用户总成绩，强制取整
-  total.value = Math.floor(mapScore(res?.userScore || 0));
+  // 设置用户总成绩，优先使用后端返回的映射后的分数
+  total.value = Math.floor(res?.mappedScore || mapScore(res?.userScore || 0));
   
   // 后端不再提供step_video_files字段
   downloadVideoName.value = [];

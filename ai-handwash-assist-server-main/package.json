@@ -10,7 +10,10 @@
     "test:api": "node test-api.js",
     "test:frontend": "node test-frontend-compatibility.js",
     "test:register": "node test-register.js",
-    "create:account": "node create-test-account.js"
+    "create:account": "node create-test-account.js",
+    "update:mapped-scores": "node update-mapped-scores.js",
+    "view:database": "node view-database.js",
+    "migrate:remove-step-correctness": "node migrate-remove-step-correctness.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

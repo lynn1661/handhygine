@@ -43,9 +43,9 @@ async function testDatabase() {
       userID: 'user_123',
       role: 'student',
       start_time: new Date().toLocaleString('zh-CN'),
-      step_correctness: JSON.stringify([true, false, true]),
       step_points: JSON.stringify([8.5, 7.2, 9.1]),
       total: 24.8,
+      mapped_total: 0,
       record_time: JSON.stringify([{
         timestamp: Date.now(),
         datestring: new Date().toISOString()
@@ -55,12 +55,11 @@ async function testDatabase() {
     await db.run(`
       INSERT INTO user_info (
         accountID, userID, role, start_time,
-        step_correctness, step_points, total, record_time
+        step_points, total, mapped_total, record_time
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       userInfo.accountID, userInfo.userID, userInfo.role, userInfo.start_time,
-      userInfo.step_correctness, userInfo.step_points,
-      userInfo.total, userInfo.record_time
+      userInfo.step_points, userInfo.total, userInfo.mapped_total, userInfo.record_time
     ]);
     console.log('✅ 用户信息数据插入成功');
     
