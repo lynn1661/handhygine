@@ -1,4 +1,4 @@
-import { updateRole, append_rating, get_rank } from "@/services/HandHygiene.js";
+import { updateRole as createSession, append_rating, get_rank } from "@/services/HandHygiene.js";
 
 export default {
   namespaced: true,
@@ -53,8 +53,10 @@ export default {
   actions: {
     async updateRole({ commit }, payload) {
       try {
-        const { data } = await updateRole(payload);
-        commit("setUserRole", payload.role);
+        const { data } = await createSession(payload);
+        if (payload.role) {
+          commit("setUserRole", payload.role);
+        }
         return data;
       } catch (error) {
         console.log(error);

@@ -69,8 +69,37 @@ import { ref, onMounted, onUnmounted, watch, reactive } from "vue";
 // 改为动态加载脚本后使用全局变量
 
 import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 
 const router = useRouter();
+const store = useStore();
+
+// 自动创建会话的函数
+const createSession = async () => {
+  try {
+    // 检查是否已有会话ID
+    const existingSessionID = sessionStorage.getItem("sessionID") || localStorage.getItem("sessionID");
+    if (existingSessionID) {
+      console.log("已存在会话ID:", existingSessionID);
+      return existingSessionID;
+    }
+
+    // 创建新的会话，使用默认角色
+    const res = await store.dispatch("user/updateRole", { 
+      role: "User", // 使用默认角色
+    });
+    
+    // 存储会话ID
+    localStorage.setItem("sessionID", res.ID);
+    sessionStorage.setItem("sessionID", res.ID);
+    
+    console.log("创建新会话成功，ID:", res.ID);
+    return res.ID;
+  } catch (error) {
+    console.error("创建会话失败:", error);
+    throw error;
+  }
+};
 
 // 倒计时逻辑
 const percentage = ref(100);
@@ -215,7 +244,7 @@ onMounted(() => {
   // 重置组件卸载标记
   isComponentUnmounted.value = false;
   
-  // 使用setTimeout延迟初始化MediaPipe，确保DOM已完全渲染
+  // 使用setTimeout延迟初始化，确保DOM已完全渲染
   setTimeout(async () => {
     try {
       // 检查组件是否仍然挂载
@@ -223,6 +252,10 @@ onMounted(() => {
         console.log("组件在初始化过程中被卸载，取消初始化");
         return;
       }
+      
+      // 首先创建会话
+      await createSession();
+      console.log("📋 会话创建完成");
       
       // 等待本地 MediaPipe 脚本加载完成
       await waitForMediaPipeLoaded();
@@ -236,7 +269,7 @@ onMounted(() => {
       
       await initializeMediaPipe();
     } catch (error) {
-      console.error("MediaPipe初始化失败:", error);
+      console.error("初始化失败:", error);
       hasError.value = true;
       errorMessage.value = error.message;
       isInitializing.value = false;

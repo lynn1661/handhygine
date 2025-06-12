@@ -1,5 +1,4 @@
 import { createRouter, createWebHashHistory  } from "vue-router";
-import Role from "@/views/Role.vue";
 import Detecting from "@/views/Detecting.vue";
 import Hands from "@/views/Hands.vue";
 import HandwashingCompletion from "@/views/HandwashingCompletion.vue";
@@ -7,7 +6,7 @@ import HandwashingCompletion from "@/views/HandwashingCompletion.vue";
 const routes = [
   {
     path: "/",
-    component: Role,
+    component: Detecting,
   },
   {
     path: "/detecting",
