@@ -14,10 +14,6 @@
           <el-button @click="tryAgain" class="top-action-button try-again">
             {{ $t("HandHygiene.tryagain") }}
           </el-button>
-          <el-button @click="back" class="top-action-button home-button">
-            <img src="../assets/homeIcon.png" class="home-icon" />
-            {{ $t("HandHygiene.homepage") }}
-          </el-button>
           <el-button @click="switchToAuditingMode" class="top-action-button auditing-mode-button">
             Switch to Auditing Mode
           </el-button>
@@ -54,34 +50,29 @@
         <div class="right-column">
           <!-- 步骤评分列表 -->
           <div class="steps-review-section">
-            <el-scrollbar height="380px" always>
-              <div class="step-rating-container">
-                <div class="step-row" v-for="(item, index) in list.slice(0, 7)" :key="index">
-                  <div class="star-section">
-                    <div class="step-star">
-                      <el-rate
-                        :model-value="getStepRating(item.Step)"
-                        :max="1"
-                        :allow-half="true"
-                        disabled
-                        :colors="['#ffcc00', '#ffcc00', '#ffcc00']"
-                        void-color="#c0c4cc"
-                      />
-                    </div>
+            <div class="step-rating-container">
+              <div class="step-row" v-for="(item, index) in list.slice(0, 7)" :key="index">
+                <div class="star-section">
+                  <div class="step-star">
+                    <el-rate
+                      :model-value="getStepRating(item.Step)"
+                      :max="1"
+                      :allow-half="true"
+                      disabled
+                      :colors="['#ffcc00', '#ffcc00', '#ffcc00']"
+                      void-color="#c0c4cc"
+                    />
                   </div>
-                  <div class="comment-section">
+                </div>
+                                  <div class="comment-section">
                     <div class="comment-content">
                       <span class="comment-title">
                         {{ $t("HandHygiene.step" + (index + 1) + "Title") }}
                       </span>
-                      <span class="comment-text">
-                        {{ $t("HandHygiene.step" + (index + 1) + "Content") }}
-                      </span>
                     </div>
                   </div>
-                </div>
               </div>
-            </el-scrollbar>
+            </div>
           </div>
         </div>
       </div>
@@ -99,7 +90,7 @@ import { useStore } from "vuex";
 import { getTime } from "../utils/formatData";
 import { Filesystem, Directory } from "@capacitor/filesystem";
 import { ElNotification } from "element-plus";
-import { ElScrollbar, ElRate, ElDialog, ElTable, ElTableColumn, ElSwitch, ElButton } from 'element-plus'
+import { ElRate, ElDialog, ElTable, ElTableColumn, ElSwitch, ElButton } from 'element-plus'
 const store = useStore();
 const router = useRouter();
 const loading = ref(true);
@@ -107,19 +98,13 @@ const t = useI18n();
 const shouldChangeStyle = ref(true); // 默认不添加
 const HandwashingType = ref();
 const total = ref(0); // 添加total变量
-const back = () => {
-  localStorage.removeItem("accountID");
-  sessionStorage.removeItem("accountID");
-  localStorage.removeItem("accountSerialNumber");
-  sessionStorage.removeItem("accountSerialNumber");
+
+const tryAgain = () => {
+  // 清理视频数据
   store.commit("user/clearVideoBlob");
+  // 返回角色选择页面（现在是首页）
   router.push({
     path: "/",
-  });
-};
-const tryAgain = () => {
-  router.push({
-    path: "/role",
   });
 };
 
@@ -301,8 +286,8 @@ const showPerformanceMetrics = ref(false);
 onMounted(async () => {
   // Get the download name for the video based on the account's serial number
   downloadName.value = getTime(
-    sessionStorage.getItem("accountSerialNumber") ||
-      localStorage.getItem("accountSerialNumber")
+    sessionStorage.getItem("sessionID") ||
+      localStorage.getItem("sessionID")
   );
 
   // Set a 2-second timeout to disable the loading state
@@ -312,7 +297,7 @@ onMounted(async () => {
 
   // Dispatch the 'rank' action to retrieve the user's ranking data from the store
   const id =
-    sessionStorage.getItem("accountSerialNumber") || localStorage.getItem("accountSerialNumber");
+    sessionStorage.getItem("sessionID") || localStorage.getItem("sessionID");
   console.log("ID being sent: ", id); // Debugging step
   const res = await store.dispatch("user/rank", { id });
   console.log("Response from get_rank:", res); // Debugging step
@@ -812,45 +797,48 @@ onMounted(async () => {
 /* 步骤评分区域 */
 .steps-review-section {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.3) 100%);
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow: 0 10px 25px rgba(15, 56, 124, 0.08);
+  border-radius: 12px;
+  padding: 0.5rem;
+  box-shadow: 0 4px 12px rgba(15, 56, 124, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.6);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
-  overflow: hidden;
-  min-height: 400px;
+  overflow: visible;
+  height: auto;
   display: flex;
   flex-direction: column;
   
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(15, 56, 124, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 56, 124, 0.08);
   }
   
   @media (min-width: 768px) {
-    padding: 1.5rem;
+    padding: 0.8rem;
     flex: 1;
-    min-height: 450px;
+    height: auto;
   }
 }
 
 .step-rating-container {
   width: 100%;
-  padding: 0.25rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
 }
 
 .step-row {
   display: flex;
   align-items: center;
-  padding: 0.75rem;
-  margin-bottom: 0.75rem;
+  padding: 0.2rem;
+  margin-bottom: 0;
   background: linear-gradient(135deg, #f9fbff 0%, #f2f6fc 100%);
-  border-radius: 12px;
-  min-height: 3.5rem;
-  box-shadow: 0 4px 10px rgba(15, 56, 124, 0.06);
+  border-radius: 4px;
+  min-height: 1.6rem;
+  box-shadow: 0 1px 3px rgba(15, 56, 124, 0.04);
   transition: all 0.3s ease;
-  border-left: 3px solid #4a89dc;
+  border-left: 2px solid #4a89dc;
   position: relative;
   overflow: hidden;
   
@@ -859,45 +847,41 @@ onMounted(async () => {
     position: absolute;
     bottom: 0;
     right: 0;
-    width: 40%;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, rgba(74, 137, 220, 0.3));
-    border-radius: 3px;
+    width: 25%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(74, 137, 220, 0.15));
+    border-radius: 1px;
   }
   
   &:hover {
-    transform: translateY(-3px) scale(1.01);
-    box-shadow: 0 8px 15px rgba(15, 56, 124, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(15, 56, 124, 0.06);
     border-left-color: #0f387c;
   }
   
-  &:last-child {
-    margin-bottom: 0;
-  }
-  
   @media (min-width: 768px) {
-    padding: 1rem;
-    min-height: 4rem;
+    padding: 0.3rem;
+    min-height: 2rem;
   }
 }
 
 .star-section {
-  width: 3rem;
-  min-width: 3rem;
-  height: 3rem;
+  width: 1.4rem;
+  min-width: 1.4rem;
+  height: 1.4rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.4);
   border-radius: 50%;
-  box-shadow: 0 3px 8px rgba(15, 56, 124, 0.08);
-  margin-right: 0.75rem;
+  box-shadow: 0 1px 2px rgba(15, 56, 124, 0.05);
+  margin-right: 0.3rem;
   
   @media (min-width: 768px) {
-    width: 3.5rem;
-    min-width: 3.5rem;
-    height: 3.5rem;
-    margin-right: 1rem;
+    width: 1.8rem;
+    min-width: 1.8rem;
+    height: 1.8rem;
+    margin-right: 0.4rem;
   }
 }
 
@@ -910,22 +894,22 @@ onMounted(async () => {
 }
 
 .step-star :deep(.el-rate) {
-  height: 2.25rem;
-  font-size: 2.25rem;
+  height: 1rem;
+  font-size: 1rem;
   line-height: 1;
   
   @media (min-width: 768px) {
-    height: 2.5rem;
-    font-size: 2.5rem;
+    height: 1.3rem;
+    font-size: 1.3rem;
   }
 }
 
 .step-star :deep(.el-rate__icon) {
-  font-size: 2.25rem;
+  font-size: 1rem;
   margin-right: 0;
   
   @media (min-width: 768px) {
-    font-size: 2.5rem;
+    font-size: 1.3rem;
   }
 }
 
@@ -939,23 +923,14 @@ onMounted(async () => {
 }
 
 .comment-title {
-  font-weight: 700;
+  font-weight: 600;
   color: #0f387c;
-  font-size: 1rem;
-  margin-bottom: 0.25rem;
+  font-size: 0.7rem;
+  margin-bottom: 0;
+  line-height: 1.1;
   
   @media (min-width: 768px) {
-    font-size: 1.2rem;
-  }
-}
-
-.comment-text {
-  color: #4a5568;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  
-  @media (min-width: 768px) {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 }
 

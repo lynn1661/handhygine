@@ -3,7 +3,6 @@ const cors = require('cors');
 
 // 导入所有服务模块
 const userInfo = require('./services/user/info');
-const userHash = require('./services/user/hash');
 const dataRecord = require('./services/data/record');
 const dataRank = require('./services/data/rank');
 
@@ -52,24 +51,9 @@ app.get('/health', (req, res) => {
   sendResponse(res, true, { message: 'Server is running with SQLite database', timestamp: new Date().toISOString() });
 });
 
-// 用户相关API路由 - 添加数据提取中间件
-app.post('/user/info/login', extractData, handleAsync(async (req, res) => {
-  const result = await userInfo.login({ data: req.body });
-  sendResponse(res, true, result);
-}));
-
-app.post('/user/info/register', extractData, handleAsync(async (req, res) => {
-  const result = await userInfo.register({ data: req.body });
-  sendResponse(res, true, result);
-}));
-
+// 用户相关API路由 - 简化版本（无需登录）
 app.post('/user/info/fill', extractData, handleAsync(async (req, res) => {
   const result = await userInfo.fill({ data: req.body });
-  sendResponse(res, true, result);
-}));
-
-app.post('/user/hash', extractData, handleAsync(async (req, res) => {
-  const result = await userHash.hash({ data: req.body });
   sendResponse(res, true, result);
 }));
 
@@ -118,15 +102,12 @@ app.listen(PORT, () => {
   console.log(`⚡ Framework: Express.js`);
   console.log('📋 Available endpoints:');
   console.log('  GET  /health - 健康检查');
-  console.log('  POST /user/info/login - 用户登录');
-  console.log('  POST /user/info/register - 用户注册');
-  console.log('  POST /user/info/fill - 填写用户信息');
-  console.log('  POST /user/hash - 密码哈希');
+  console.log('  POST /user/info/fill - 创建训练会话');
   console.log('  POST /data/record/append_rating - 添加评分记录');
-  console.log('  POST /data/record/get_rank - 获取用户排名');
+  console.log('  POST /data/record/get_rank - 获取会话排名');
   console.log('  POST /data/rank/getRankList - 获取排行列表');
   console.log('  POST /data/rank/getAllRank - 获取所有排名');
-  console.log('  🔧 支持前端数据格式兼容');
+  console.log('  🔧 简化版本 - 无需登录注册');
   console.log('');
 });
 

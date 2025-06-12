@@ -13,7 +13,8 @@
     "create:account": "node create-test-account.js",
     "update:mapped-scores": "node update-mapped-scores.js",
     "view:database": "node view-database.js",
-    "migrate:remove-step-correctness": "node migrate-remove-step-correctness.js"
+    "migrate:remove-step-correctness": "node migrate-remove-step-correctness.js",
+    "migrate:simplify-database": "node migrate-simplify-database.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

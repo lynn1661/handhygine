@@ -20,6 +20,13 @@
     "node_modules",
     "dist",
     "**/*.spec.ts",
-    "src/components/SocketMonitor.vue"
+    "src/components/SocketMonitor.vue",
+    "src/layouts/BaseLayout.vue",
+    "src/views/Admin.vue",
+    "src/views/AllRole.vue", 
+    "src/views/HandHygiene.vue",
+    "src/views/RoleRank.vue",
+    "src/views/RoleRankList.vue",
+    "src/views/UserFeedback.vue"
   ]
 }

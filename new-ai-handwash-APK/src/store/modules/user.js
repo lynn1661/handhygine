@@ -1,4 +1,4 @@
-import { userLogin, userRegister, updateRole, append_rating, get_rank, getRankList, getAllRank } from "@/services/HandHygiene.js";
+import { updateRole, append_rating, get_rank } from "@/services/HandHygiene.js";
 
 export default {
   namespaced: true,
@@ -51,24 +51,6 @@ export default {
     }
   },
   actions: {
-    async login({ commit }, payload) {
-      try {
-        const { data } = await userLogin(payload);
-        commit("updateAccountID", data.accountID);
-        return data;
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    async register({ commit }, payload) {
-      try {
-        const { data } = await userRegister(payload);
-        return data;
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
-    },
     async updateRole({ commit }, payload) {
       try {
         const { data } = await updateRole(payload);
@@ -80,7 +62,13 @@ export default {
     },
     async rating({ commit }, payload) {
       try {
-        const { data } = await append_rating(payload);
+        // 将id重命名为sessionID以匹配后端API
+        const requestData = { 
+          sessionID: payload.id,
+          points: payload.points,
+          rating: payload.rating
+        };
+        const { data } = await append_rating(requestData);
         return data;
       } catch (error) {
         console.log(error);
@@ -88,25 +76,9 @@ export default {
     },
     async rank({ commit }, payload) {
       try {
-        const { data } = await get_rank(payload);
-        return data;
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    async ranklist({ commit }, payload) {
-      try {
-        console.log("Payload in ranklist action:", payload);
-        const { data } = await getRankList(payload);
-        return data;
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    async allrank({ commit }, payload) {
-      try {
-        console.log("Payload in allrank action:", payload);
-        const { data } = await getAllRank(payload);
+        // 将id重命名为sessionID以匹配后端API
+        const requestData = { sessionID: payload.id };
+        const { data } = await get_rank(requestData);
         return data;
       } catch (error) {
         console.log(error);

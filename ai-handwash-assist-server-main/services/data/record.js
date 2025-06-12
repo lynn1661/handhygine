@@ -1,16 +1,15 @@
 // record.js
-// 改写说明：
-//   1) append_rating({ data }): 根据 data.id 先 SELECT 一行 user_info，
-//      然后把 JSON 字段 parse 出来，push 新的 step_points / record_time，计算新的 total，最后 UPDATE 回去
-//   2) get_rank({ data }): 根据 data.id SELECT 一行，读取 total、step_points，然后再去读取全部用户的 total，计算该用户的排名百分比和等级
+// 简化版本：
+//   1) append_rating({ data }): 根据 data.sessionID 更新训练会话的记录
+//   2) get_rank({ data }): 根据 data.sessionID 获取排名信息
 
 const { getDb } = require('../../sqliteHelper');
 
-// append_rating: 往某个 user_info 记录里追加一步评分、视频记录等
+// append_rating: 往某个训练会话记录里追加一步评分
 const append_rating = async ({ data }) => {
-  // 必须带 data.id
-  if (!data.id) {
-    const err = new Error('missing field. required field: id');
+  // 必须带 data.sessionID
+  if (!data.sessionID) {
+    const err = new Error('missing field. required field: sessionID');
     err.code = 400;
     throw err;
   }
@@ -18,9 +17,9 @@ const append_rating = async ({ data }) => {
   const db = await getDb();
 
   // 1) 读取这条记录
-  const row = await db.get(`SELECT * FROM user_info WHERE id = ?;`, data.id);
+  const row = await db.get(`SELECT * FROM user_info WHERE id = ?;`, data.sessionID);
   if (!row) {
-    const err = new Error('Record not found');
+    const err = new Error('Session not found');
     err.code = 404;
     throw err;
   }
@@ -78,7 +77,7 @@ const append_rating = async ({ data }) => {
     JSON.stringify(record_time),
     total,
     mappedTotal,
-    data.id
+    data.sessionID
   );
 
   if (result.stmt.changes === 0) {
@@ -90,20 +89,20 @@ const append_rating = async ({ data }) => {
   return { message: 'Successfully updated' };
 };
 
-// get_rank: 取出单个用户的 total、step_points，然后与所有用户的 total 做比较，算出排名百分比、等级
+// get_rank: 取出单个训练会话的 total、step_points，然后与所有记录的 total 做比较，算出排名百分比、等级
 const get_rank = async ({ data }) => {
-  if (!data.id) {
-    const err = new Error('Missing field: id is required');
+  if (!data.sessionID) {
+    const err = new Error('Missing field: sessionID is required');
     err.code = 400;
     throw err;
   }
 
   const db = await getDb();
 
-  // 1) 先读取该用户整行
-  const row = await db.get(`SELECT * FROM user_info WHERE id = ?;`, data.id);
+  // 1) 先读取该会话记录
+  const row = await db.get(`SELECT * FROM user_info WHERE id = ?;`, data.sessionID);
   if (!row) {
-    const err = new Error('User data not found');
+    const err = new Error('Session data not found');
     err.code = 500;
     throw err;
   }
@@ -119,16 +118,16 @@ const get_rank = async ({ data }) => {
     step_points = [];
   }
 
-  // 3) 读取 allUsers（只要 total 值用于排名），不附带 JSON 字段
+  // 3) 读取所有记录（只要 total 值用于排名）
   const allRows = await db.all(`SELECT total FROM user_info;`);
 
-  // 把所有用户的 total 收集到一个数组
+  // 把所有记录的 total 收集到一个数组
   const allScores = allRows
     .map((r) => (typeof r.total === 'number' ? r.total : 0))
     .filter((v) => v !== undefined && v !== null);
 
   if (!allScores.length) {
-    const err = new Error('No user data found');
+    const err = new Error('No training data found');
     err.code = 500;
     throw err;
   }

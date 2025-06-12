@@ -549,7 +549,7 @@ async function stopCountdown() {
     try {
       // 存储评分
       await store.dispatch("user/rating", {
-        id: sessionStorage.getItem("accountSerialNumber") || localStorage.getItem("accountSerialNumber"),
+        id: sessionStorage.getItem("sessionID") || localStorage.getItem("sessionID"),
         rating: text.value,
         points: parseFloat((trueRatio / 7).toFixed(3)),
       });
@@ -726,7 +726,7 @@ onMounted(() => {
   console.log(`组件挂载，当前步骤: ${currentStep.value}，应显示图片: ${getStepGif()}`);
   
   downloadName.value = getTime(
-    sessionStorage.getItem("accountSerialNumber") || localStorage.getItem("accountSerialNumber")
+    sessionStorage.getItem("sessionID") || localStorage.getItem("sessionID")
   );
   
   // 重置评估状态
@@ -1380,11 +1380,9 @@ watch(countdownStarted, (newVal) => {
 // 返回首页
 const backHome = () => {
   redirectTimeoutId.value = false;
-  localStorage.removeItem("accountID");
-  sessionStorage.removeItem("accountID");
-  localStorage.removeItem("accountSerialNumber");
-  sessionStorage.removeItem("accountSerialNumber");
+  // 清理视频数据
   store.commit("user/clearVideoBlob");
+  // 返回首页
   router.push({
     path: "/",
   });

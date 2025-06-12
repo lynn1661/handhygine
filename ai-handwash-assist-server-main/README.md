@@ -26,19 +26,12 @@ npm start
 
 ## 🗄️ 数据库
 
-使用 SQLite 数据库 (`./data.db`)，包含以下表：
+使用 SQLite 数据库 (`./data.db`)，简化版本，无需登录系统：
 
-### account 表
-- `accountID` (TEXT, PRIMARY KEY) - 账户ID
-- `password` (TEXT) - bcrypt 哈希密码
-
-### user_info 表
-- `id` (INTEGER, PRIMARY KEY, AUTOINCREMENT) - 自增ID
-- `accountID` (TEXT) - 账户ID（外键）
-- `userID` (TEXT) - 用户ID
-- `role` (TEXT) - 用户角色
+### user_info 表（训练会话记录）
+- `id` (INTEGER, PRIMARY KEY, AUTOINCREMENT) - 会话ID
+- `role` (TEXT) - 用户角色（Doctor, Nurse, Student等）
 - `start_time` (TEXT) - 开始时间
-
 - `step_points` (TEXT) - 步骤得分（JSON数组）
 - `total` (REAL) - 原始总分
 - `mapped_total` (REAL) - 映射后的总分
@@ -50,31 +43,37 @@ npm start
 - `GET /` - 服务器信息
 - `GET /health` - 健康检查
 
-### 用户相关
-- `POST /user/info/login` - 用户登录
-- `POST /user/info/fill` - 填写用户信息
+### 会话相关
+- `POST /user/info/fill` - 创建训练会话（只需提供角色）
 - `POST /user/hash` - 密码哈希
 
 ### 数据相关
-- `POST /data/record/append_rating` - 添加评分记录
-- `POST /data/record/get_rank` - 获取用户排名
-- `POST /data/rank/getRankList` - 获取排行列表
-- `POST /data/rank/getAllRank` - 获取所有排名
+- `POST /data/record/append_rating` - 添加评分记录（使用sessionID）
+- `POST /data/record/get_rank` - 获取会话排名（使用sessionID）
+- `POST /data/rank/getRankList` - 获取排行列表（按角色筛选）
+- `POST /data/rank/getAllRank` - 获取所有排名（统计所有会话）
 
 ## 📝 API 使用示例
 
-### 用户登录
-```bash
-curl -X POST http://localhost:3001/user/info/login \
-  -H "Content-Type: application/json" \
-  -d '{"accountID":"testuser123","password":"password123"}'
-```
-
-### 填写用户信息
+### 创建训练会话
 ```bash
 curl -X POST http://localhost:3001/user/info/fill \
   -H "Content-Type: application/json" \
-  -d '{"accountID":"testuser123","userID":"user001","role":"student"}'
+  -d '{"role":"Doctor"}'
+```
+
+### 添加评分记录
+```bash
+curl -X POST http://localhost:3001/data/record/append_rating \
+  -H "Content-Type: application/json" \
+  -d '{"sessionID":1,"points":8.5}'
+```
+
+### 获取会话排名
+```bash
+curl -X POST http://localhost:3001/data/record/get_rank \
+  -H "Content-Type: application/json" \
+  -d '{"sessionID":1}'
 ```
 
 ### 添加评分记录

@@ -30,25 +30,13 @@ async function initDb() {
     driver: sqlite3.Database,
   });
 
-  // 创建 account 表（如果不存在）
-  // 字段：accountID（TEXT PK），password（TEXT，用 bcrypt 存储的哈希）
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS account (
-      accountID TEXT PRIMARY KEY,
-      password  TEXT NOT NULL
-      -- 如果有其他字段，例如 email、name，可在此添加
-    );
-  `);
-
   // 创建 user_info 表（如果不存在）
-  // 为了兼容原先 Mongo 方案里可能出现的数组/对象字段，这里将这些字段全部存在 JSON TEXT
+  // 简化版本，不需要账户系统，每次训练都是独立的记录
   await db.exec(`
     CREATE TABLE IF NOT EXISTS user_info (
       id               INTEGER PRIMARY KEY AUTOINCREMENT,
-      accountID        TEXT NOT NULL,           -- 外键, 对应 account.accountID
-      userID           TEXT NOT NULL,
-      role             TEXT NOT NULL,
-      start_time       TEXT NOT NULL,           -- e.g. "DD/M/YYYY 上午/下午 hh:mm:ss"
+      role             TEXT NOT NULL,           -- 用户角色（Doctor, Nurse, Student等）
+      start_time       TEXT NOT NULL,           -- 开始时间 e.g. "DD/M/YYYY 上午/下午 hh:mm:ss"
       step_points      TEXT,                    -- JSON 数组文本
       total            REAL DEFAULT 0,          -- 原始总分数值
       mapped_total     REAL DEFAULT 0,          -- 映射后的总分数值
@@ -67,17 +55,28 @@ async function initDb() {
     }
   }
 
-  // 检查并删除不需要的 step_correctness 字段
+  // 检查并提示删除不需要的字段
   try {
     const tableInfo = await db.all(`PRAGMA table_info(user_info)`);
     const hasStepCorrectness = tableInfo.some(col => col.name === 'step_correctness');
+    const hasAccountID = tableInfo.some(col => col.name === 'accountID');
+    const hasUserID = tableInfo.some(col => col.name === 'userID');
     
-    if (hasStepCorrectness) {
-      console.log('⚠️ 检测到 step_correctness 字段，建议运行迁移脚本删除:');
-      console.log('   npm run migrate:remove-step-correctness');
+    if (hasStepCorrectness || hasAccountID || hasUserID) {
+      console.log('⚠️ 检测到旧的字段，建议运行迁移脚本:');
+      if (hasStepCorrectness) console.log('   - step_correctness 字段');
+      if (hasAccountID) console.log('   - accountID 字段');
+      if (hasUserID) console.log('   - userID 字段');
+      console.log('   运行: npm run migrate:simplify-database');
+    }
+
+    // 检查是否存在account表
+    const tables = await db.all(`SELECT name FROM sqlite_master WHERE type='table' AND name='account'`);
+    if (tables.length > 0) {
+      console.log('⚠️ 检测到 account 表，建议运行迁移脚本删除');
     }
   } catch (error) {
-    console.warn('⚠️ 检查 step_correctness 字段时出现问题:', error.message);
+    console.warn('⚠️ 检查数据库结构时出现问题:', error.message);
   }
 
   return db;

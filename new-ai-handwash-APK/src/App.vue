@@ -44,11 +44,7 @@ const showMonitor = ref(false);
 
 // 定义需要排除socket监控的页面路径
 const excludedPages = [
-  '/admin',
-  '/allrole',
-  '/rolerank',
-  '/roleranklist',
-  '/feedback'
+  // 目前没有需要排除的页面，所有页面都允许socket监控
 ];
 
 // 检查当前页面是否在排除列表中

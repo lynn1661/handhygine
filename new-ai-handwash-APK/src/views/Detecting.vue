@@ -11,8 +11,8 @@
           <el-button @click="switchToAuditingMode" class="auditing-mode-button">
             Switch to Auditing Mode
           </el-button>
-          <div class="back-btn" @click="backHome">
-            <img src="../assets/blueHome.png" alt="返回首页" />
+        <div class="back-btn" @click="backHome">
+          <img src="../assets/blueHome.png" alt="返回首页" />
           </div>
         </div>
       </div>
@@ -117,10 +117,7 @@ const startCountdown = () => {
 
 const backHome = () => {
   state.redirectTimeoutId = false;
-  localStorage.removeItem("accountID");
-  sessionStorage.removeItem("accountID");
-  localStorage.removeItem("accountSerialNumber");
-  sessionStorage.removeItem("accountSerialNumber");
+  // 返回首页
   router.push({
     path: "/",
   });

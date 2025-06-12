@@ -1,8 +1,8 @@
 // rank.js
-// 改写说明：
-//   - 需要根据 accountID、role、dateRange 等条件，把 user_info 表中的 JSON 字段 load 出来
-//   - 原来 filter 中有 start_time 的正则匹配，这里可以用 SQLite LIKE 或正则表达式匹配
-//   - 需要按 total 字段 DESC 排序，计算分组统计等
+// 简化版本：
+//   - 根据 role、dateRange 等条件查询训练记录
+//   - 按 total 字段 DESC 排序，计算分组统计等
+//   - 不再需要 accountID 过滤
 
 const { getDb } = require('../../sqliteHelper');
 
@@ -20,16 +20,15 @@ const formatDateForQuery = (date) => {
   return `${day}/${month}/${year}`; // 例如 "6/5/2025"
 };
 
-// getRankList: 按照 accountID、role、日期范围来筛选，该用户的所有记录，返回按 total DESC 排序的列表
+// getRankList: 按照 role、日期范围来筛选训练记录，返回按 total DESC 排序的列表
 const getRankList = async ({ data }) => {
   const role = data.role || 'Doctor';
-  const accountID = data.accountID;
 
   const db = await getDb();
 
-  // 构造 datePatterns 数组，然后转成一个 SQL LIKE 条件 ：start_time LIKE 'pattern%' OR start_time LIKE 'pattern%'
-  let whereClauses = [`accountID = ?`, `role = ?`, `total IS NOT NULL`];
-  const params = [accountID, role];
+  // 构造 datePatterns 数组，然后转成一个 SQL LIKE 条件
+  let whereClauses = [`role = ?`, `total IS NOT NULL`];
+  const params = [role];
 
   if (data.dateRange && data.dateRange.start && data.dateRange.end) {
     const startDate = parseDate(data.dateRange.start);
@@ -58,11 +57,11 @@ const getRankList = async ({ data }) => {
 
   // 完整的查询条件字符串
   const whereStr = whereClauses.join(' AND ');
-  const sqlAll = `SELECT * FROM user_info WHERE accountID = ? AND role = ? AND total IS NOT NULL ORDER BY total DESC;`;
+  const sqlAll = `SELECT * FROM user_info WHERE role = ? AND total IS NOT NULL ORDER BY total DESC;`;
   const sqlFiltered = `SELECT * FROM user_info WHERE ${whereStr} ORDER BY total DESC;`;
 
   // 调试用：先查询所有（不考虑日期），用于打印检查
-  const allRows = await db.all(sqlAll, [accountID, role]);
+  const allRows = await db.all(sqlAll, [role]);
   console.log(`总共找到 ${allRows.length} 条记录（不考虑日期筛选）`);
   if (allRows.length > 0) {
     console.log(
@@ -85,12 +84,11 @@ const getRankList = async ({ data }) => {
   const records = filteredRows.map((row) => {
     return {
       id: row.id,
-      accountID: row.accountID,
-      userID: row.userID,
       role: row.role,
       start_time: row.start_time,
       step_points: JSON.parse(row.step_points || '[]'),
       total: row.total,
+      mapped_total: row.mapped_total,
       record_time: JSON.parse(row.record_time || '[]'),
     };
   });
@@ -101,14 +99,13 @@ const getRankList = async ({ data }) => {
   };
 };
 
-// getAllRank: 按 accountID 查询所有（不分 role），然后按照 total 做排行、分组统计
+// getAllRank: 查询所有训练记录（不分 role），然后按照 total 做排行、分组统计
 const getAllRank = async ({ data }) => {
-  const accountID = data.accountID;
   const db = await getDb();
 
   // 构造与上面相似的日期过滤条件
-  let whereClauses = [`accountID = ?`, `total IS NOT NULL`];
-  const params = [accountID];
+  let whereClauses = [`total IS NOT NULL`];
+  const params = [];
 
   if (data.dateRange && data.dateRange.start && data.dateRange.end) {
     const startDate = parseDate(data.dateRange.start);
@@ -132,11 +129,11 @@ const getAllRank = async ({ data }) => {
   }
 
   const whereStr = whereClauses.join(' AND ');
-  const sqlAll = `SELECT * FROM user_info WHERE accountID = ? AND total IS NOT NULL ORDER BY total DESC;`;
+  const sqlAll = `SELECT * FROM user_info WHERE total IS NOT NULL ORDER BY total DESC;`;
   const sqlFiltered = `SELECT * FROM user_info WHERE ${whereStr} ORDER BY total DESC;`;
 
   // 调试：先打印全部
-  const allRows = await db.all(sqlAll, [accountID]);
+  const allRows = await db.all(sqlAll, []);
   console.log(`总共找到 ${allRows.length} 条记录（不考虑日期）`);
 
   // 再打印过滤后的
@@ -148,12 +145,11 @@ const getAllRank = async ({ data }) => {
   filteredRows.forEach((row) => {
     const rec = {
       id: row.id,
-      accountID: row.accountID,
-      userID: row.userID,
       role: row.role,
       start_time: row.start_time,
       step_points: JSON.parse(row.step_points || '[]'),
       total: row.total,
+      mapped_total: row.mapped_total,
       record_time: JSON.parse(row.record_time || '[]'),
     };
 

@@ -11,24 +11,15 @@
           <el-button @click="switchToAuditingMode" class="auditing-mode-button">
             Switch to Auditing Mode
           </el-button>
-          <div class="back-btn" @click="backHome">
-            <img src="../assets/home.png" alt="返回首页" />
+        <div class="back-btn" @click="backHome">
+          <img src="../assets/home.png" alt="返回首页" />
           </div>
         </div>
       </div>
 
       <!-- 主要内容区域 -->
       <div class="main-section">
-        <!-- 用户ID输入区域 -->
-        <div class="user-input-section">
-          <el-input
-            v-model="userID"
-            :placeholder="$t('HandHygiene.userID') "
-            class="user-input"
-          />
-        </div>
-
-        <!-- 角色选择区域 - 移除标题 -->
+        <!-- 角色选择区域 -->
         <div class="role-selection">
           <div class="role-buttons">
             <button @click="selectRole('Doctor')" class="role-button doctor-btn">
@@ -61,28 +52,32 @@ import { onMounted, onUnmounted } from 'vue';
 const store = useStore();
 const router = useRouter();
 const t = useI18n();
-const userID = ref("");
 
 async function selectRole(role) {
-  const accountID = localStorage.getItem("accountID");
-  const res = await store.dispatch("user/updateRole", { 
-    accountID: accountID,
-    userID: userID.value,
-    role: role, 
-  });
-  localStorage.setItem("accountSerialNumber", res.ID);
-  sessionStorage.setItem("accountSerialNumber", res.ID);
-  router.push({
-    path: "/detecting",
-  });
+  try {
+    const res = await store.dispatch("user/updateRole", { 
+      role: role, 
+    });
+    // 存储会话ID供后续使用
+    localStorage.setItem("sessionID", res.ID);
+    sessionStorage.setItem("sessionID", res.ID);
+    router.push({
+      path: "/detecting",
+    });
+  } catch (error) {
+    console.error("Failed to create training session:", error);
+    ElNotification({
+      title: "Error",
+      message: "Failed to start training session. Please try again.",
+      type: "error"
+    });
+  }
 };
 
 const backHome = () => {
-  localStorage.removeItem("accountID");
-  sessionStorage.removeItem("accountID");
-  localStorage.removeItem("accountSerialNumber");
-  sessionStorage.removeItem("accountSerialNumber");
+  // 清理视频数据
   store.commit("user/clearVideoBlob");
+  // 返回首页
   router.push({
     path: "/",
   });
@@ -161,7 +156,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
-  margin-bottom: -1rem;
+  margin-bottom: 1rem;
   width: 100%;
   margin-top: 1.5rem;
 }
@@ -231,51 +226,16 @@ onUnmounted(() => {
   }
 }
 
-/* 主要内容区域 */
+/* 主要内容区域 - 居中显示 */
 .main-section {
   display: flex;
   flex-direction: column;
   width: 100%;
   box-sizing: border-box;
   flex: 1;
-  gap: 3rem;
-  justify-content: flex-start;
-  align-items: center;
-  margin-top: 0.5rem;
-  padding-bottom: 4rem;
-}
-
-/* 用户ID输入区域 */
-.user-input-section {
-  width: 100%;
-  max-width: 650px;
-  display: flex;
   justify-content: center;
-}
-
-.user-input {
-  width: 100%;
-  
-  :deep(.el-input__wrapper) {
-    background: rgba(245, 248, 253, 0.9);
-    border-radius: 30px;
-    height: 70px;
-    box-shadow: 0 6px 16px rgba(15, 56, 124, 0.15);
-    border: 1px solid rgba(15, 56, 124, 0.1);
-  }
-  
-  :deep(.el-input__inner) {
-    font-family: "Helvetica85", sans-serif;
-    font-size: 1.4rem;
-    color: #0f387c;
-    height: 70px;
-    padding: 0 2rem;
-    
-    &::placeholder {
-      color: #7791bc;
-      opacity: 0.8;
-    }
-  }
+  align-items: center;
+  padding: 2rem 0;
 }
 
 /* 角色选择区域 */
@@ -285,19 +245,42 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  //margin-top: 2rem;
+  gap: 2rem;
+}
+
+.role-title {
+  text-align: center;
+  margin-bottom: 1rem;
+  
+  h2 {
+    font-family: "Helvetica85", sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0f387c;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(15, 56, 124, 0.2);
+    letter-spacing: 1px;
+    
+    @media (max-width: 768px) {
+      font-size: 1.8rem;
+    }
+    
+    @media (max-width: 480px) {
+      font-size: 1.6rem;
+    }
+  }
 }
 
 .role-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
+  gap: 1.5rem;
   width: 100%;
 }
 
 .role-button {
   width: 100%;
-  height: 85px;
+  height: 100px;
   background-size: cover;
   background-position: center;
   border-radius: 20px;
@@ -305,7 +288,7 @@ onUnmounted(() => {
   color: white;
   font-family: "Helvetica85", sans-serif;
   font-weight: 700;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   transition: all 0.3s;
   position: relative;
@@ -355,51 +338,47 @@ onUnmounted(() => {
 @media (max-width: 768px) {
   .role-buttons {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 1.25rem;
   }
   
   .role-button {
-    height: 75px;
-    font-size: 1.2rem;
-  }
-  
-  .user-input {
-    :deep(.el-input__wrapper) {
-      height: 60px;
-    }
-    
-    :deep(.el-input__inner) {
-      height: 60px;
-      font-size: 1.25rem;
-    }
+    height: 85px;
+    font-size: 1.3rem;
   }
   
   .main-section {
-    gap: 2.5rem;
+    padding: 1.5rem 0;
   }
 }
 
 @media (max-width: 480px) {
   .role-buttons {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
+    gap: 1rem;
   }
   
   .role-button {
-    height: 70px;
-    font-size: 1.1rem;
+    height: 80px;
+    font-size: 1.2rem;
+  }
+  
+  .role-selection {
+    gap: 1.5rem;
   }
 }
 
 @media (max-height: 700px) {
   .role-button {
-    height: 70px;
-    font-size: 1.2rem;
+    height: 85px;
+    font-size: 1.3rem;
   }
   
   .main-section {
-    margin-top: 5rem;
-    gap: 3rem;
+    padding: 1rem 0;
+  }
+  
+  .role-selection {
+    gap: 1.5rem;
   }
 }
 </style>

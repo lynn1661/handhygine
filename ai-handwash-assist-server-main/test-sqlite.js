@@ -18,34 +18,17 @@ async function testDatabase() {
     `);
     console.log('📋 已创建的表:', tables.map(t => t.name));
     
-    // 3. 测试插入账户数据
-    console.log('➕ 测试插入账户数据...');
-    const testAccountID = 'test_' + Date.now();
-    const testPassword = 'test_password_hash';
+    // 3. 测试数据库简化后的结构
+    console.log('🔍 测试简化后的数据库结构...');
     
-    await db.run(`
-      INSERT INTO account (accountID, password) 
-      VALUES (?, ?)
-    `, [testAccountID, testPassword]);
-    console.log('✅ 账户数据插入成功');
-    
-    // 4. 测试查询账户数据
-    console.log('🔍 测试查询账户数据...');
-    const account = await db.get(`
-      SELECT * FROM account WHERE accountID = ?
-    `, [testAccountID]);
-    console.log('📄 查询到的账户:', account);
-    
-    // 5. 测试插入用户信息数据
-    console.log('➕ 测试插入用户信息数据...');
-    const userInfo = {
-      accountID: testAccountID,
-      userID: 'user_123',
+    // 4. 测试插入训练会话数据
+    console.log('➕ 测试插入训练会话数据...');
+    const sessionInfo = {
       role: 'student',
       start_time: new Date().toLocaleString('zh-CN'),
       step_points: JSON.stringify([8.5, 7.2, 9.1]),
       total: 24.8,
-      mapped_total: 0,
+      mapped_total: 35,
       record_time: JSON.stringify([{
         timestamp: Date.now(),
         datestring: new Date().toISOString()
@@ -54,59 +37,48 @@ async function testDatabase() {
     
     await db.run(`
       INSERT INTO user_info (
-        accountID, userID, role, start_time,
-        step_points, total, mapped_total, record_time
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        role, start_time, step_points, total, mapped_total, record_time
+      ) VALUES (?, ?, ?, ?, ?, ?)
     `, [
-      userInfo.accountID, userInfo.userID, userInfo.role, userInfo.start_time,
-      userInfo.step_points, userInfo.total, userInfo.mapped_total, userInfo.record_time
+      sessionInfo.role, sessionInfo.start_time,
+      sessionInfo.step_points, sessionInfo.total, sessionInfo.mapped_total, sessionInfo.record_time
     ]);
-    console.log('✅ 用户信息数据插入成功');
+    console.log('✅ 训练会话数据插入成功');
     
-    // 6. 测试查询用户信息数据
-    console.log('🔍 测试查询用户信息数据...');
-    const userInfoResult = await db.get(`
-      SELECT * FROM user_info WHERE accountID = ?
-    `, [testAccountID]);
-    console.log('📄 查询到的用户信息:', userInfoResult);
+    // 5. 测试查询训练会话数据
+    console.log('🔍 测试查询训练会话数据...');
+    const sessionResult = await db.get(`
+      SELECT * FROM user_info ORDER BY id DESC LIMIT 1
+    `);
+    console.log('📄 查询到的训练会话:', sessionResult);
     
-    // 7. 测试联表查询
-    console.log('🔍 测试联表查询...');
-    const joinResult = await db.all(`
-      SELECT a.accountID, a.password, u.userID, u.role, u.total
-      FROM account a
-      LEFT JOIN user_info u ON a.accountID = u.accountID
-      WHERE a.accountID = ?
-    `, [testAccountID]);
-    console.log('📄 联表查询结果:', joinResult);
-    
-    // 8. 测试统计查询
+    // 6. 测试统计查询
     console.log('🔍 测试统计查询...');
     const stats = await db.all(`
       SELECT 
-        COUNT(*) as total_users,
+        COUNT(*) as total_sessions,
         AVG(total) as avg_score,
         MAX(total) as max_score,
-        MIN(total) as min_score
+        MIN(total) as min_score,
+        AVG(mapped_total) as avg_mapped_score
       FROM user_info
     `);
     console.log('📊 统计信息:', stats[0]);
     
-    // 9. 清理测试数据
+    // 7. 清理测试数据
     console.log('🧹 清理测试数据...');
-    await db.run('DELETE FROM user_info WHERE accountID = ?', [testAccountID]);
-    await db.run('DELETE FROM account WHERE accountID = ?', [testAccountID]);
+    await db.run('DELETE FROM user_info WHERE id = ?', [sessionResult.id]);
     console.log('✅ 测试数据清理完成');
     
     console.log('🎉 SQLite 数据库测试全部通过！');
-    console.log('📝 数据库功能验证结果:');
+    console.log('📝 简化数据库功能验证结果:');
     console.log('  ✅ 数据库连接正常');
-    console.log('  ✅ 表结构创建正常');
-    console.log('  ✅ 数据插入正常');
-    console.log('  ✅ 数据查询正常');
-    console.log('  ✅ 联表查询正常');
+    console.log('  ✅ 简化表结构创建正常');
+    console.log('  ✅ 训练会话数据插入正常');
+    console.log('  ✅ 训练会话数据查询正常');
     console.log('  ✅ 统计查询正常');
     console.log('  ✅ 数据清理正常');
+    console.log('  ✅ 无需登录系统运行正常');
     
   } catch (error) {
     console.error('❌ 数据库测试失败:', error);

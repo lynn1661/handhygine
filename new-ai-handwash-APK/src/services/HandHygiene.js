@@ -1,17 +1,5 @@
 import axiosInstance from "@/utils/axiosInstance";
 
-export async function userLogin(params) {
-  return axiosInstance.post("/user/info/login", {
-    ...params,
-  });
-}
-
-export async function userRegister(params) {
-  return axiosInstance.post("/user/info/register", {
-    ...params,
-  });
-}
-
 export async function updateRole(params) {
   return axiosInstance.post("/user/info/fill", {
     ...params,
@@ -27,18 +15,6 @@ export async function append_rating(params) {
 
 export async function get_rank(params) {
   return axiosInstance.post("/data/record/get_rank", {
-    ...params,
-  });
-}
-
-export async function getRankList(params) {
-  return axiosInstance.post("/data/rank/getRankList", {
-    ...params,
-  });
-}
-
-export async function getAllRank(params) {
-  return axiosInstance.post("/data/rank/getAllRank", {
     ...params,
   });
 }
