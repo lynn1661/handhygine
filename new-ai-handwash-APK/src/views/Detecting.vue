@@ -124,7 +124,7 @@ const backHome = () => {
 };
 
 const switchToAuditingMode = () => {
-  window.open("http://localhost:8080", "_blank");
+  window.location.href = "http://localhost:8080";
 };
 
 const stopCountdown = () => {
