@@ -77,23 +77,24 @@ const store = useStore();
 // 自动创建会话的函数
 const createSession = async () => {
   try {
-    // 检查是否已有会话ID
-    const existingSessionID = sessionStorage.getItem("sessionID") || localStorage.getItem("sessionID");
-    if (existingSessionID) {
-      console.log("已存在会话ID:", existingSessionID);
-      return existingSessionID;
-    }
-
-    // 创建新的会话，使用默认角色
-    const res = await store.dispatch("user/updateRole", { 
-      role: "User", // 使用默认角色
-    });
+    // 每次访问Detecting页面都创建新的会话
+    console.log("开始创建新的训练会话...");
     
-    // 存储会话ID
+    // 先清理所有旧的会话数据
+    localStorage.removeItem("sessionID");
+    sessionStorage.removeItem("sessionID");
+    console.log("已清理旧的sessionID");
+
+    // 创建新的会话
+    const res = await store.dispatch("user/updateRole", {});
+    
+    // 存储新的会话ID
     localStorage.setItem("sessionID", res.ID);
     sessionStorage.setItem("sessionID", res.ID);
     
     console.log("创建新会话成功，ID:", res.ID);
+    console.log("localStorage sessionID:", localStorage.getItem("sessionID"));
+    console.log("sessionStorage sessionID:", sessionStorage.getItem("sessionID"));
     return res.ID;
   } catch (error) {
     console.error("创建会话失败:", error);
@@ -252,6 +253,10 @@ onMounted(() => {
         console.log("组件在初始化过程中被卸载，取消初始化");
         return;
       }
+      
+      // 清理之前的数据
+      store.commit("user/clearVideoBlob");
+      store.commit("user/resetPerformanceMetrics");
       
       // 首先创建会话
       await createSession();

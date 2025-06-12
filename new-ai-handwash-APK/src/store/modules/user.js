@@ -4,7 +4,6 @@ export default {
   namespaced: true,
   state: {
     userID: "",
-    role: "",
     blobs: [],
     performanceMetrics: {
       jitterReduction: 0,
@@ -23,9 +22,7 @@ export default {
     updateAccountID(state, payload) {
       state.accountID = payload;
     },
-    setUserRole(state, role) {
-      state.role = role;
-    },
+
     addBlob(state, payload) {
       state.blobs.push(payload);
     },
@@ -54,9 +51,6 @@ export default {
     async updateRole({ commit }, payload) {
       try {
         const { data } = await createSession(payload);
-        if (payload.role) {
-          commit("setUserRole", payload.role);
-        }
         return data;
       } catch (error) {
         console.log(error);

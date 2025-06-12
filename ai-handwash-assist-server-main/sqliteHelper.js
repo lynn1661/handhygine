@@ -31,11 +31,10 @@ async function initDb() {
   });
 
   // 创建 user_info 表（如果不存在）
-  // 简化版本，不需要账户系统，每次训练都是独立的记录
+  // 简化版本，不需要账户系统和角色，每次训练都是独立的记录
   await db.exec(`
     CREATE TABLE IF NOT EXISTS user_info (
       id               INTEGER PRIMARY KEY AUTOINCREMENT,
-      role             TEXT NOT NULL,           -- 用户角色（Doctor, Nurse, Student等）
       start_time       TEXT NOT NULL,           -- 开始时间 e.g. "DD/M/YYYY 上午/下午 hh:mm:ss"
       step_points      TEXT,                    -- JSON 数组文本
       total            REAL DEFAULT 0,          -- 原始总分数值

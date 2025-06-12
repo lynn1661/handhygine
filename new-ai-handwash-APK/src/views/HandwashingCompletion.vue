@@ -298,7 +298,9 @@ onMounted(async () => {
   // Dispatch the 'rank' action to retrieve the user's ranking data from the store
   const id =
     sessionStorage.getItem("sessionID") || localStorage.getItem("sessionID");
-  console.log("ID being sent: ", id); // Debugging step
+  console.log("HandwashingCompletion.vue - 使用的sessionID:", id);
+  console.log("localStorage sessionID:", localStorage.getItem("sessionID"));
+  console.log("sessionStorage sessionID:", sessionStorage.getItem("sessionID"));
   const res = await store.dispatch("user/rank", { id });
   console.log("Response from get_rank:", res); // Debugging step
 

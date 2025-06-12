@@ -548,8 +548,10 @@ async function stopCountdown() {
 
     try {
       // 存储评分
+      const currentSessionID = sessionStorage.getItem("sessionID") || localStorage.getItem("sessionID");
+      console.log("Hands.vue - 使用的sessionID:", currentSessionID);
       await store.dispatch("user/rating", {
-        id: sessionStorage.getItem("sessionID") || localStorage.getItem("sessionID"),
+        id: currentSessionID,
         rating: text.value,
         points: parseFloat((trueRatio / 7).toFixed(3)),
       });
