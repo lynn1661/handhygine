@@ -53,8 +53,8 @@ jobs:
         echo "前端服务正常"
         
         echo "检查后端服务..."
-        # 尝试实际的API端点（基于micro-server框架）
-        curl -f http://${{ secrets.EC2_HOST }}:3000/data/rank || curl -f http://${{ secrets.EC2_HOST }}:3000/user/info || curl -f http://${{ secrets.EC2_HOST }}:3000/socket.io/ || echo "后端API端点检查失败，但服务正在运行"
+        # 使用确认可用的API端点
+        curl -f http://${{ secrets.EC2_HOST }}:3000/api/data/rank || curl -f http://${{ secrets.EC2_HOST }}:3000/api/user/info || curl -f http://${{ secrets.EC2_HOST }}:3000/services/data/rank || echo "后端API端点检查失败，但服务正在运行"
         
         echo "检查AI服务..."
         curl -f http://${{ secrets.EC2_HOST }}:9500 || exit 1
