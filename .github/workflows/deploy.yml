@@ -1,0 +1,54 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ laptoptest ]
+  pull_request:
+    branches: [ laptoptest ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+        
+    - name: Deploy to EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          # 进入项目目录
+          cd /home/${{ secrets.EC2_USER }}/handhygiene || { echo "项目目录不存在"; exit 1; }
+          
+          # 停止现有服务
+          sudo docker-compose down || true
+          
+          # 拉取最新代码
+          git fetch origin
+          git checkout laptoptest
+          git pull origin laptoptest
+          
+          # 清理Docker镜像缓存
+          sudo docker system prune -f
+          
+          # 重新构建并启动服务
+          sudo docker-compose up -d --build
+          
+          # 检查服务状态
+          sudo docker-compose ps
+          
+          echo "部署完成！"
+        EOF
+        
+    - name: Health Check
+      run: |
+        sleep 30
+        curl -f http://${{ secrets.EC2_HOST }}:8080 || exit 1
+        curl -f http://${{ secrets.EC2_HOST }}:3000 || exit 1
+        curl -f http://${{ secrets.EC2_HOST }}:9500 || exit 1
+        echo "健康检查通过！" 

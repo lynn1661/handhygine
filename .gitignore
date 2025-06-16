@@ -2,3 +2,31 @@
 new-ai-handwash-AR
 nginx-update.conf
 ai-handwash-assist-server-main/venv39
+handhygiene
+
+# Docker相关
+.docker/
+
+# 系统文件
+.DS_Store
+*.log
+
+# IDE文件
+.vscode/
+.idea/
+
+# 环境变量文件
+.env
+.env.local
+
+# Node modules (如果有)
+node_modules/
+
+# Python缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# 备份文件
+*.bak
+*.backup
