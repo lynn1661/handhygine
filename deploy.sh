@@ -57,8 +57,8 @@ done
 # 检查后端服务
 backend_ok=false
 for i in {1..5}; do
-    # 尝试多个可能的端点
-    if curl -f http://localhost:3000/api > /dev/null 2>&1 || curl -f http://localhost:3000/health > /dev/null 2>&1 || curl -f http://localhost:3000/status > /dev/null 2>&1; then
+    # 尝试实际的API端点（基于micro-server框架）
+    if curl -f http://localhost:3000/data/rank > /dev/null 2>&1 || curl -f http://localhost:3000/user/info > /dev/null 2>&1 || curl -f http://localhost:3000/socket.io/ > /dev/null 2>&1; then
         echo "✅ 后端服务(3000)正常"
         backend_ok=true
         break
