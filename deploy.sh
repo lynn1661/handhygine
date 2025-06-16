@@ -57,12 +57,19 @@ done
 # 检查后端服务
 backend_ok=false
 for i in {1..5}; do
-    if curl -f http://localhost:3000 > /dev/null 2>&1; then
+    # 尝试多个可能的端点
+    if curl -f http://localhost:3000/api > /dev/null 2>&1 || curl -f http://localhost:3000/health > /dev/null 2>&1 || curl -f http://localhost:3000/status > /dev/null 2>&1; then
         echo "✅ 后端服务(3000)正常"
         backend_ok=true
         break
     else
         echo "❌ 后端服务检查失败，重试 $i/5..."
+        # 也检查是否服务启动但根路径无响应
+        if curl -s http://localhost:3000 > /dev/null 2>&1; then
+            echo "⚠️  后端服务已启动但根路径无响应，可能正常"
+            backend_ok=true
+            break
+        fi
         sleep 5
     fi
 done

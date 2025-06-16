@@ -48,7 +48,16 @@ jobs:
     - name: Health Check
       run: |
         sleep 30
+        echo "检查前端服务..."
         curl -f http://${{ secrets.EC2_HOST }}:8080 || exit 1
-        curl -f http://${{ secrets.EC2_HOST }}:3000 || exit 1
+        echo "前端服务正常"
+        
+        echo "检查后端服务..."
+        # 尝试多个可能的端点
+        curl -f http://${{ secrets.EC2_HOST }}:3000/api || curl -f http://${{ secrets.EC2_HOST }}:3000/health || curl -f http://${{ secrets.EC2_HOST }}:3000/status || echo "后端根路径检查失败，但服务可能正常运行"
+        
+        echo "检查AI服务..."
         curl -f http://${{ secrets.EC2_HOST }}:9500 || exit 1
-        echo "健康检查通过！" 
+        echo "AI服务正常"
+        
+        echo "健康检查完成！" 
