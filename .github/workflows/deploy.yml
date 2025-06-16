@@ -23,7 +23,7 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           # 进入项目目录
-          cd /home/${{ secrets.EC2_USER }}/handhygiene || { echo "项目目录不存在"; exit 1; }
+          cd /home/${{ secrets.EC2_USER }}/handhygine || { echo "项目目录不存在"; exit 1; }
           
           # 停止现有服务
           sudo docker-compose down || true

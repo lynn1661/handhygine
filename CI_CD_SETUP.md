@@ -28,8 +28,8 @@ sudo systemctl enable docker
 sudo usermod -aG docker $USER
 
 # 克隆项目（如果还没有）
-git clone <你的仓库地址> ~/handhygiene
-cd ~/handhygiene
+git clone <你的仓库地址> ~/handhygine
+cd ~/handhygine
 
 # 复制部署脚本并设置权限
 chmod +x deploy.sh
@@ -80,7 +80,7 @@ cat ~/.ssh/your-ec2-key.pem
 #### 手动测试部署脚本
 在EC2上运行：
 ```bash
-cd ~/handhygiene
+cd ~/handhygine
 ./deploy.sh
 ```
 
