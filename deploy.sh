@@ -42,32 +42,49 @@ sudo docker-compose ps
 
 # 健康检查
 echo "执行健康检查..."
+
+# 检查前端服务
 for i in {1..5}; do
     if curl -f http://localhost:8080 > /dev/null 2>&1; then
-        echo "前端服务(8080)正常"
+        echo "✅ 前端服务(8080)正常"
         break
     else
-        echo "前端服务检查失败，重试 $i/5..."
+        echo "❌ 前端服务检查失败，重试 $i/5..."
         sleep 5
     fi
 done
 
+# 检查后端服务
+backend_ok=false
 for i in {1..5}; do
     if curl -f http://localhost:3000 > /dev/null 2>&1; then
-        echo "后端服务(3000)正常"
+        echo "✅ 后端服务(3000)正常"
+        backend_ok=true
         break
     else
-        echo "后端服务检查失败，重试 $i/5..."
+        echo "❌ 后端服务检查失败，重试 $i/5..."
         sleep 5
     fi
 done
 
+# 如果后端服务失败，显示调试信息
+if [ "$backend_ok" = false ]; then
+    echo "⚠️  后端服务启动失败，显示详细信息："
+    echo "后端容器状态："
+    sudo docker-compose ps backend
+    echo "后端服务日志（最后10行）："
+    sudo docker-compose logs --tail=10 backend
+    echo "建议运行以下命令进行修复："
+    echo "  ./fix-backend.sh"
+fi
+
+# 检查AI服务
 for i in {1..5}; do
     if curl -f http://localhost:9500 > /dev/null 2>&1; then
-        echo "AI服务(9500)正常"
+        echo "✅ AI服务(9500)正常"
         break
     else
-        echo "AI服务检查失败，重试 $i/5..."
+        echo "❌ AI服务检查失败，重试 $i/5..."
         sleep 5
     fi
 done
