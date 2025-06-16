@@ -16,8 +16,8 @@ echo "=================================================="
 echo "1. 测试用户登录 - /api/user/info/login"
 echo "   POST请求，需要参数：accountID, password"
 login_data='{
-  "accountID": "testuser",
-  "password": "testpassword"
+  "accountID": "test",
+  "password": "P@ssW0rd"
 }'
 printf "   登录测试:      "
 response=$(curl -s -X POST -H "Content-Type: application/json" -d "$login_data" "http://$HOST:$PORT/api/user/info/login" 2>/dev/null)
@@ -34,7 +34,7 @@ fi
 echo -e "\n2. 测试填写用户信息 - /api/user/info/fill"
 echo "   POST请求，需要参数：accountID, userID, role"
 fill_data='{
-  "accountID": "testuser",
+  "accountID": "test",
   "userID": "test123",
   "role": "Doctor"
 }'
@@ -53,7 +53,7 @@ fi
 echo -e "\n3. 测试排名查询 - /api/data/rank/getRankList"
 echo "   POST请求，需要参数：accountID, role"
 rank_data='{
-  "accountID": "testuser",
+  "accountID": "test",
   "role": "Doctor"
 }'
 printf "   排名查询:      "
@@ -72,7 +72,7 @@ echo "   POST请求，需要参数：id, rating, points"
 record_data='{
   "id": "507f1f77bcf86cd799439011",
   "rating": "Good",
-  "points": 85
+  "points": 15
 }'
 printf "   记录追加:      "
 response=$(curl -s -X POST -H "Content-Type: application/json" -d "$record_data" "http://$HOST:$PORT/api/data/record/append_rating" 2>/dev/null)
