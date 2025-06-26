@@ -14,9 +14,6 @@
           <el-button @click="tryAgain" class="top-action-button try-again">
             {{ $t("HandHygiene.tryagain") }}
           </el-button>
-          <el-button @click="switchToAuditingMode" class="top-action-button auditing-mode-button">
-            Switch to Auditing Mode
-          </el-button>
         </div>
         
         <!-- 右侧：语言选择器 -->
@@ -106,10 +103,6 @@ const tryAgain = () => {
   router.push({
     path: "/",
   });
-};
-
-const switchToAuditingMode = () => {
-  window.location.href = "http://localhost:8080";
 };
 
 const blobs = computed(() => {
@@ -368,7 +361,7 @@ onMounted(async () => {
 
 .content-wrapper {
   width: 100%;
-  max-width: 1200px;
+  max-width: 800px; /* 限制宽度以适应一列布局 */
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -384,13 +377,6 @@ onMounted(async () => {
   -webkit-backdrop-filter: none;
   border: none;
   transition: none;
-  
-  @media (min-width: 768px) {
-    &:hover {
-      box-shadow: none;
-      transform: none;
-    }
-  }
 }
 
 /* 顶部区域样式 */
@@ -567,24 +553,17 @@ onMounted(async () => {
   }
 }
 
-/* 主要内容区域 - 响应式布局 */
+/* 主要内容区域 - 改为全部垂直布局 */
 .main-section {
   display: flex;
-  flex-direction: column;
+  flex-direction: column; /* 统一为垂直布局 */
   width: 100%;
   box-sizing: border-box;
   flex: 1;
   gap: 1.5rem;
   justify-content: flex-start;
   margin-bottom: 1.5rem;
-  align-items: flex-start;
-  
-  /* 桌面端左右分栏布局 */
-  @media (min-width: 768px) {
-    flex-direction: row !important;
-    gap: 2rem !important;
-    align-items: stretch !important;
-  }
+  align-items: center; /* 居中对齐 */
 }
 
 /* 左栏样式 */
@@ -592,10 +571,6 @@ onMounted(async () => {
   width: 100%;
   display: flex;
   flex-direction: column;
-  
-  @media (min-width: 768px) {
-    width: 45% !important;
-  }
 }
 
 /* 右栏样式 */
@@ -604,10 +579,6 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  
-  @media (min-width: 768px) {
-    width: 55% !important;
-  }
 }
 
 /* 成就展示区域 */
@@ -831,11 +802,11 @@ onMounted(async () => {
 .step-row {
   display: flex;
   align-items: center;
-  padding: 0.2rem;
+  padding: 0.4rem; /* 增加内边距以适应更大字体 */
   margin-bottom: 0;
   background: linear-gradient(135deg, #f9fbff 0%, #f2f6fc 100%);
   border-radius: 4px;
-  min-height: 1.6rem;
+  min-height: 2.2rem; /* 增加最小高度 */
   box-shadow: 0 1px 3px rgba(15, 56, 124, 0.04);
   transition: all 0.3s ease;
   border-left: 2px solid #4a89dc;
@@ -860,8 +831,8 @@ onMounted(async () => {
   }
   
   @media (min-width: 768px) {
-    padding: 0.3rem;
-    min-height: 2rem;
+    padding: 0.5rem; /* 桌面端也增加内边距 */
+    min-height: 2.8rem; /* 桌面端增加最小高度 */
   }
 }
 
@@ -925,12 +896,12 @@ onMounted(async () => {
 .comment-title {
   font-weight: 600;
   color: #0f387c;
-  font-size: 0.7rem;
+  font-size: 1rem; /* 增大字体大小 */
   margin-bottom: 0;
-  line-height: 1.1;
+  line-height: 1.2;
   
   @media (min-width: 768px) {
-    font-size: 0.9rem;
+    font-size: 1.2rem; /* 桌面端也增大字体 */
   }
 }
 

@@ -35,6 +35,7 @@ async function initDb() {
   await db.exec(`
     CREATE TABLE IF NOT EXISTS user_info (
       id               INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_name        TEXT,                    -- 用户名称
       role             TEXT NOT NULL,           -- 用户角色（Doctor, Nurse, Student等）
       start_time       TEXT NOT NULL,           -- 开始时间 e.g. "DD/M/YYYY 上午/下午 hh:mm:ss"
       step_points      TEXT,                    -- JSON 数组文本
@@ -44,7 +45,7 @@ async function initDb() {
     );
   `);
 
-  // 为现有数据添加 mapped_total 字段（如果不存在）
+  // 为现有数据添加字段（如果不存在）
   try {
     await db.exec(`ALTER TABLE user_info ADD COLUMN mapped_total REAL DEFAULT 0;`);
     console.log('✅ 已添加 mapped_total 字段');
@@ -52,6 +53,17 @@ async function initDb() {
     // 字段已存在，忽略错误
     if (!error.message.includes('duplicate column name')) {
       console.warn('⚠️ 添加 mapped_total 字段时出现问题:', error.message);
+    }
+  }
+
+  // 为现有数据添加 user_name 字段（如果不存在）
+  try {
+    await db.exec(`ALTER TABLE user_info ADD COLUMN user_name TEXT;`);
+    console.log('✅ 已添加 user_name 字段');
+  } catch (error) {
+    // 字段已存在，忽略错误
+    if (!error.message.includes('duplicate column name')) {
+      console.warn('⚠️ 添加 user_name 字段时出现问题:', error.message);
     }
   }
 

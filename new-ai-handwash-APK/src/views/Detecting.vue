@@ -8,9 +8,6 @@
           <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
         </div>
         <div class="top-actions">
-          <el-button @click="switchToAuditingMode" class="auditing-mode-button">
-            Switch to Auditing Mode
-          </el-button>
         <div class="back-btn" @click="backHome">
           <img src="../assets/blueHome.png" alt="返回首页" />
           </div>
@@ -123,9 +120,7 @@ const backHome = () => {
   });
 };
 
-const switchToAuditingMode = () => {
-  window.location.href = "http://localhost:8080";
-};
+
 
 const stopCountdown = () => {
   clearInterval(timer);
@@ -664,19 +659,7 @@ onUnmounted(() => {
   gap: 1rem;
 }
 
-.auditing-mode-button {
-  background-color: #409EFF;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
 
-  &:hover {
-    background-color: #66B1FF;
-  }
-}
 
 .back-btn {
   width: 3rem;

@@ -2679,30 +2679,19 @@ function detectWristArmWash(frames) {
   }
 }
 
-/* 主要内容区域 - 桌面时为水平布局，移动时为垂直布局 */
+/* 主要内容区域 - 改为全部垂直布局 */
 .main-section {
   display: flex;
-  flex-direction: column; /* 默认为垂直布局 */
+  flex-direction: column; /* 统一为垂直布局 */
   width: 100%;
   box-sizing: border-box;
   flex: 1;
-  gap: 0.2rem; /* 进一步减小内容间距 */
-  justify-content: flex-start; /* 改为flex-start，让内容靠上 */
-  margin-top: 0; /* 移除负margin */
-  padding-top: 0; /* 确保没有顶部padding */
-  position: relative; /* 添加相对定位 */
-  top: -1.25rem !important; /* 减小桌面端往上移动距离 */
-  
-  /* 在桌面屏幕上使用水平布局 - 降低阈值确保更广泛兼容 */
-  @media (min-width: 768px) {
-    flex-direction: row !important;
-    align-items: flex-start !important; /* 改为flex-start */
-    gap: 0.75rem !important;
-    justify-content: flex-start !important; /* 让内容靠上 */
-    margin-top: 0 !important; /* 移除负margin */
-    padding-top: 0 !important; /* 确保没有顶部padding */
-    top: -1rem !important; /* 桌面端大幅往上移动 */
-  }
+  gap: 0.5rem; /* 减小内容间距 */
+  justify-content: flex-start; /* 让内容靠上 */
+  margin-top: 0;
+  padding-top: 0;
+  position: relative;
+  align-items: center; /* 居中对齐 */
 }
 
 /* 指导区域 */
@@ -2710,12 +2699,7 @@ function detectWristArmWash(frames) {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: 0.1rem; /* 进一步减小 */
-  
-  @media (min-width: 768px) {
-    width: 48% !important; /* 在桌面端占用接近一半宽度 */
-    margin-bottom: 0 !important;
-  }
+  margin-bottom: 0.25rem; /* 减小底部间距 */
 }
 
 /* 右侧区域容器 */
@@ -2723,28 +2707,17 @@ function detectWristArmWash(frames) {
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: 0.75rem;
-  
-  @media (min-width: 768px) {
-    width: 48% !important; /* 在桌面端占用接近一半宽度 */
-    padding-top: 2rem !important;
-  }
+  gap: 0.5rem; /* 减小间距 */
 }
 
 .guide-image-container {
   position: relative;
-  width: 100%;
-  max-width: 450px;
+  width: 500px;
   margin: 0 auto;
-  
-  @media (min-width: 768px) {
-    max-width: 100% !important;
-  }
 }
 
 .guide-image {
   width: 100%;
-  aspect-ratio: 1/1;
   object-fit: cover;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(15, 56, 124, 0.15);
@@ -2758,8 +2731,8 @@ function detectWristArmWash(frames) {
 }
 
 .timer-circle {
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 3rem;
+  height: 3rem;
   background: rgba(245, 248, 253, 0.9);
   border: 2px solid #7791bc;
   display: flex;
@@ -2771,16 +2744,16 @@ function detectWristArmWash(frames) {
   span {
     font-family: "Helvetica85", sans-serif;
     font-weight: 700;
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     color: #0f387c;
   }
   
   @media (max-width: 480px) {
-    width: 3rem;
-    height: 3rem;
+    width: 2.5rem;
+    height: 2.5rem;
     
     span {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
     }
   }
 }
@@ -2791,31 +2764,25 @@ function detectWristArmWash(frames) {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-top: 0; /* 移除顶部边距 */
+  margin-top: 0;
 }
 
 .camera-container {
-  width: 90%;
-  max-width: 450px;
+  width: 500px;
   position: relative;
   background: transparent;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(15, 56, 124, 0.1);
-  aspect-ratio: 16/9;
+  aspect-ratio: 5/4;
   margin: 0 auto;
   margin-bottom: 0.5rem;
   z-index: 1;
-  
-  @media (min-width: 768px) {
-    max-width: 100% !important;
-    margin-bottom: 1rem !important;
-  }
+  max-height: 300px;
 }
 
 .output_canvas {
   width: 100%;
-  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
@@ -2842,41 +2809,35 @@ function detectWristArmWash(frames) {
 
 /* 反馈卡片 */
 .feedback-card {
-  width: 90%;
-  max-width: 450px;
-  margin: 0 auto;
-  margin-top: 0.5rem;
+  width: 500px;
+  margin: 0.5rem auto;
   background-color: rgba(255, 255, 255, 0.5);
   border-radius: 12px;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   box-shadow: 0 4px 12px rgba(15, 56, 124, 0.1);
   z-index: 1;
   margin-bottom: 0.5rem;
-  
-  @media (min-width: 768px) {
-    max-width: 100% !important;
-  }
 }
 
 .feedback-title {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
   text-align: center;
   color: #0f387c;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   
   @media (max-width: 480px) {
-    font-size: 1.125rem;
+    font-size: 1rem;
   }
 }
 
 .feedback-rating {
   text-align: center;
-  transform: scale(2);
-  padding: 0.5rem 0;
+  transform: scale(1.5);
+  padding: 0.25rem 0;
   
   @media (max-width: 480px) {
-    transform: scale(1.7);
+    transform: scale(1.3);
   }
 }
 
@@ -2972,31 +2933,16 @@ function detectWristArmWash(frames) {
   z-index: 10;
 }
 
-/* 进一步优化桌面布局 */
-@media (min-width: 768px) {
-  .content-wrapper {
-    flex-direction: column !important;
-    justify-content: flex-start !important;
-    padding: 1rem !important;
-  }
-  
-  .main-section {
-    flex: 1 !important;
-    margin-top: 1rem !important;
-  }
-  
-  .guide-image-container {
-    max-width: 100% !important;
-  }
-  
-  .camera-container {
-    max-width: 100% !important;
-    margin-bottom: 1rem !important;
-  }
-  
-  .feedback-card {
-    max-width: 100% !important;
-  }
+/* 优化所有屏幕尺寸的布局 */
+.content-wrapper {
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 1rem;
+}
+
+.main-section {
+  flex: 1;
+  margin-top: 0.5rem;
 }
 
 /* 响应式布局优化 */
@@ -3086,70 +3032,27 @@ function detectWristArmWash(frames) {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* 桌面端特定样式优化 */
+/* 大屏幕优化 */
 @media (min-width: 1200px) {
   .content-wrapper {
-    max-width: 1600px; /* 在超大屏幕上进一步增加宽度 */
+    max-width: 500px;
   }
   
-  .main-section {
-    gap: 2rem !important; /* 增加左右两侧的间距 */
-  }
-  
-  .guide-image {
-    border-radius: 16px; /* 在大屏幕上增加圆角 */
-  }
-  
+  .guide-image,
   .camera-container {
-    border-radius: 16px; /* 在大屏幕上增加圆角 */
+    border-radius: 16px;
   }
   
   .feedback-card {
-    padding: 1rem 1.5rem; /* 在大屏幕上增加内边距 */
+    padding: 0.75rem 1rem;
   }
   
   .feedback-title {
-    font-size: 1.5rem; /* 在大屏幕上增加字体大小 */
+    font-size: 1.25rem;
   }
 }
 
-/* 调整图片容器在水平布局中的高度比例 */
-@media (min-width: 768px) {
-  .guide-image {
-    max-height: 70vh;
-    width: auto;
-    margin: 0 auto;
-    display: block;
-  }
-  
-  .camera-container {
-    margin-bottom: 1rem !important;
-    height: auto;
-    min-height: 350px;
-  }
-  
-  /* 调整评分卡片在水平布局中的样式 */
-  .feedback-card {
-    margin-top: 0;
-  }
-  
-  /* 增强标题在水平布局中的可见性 */
-  .step-title {
-    font-size: 2rem;
-  }
-}
-
-/* 针对超宽显示器的优化 */
-@media (min-width: 1600px) {
-  .guide-section, .right-section {
-    width: 45% !important;
-  }
-  
-  .main-section {
-    justify-content: center !important;
-    gap: 4rem !important;
-  }
-}
+/* 移除重复的样式定义，避免冲突 */
 
 /* 卡尔曼滤波切换开关样式 */
 .filter-toggle {

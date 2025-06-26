@@ -27,8 +27,9 @@ async function fill({ data }) {
   const nowStr = new Date().toLocaleString('zh-HK', { timeZone: 'Asia/Hong_Kong' });
 
   const result = await db.run(
-    `INSERT INTO user_info (role, start_time, step_points, total, mapped_total, record_time)
-     VALUES (?, ?, ?, ?, ?, ?);`,
+    `INSERT INTO user_info (user_name, role, start_time, step_points, total, mapped_total, record_time)
+     VALUES (?, ?, ?, ?, ?, ?, ?);`,
+    data.userName || null,  // 用户名称，可选
     data.role,
     nowStr,
     JSON.stringify([]), // step_points

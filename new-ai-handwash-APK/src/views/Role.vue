@@ -8,9 +8,6 @@
           <img src="../assets/sn-logo.png" alt="Logo 2" class="logo-image" />
         </div>
         <div class="top-actions">
-          <el-button @click="switchToAuditingMode" class="auditing-mode-button">
-            Switch to Auditing Mode
-          </el-button>
         <div class="back-btn" @click="backHome">
           <img src="../assets/home.png" alt="返回首页" />
           </div>
@@ -19,6 +16,18 @@
 
       <!-- 主要内容区域 -->
       <div class="main-section">
+        <!-- 用户输入区域 -->
+        <div class="user-input-section">
+          <div class="input-container">
+            <el-input 
+              v-model="userId" 
+              placeholder="Please enter User ID"
+              class="user-input"
+              clearable
+            />
+          </div>
+        </div>
+
         <!-- 角色选择区域 -->
         <div class="role-selection">
           <div class="role-buttons">
@@ -44,7 +53,7 @@
 <script setup>
 import { ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { ElNotification } from "element-plus";
+import { ElNotification, ElInput } from "element-plus";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { onMounted, onUnmounted } from 'vue';
@@ -53,10 +62,24 @@ const store = useStore();
 const router = useRouter();
 const t = useI18n();
 
+// 添加用户ID输入
+const userId = ref('');
+
 async function selectRole(role) {
+  // 检查用户ID是否已输入
+  if (!userId.value.trim()) {
+    ElNotification({
+      title: "Notice",
+      message: "Please enter User ID first",
+      type: "warning"
+    });
+    return;
+  }
+
   try {
     const res = await store.dispatch("user/updateRole", { 
-      role: role, 
+      role: role,
+      userName: userId.value.trim()
     });
     // 存储会话ID供后续使用
     localStorage.setItem("sessionID", res.ID);
@@ -81,10 +104,6 @@ const backHome = () => {
   router.push({
     path: "/",
   });
-};
-
-const switchToAuditingMode = () => {
-  window.location.href = "http://localhost:8080";
 };
 
 let inactivityTimer = null;
@@ -187,20 +206,6 @@ onUnmounted(() => {
   gap: 1rem;
 }
 
-.auditing-mode-button {
-  background-color: #409EFF;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-
-  &:hover {
-    background-color: #66B1FF;
-  }
-}
-
 .back-btn {
   width: 4.5rem;
   height: 4.5rem;
@@ -236,51 +241,76 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
   padding: 2rem 0;
+  gap: 2rem;
+}
+
+/* 用户输入区域样式 */
+.user-input-section {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.input-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.user-input) {
+  .el-input__wrapper {
+    border-radius: 12px;
+    border: 2px solid #e0e4e9;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(15, 56, 124, 0.1);
+    
+    &:hover {
+      border-color: #0f387c;
+      box-shadow: 0 4px 12px rgba(15, 56, 124, 0.15);
+    }
+    
+    &.is-focus {
+      border-color: #0f387c;
+      box-shadow: 0 0 0 3px rgba(15, 56, 124, 0.1);
+    }
+  }
+  
+  .el-input__inner {
+    font-family: "Helvetica85", sans-serif;
+    font-size: 1rem;
+    color: #0f387c;
+    text-align: center;
+    
+    &::placeholder {
+      color: #a0a4a8;
+      font-weight: 400;
+    }
+  }
 }
 
 /* 角色选择区域 */
 .role-selection {
   width: 100%;
-  max-width: 650px;
+  max-width: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
-}
-
-.role-title {
-  text-align: center;
-  margin-bottom: 1rem;
-  
-  h2 {
-    font-family: "Helvetica85", sans-serif;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #0f387c;
-    margin: 0;
-    text-shadow: 0 2px 4px rgba(15, 56, 124, 0.2);
-    letter-spacing: 1px;
-    
-    @media (max-width: 768px) {
-      font-size: 1.8rem;
-    }
-    
-    @media (max-width: 480px) {
-      font-size: 1.6rem;
-    }
-  }
 }
 
 .role-buttons {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
   width: 100%;
 }
 
 .role-button {
   width: 100%;
-  height: 100px;
+  height: 85px;
   background-size: cover;
   background-position: center;
   border-radius: 20px;
@@ -288,7 +318,7 @@ onUnmounted(() => {
   color: white;
   font-family: "Helvetica85", sans-serif;
   font-weight: 700;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   transition: all 0.3s;
   position: relative;
@@ -335,35 +365,31 @@ onUnmounted(() => {
 }
 
 /* 响应式布局调整 */
-@media (max-width: 768px) {
+@media (min-width: 1025px) {
+  .role-selection {
+    max-width: 650px;
+  }
+  
   .role-buttons {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
   }
   
   .role-button {
-    height: 85px;
-    font-size: 1.3rem;
+    height: 100px;
   }
-  
+}
+
+@media (max-width: 768px) {
   .main-section {
     padding: 1.5rem 0;
   }
 }
 
 @media (max-width: 480px) {
-  .role-buttons {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
   .role-button {
     height: 80px;
     font-size: 1.2rem;
-  }
-  
-  .role-selection {
-    gap: 1.5rem;
   }
 }
 
