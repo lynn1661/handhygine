@@ -121,9 +121,18 @@ export function initializeSocket() {
     console.log('初始化Socket连接，配置:', SOCKET_CONFIG);
     console.log('当前环境:', process.env.NODE_ENV);
     
-    // 连接到本地端口9501的AI模型服务器
-    const socketUrl = "http://localhost:9501";
+    // 根据环境确定 Socket.io 连接 URL
+    const getSocketUrl = () => {
+      // 在生产环境中，使用当前域名和协议（通过nginx代理）
+      if (process.env.NODE_ENV === 'production') {
+        return window.location.origin; // 使用当前域名，通过nginx代理到9501
+      }
+      
+      // 开发环境仍然直接连接到本地AI服务器
+      return "http://localhost:9501";
+    };
     
+    const socketUrl = getSocketUrl();
     console.log('Socket连接URL:', socketUrl);
     
     // 创建Socket连接

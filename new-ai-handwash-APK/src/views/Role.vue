@@ -78,7 +78,7 @@ async function selectRole(role) {
 
   try {
     const res = await store.dispatch("user/updateRole", { 
-      role: role,
+      role: role, 
       userName: userId.value.trim()
     });
     // 存储会话ID供后续使用
@@ -378,8 +378,8 @@ onUnmounted(() => {
   .role-button {
     height: 100px;
   }
-}
-
+  }
+  
 @media (max-width: 768px) {
   .main-section {
     padding: 1.5rem 0;

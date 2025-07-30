@@ -1,0 +1,59 @@
+services:
+  # --- 前端服务 ---
+  frontend:
+    build: 
+      context: new-ai-handwash-APK
+      platforms: 
+        - linux/amd64
+    image: handhygiene-frontend-x86:latest
+    container_name: handhygiene-frontend-x86
+    ports:
+      - "8081:81"
+    restart: always
+    networks:
+      - app-network
+    depends_on:
+      - backend
+      - ai
+
+  # --- 后端服务 ---
+  backend:
+    build: 
+      context: ai-handwash-assist-server-main
+      platforms: 
+        - linux/amd64
+    image: handhygiene-backend-x86:latest
+    container_name: handhygiene-backend-x86
+    ports:
+      - "3001:3001"
+    restart: always
+    networks:
+      - app-network
+    volumes:
+      # 挂载SQLite数据库文件到宿主机，确保数据持久化
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - DB_PATH=/app/data/data.db
+
+  # --- AI服务 ---
+  ai:
+    build: 
+      context: new-ai-handwash-server
+      platforms: 
+        - linux/amd64
+    image: handhygiene-ai-x86:latest
+    container_name: handhygiene-ai-x86
+    ports:
+      - "9501:9501"
+    restart: always
+    networks:
+      - app-network
+    deploy:
+      resources:
+        reservations:
+          memory: 1G
+
+networks:
+  app-network:
+    driver: bridge 
